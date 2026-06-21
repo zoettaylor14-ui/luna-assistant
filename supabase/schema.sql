@@ -481,3 +481,33 @@ create table if not exists public.sync_logs (
 );
 alter table public.sync_logs enable row level security;
 create policy "Users manage own sync logs" on public.sync_logs for all using (auth.uid() = user_id);
+
+-- ─── Morning Messages ─────────────────────────────────────────
+create table if not exists public.morning_messages (
+  id                   uuid default uuid_generate_v4() primary key,
+  user_id              uuid references auth.users(id) on delete cascade not null,
+  date                 date not null,
+  greeting             text,
+  soul_read            text,
+  astrology_reflection text,
+  human_design_reminder text,
+  work_awareness       text,
+  highest_self_lesson  text,
+  protect              text,
+  release              text,
+  first_move           text,
+  crystal              text,
+  crystal_why          text,
+  mantra               text,
+  tone_mode            text,
+  day_theme            text,
+  astrology_context    jsonb,
+  life_context         jsonb,
+  generated_from       jsonb,
+  user_rating          smallint check (user_rating between 1 and 5),
+  created_at           timestamptz default now()
+);
+alter table public.morning_messages enable row level security;
+create policy "Users manage own morning messages" on public.morning_messages for all using (auth.uid() = user_id);
+create unique index morning_messages_user_date_idx on public.morning_messages (user_id, date);
+create policy "Users manage own sync logs" on public.sync_logs for all using (auth.uid() = user_id);
