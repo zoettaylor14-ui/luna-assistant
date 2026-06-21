@@ -24,7 +24,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
       style={{
         height: 'var(--nav-h)',
         background: 'rgba(253,248,243,0.96)',

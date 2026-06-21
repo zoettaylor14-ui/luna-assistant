@@ -166,6 +166,17 @@ body {
 /* ─── Bottom nav safe area ──────────────────────────────────── */
 .pb-nav { padding-bottom: calc(var(--nav-h) + 16px); }
 
+/* ─── Desktop overrides ─────────────────────────────────────── */
+@media (min-width: 1024px) {
+  /* No bottom nav on desktop — reset padding */
+  .pb-nav { padding-bottom: 3rem; }
+
+  /* Subtle scrollbar for desktop sidebar */
+  aside::-webkit-scrollbar       { width: 4px; }
+  aside::-webkit-scrollbar-track { background: transparent; }
+  aside::-webkit-scrollbar-thumb { background: rgba(139,111,184,0.15); border-radius: 4px; }
+}
+
 /* ─── Recording dot ─────────────────────────────────────────── */
 .rec-dot {
   width: 8px;

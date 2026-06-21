@@ -6,6 +6,7 @@ import {
   Heart, Zap, Moon, BriefcaseIcon, Sparkles, Compass,
   Star, Calendar, ChevronRight, ArrowRight, Sun
 } from 'lucide-react'
+// Compass used in desktop layout only
 import Link from 'next/link'
 
 // ─── Static data ────────────────────────────────────────────
@@ -145,7 +146,10 @@ export default function SanctuaryPage() {
         style={{ background: 'radial-gradient(circle, rgba(168,196,218,0.2) 0%, transparent 70%)', filter: 'blur(40px)' }} />
 
       <AppLayout noPad>
-        <div className="px-4 pt-12 pb-nav space-y-3">
+        {/* ══════════════════════════════════════════
+            MOBILE / TABLET  (hidden on desktop)
+        ══════════════════════════════════════════ */}
+        <div className="lg:hidden px-4 pt-12 pb-nav space-y-3">
 
           {/* ── Header ── */}
           <div className="flex items-start justify-between mb-1">
@@ -355,6 +359,242 @@ export default function SanctuaryPage() {
                 </div>
               </div>
               <ArrowRight className="h-4 w-4" style={{ color: 'var(--violet)' }} />
+            </div>
+          </Link>
+
+        </div>
+
+        {/* ══════════════════════════════════════════
+            DESKTOP  (hidden on mobile/tablet)
+            Apple-style large organized tile grid
+        ══════════════════════════════════════════ */}
+        <div className="hidden lg:block pt-10 pb-12">
+
+          {/* ── Desktop header ── */}
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-sm font-medium mb-1" style={{ color: 'var(--mist)' }}>{today}</p>
+              <h1 className="font-display text-4xl font-bold" style={{ color: 'var(--depth)' }}>
+                {greeting}, Zoe ✨
+              </h1>
+              <p className="text-base mt-1.5 font-display italic" style={{ color: 'var(--violet)' }}>
+                You are not behind. You are returning.
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-xs font-semibold" style={{ color: 'var(--mist)' }}>Moon Phase</p>
+                <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--depth)' }}>{moon.emoji} {moon.name}</p>
+                <p className="text-xs" style={{ color: 'var(--mist)' }}>{moon.keyword}</p>
+              </div>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, var(--violet), var(--violet-deep))', border: '3px solid white', boxShadow: '0 4px 16px rgba(139,111,184,0.3)' }}>
+                <span className="text-white text-lg font-bold">Z</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Row 1: 4 stat tiles ── */}
+          <div className="grid grid-cols-4 gap-4 mb-4">
+            {[
+              { icon: <Heart className="h-6 w-6" style={{ color: '#8B6FB8' }} />, label: 'Mood', value: 'Calm', sub: '7 / 10', color: '#8B6FB8', bg: 'rgba(139,111,184,0.08)' },
+              { icon: <Zap className="h-6 w-6" style={{ color: '#C9A96E' }} />, label: 'Energy', value: 'Steady', sub: '6 / 10', color: '#C9A96E', bg: 'rgba(201,169,110,0.1)' },
+              { icon: <Moon className="h-6 w-6" style={{ color: '#6A4F9B' }} />, label: 'Sleep', value: 'Good', sub: '7.5 hrs', color: '#6A4F9B', bg: 'rgba(106,79,155,0.08)' },
+              { icon: <Sparkles className="h-6 w-6" style={{ color: '#A8C4DA' }} />, label: 'Spirit', value: 'Aligned', sub: 'Projector day', color: '#A8C4DA', bg: 'rgba(168,196,218,0.15)' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-2xl p-5 flex flex-col gap-3"
+                style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(139,111,184,0.1)', boxShadow: '0 2px 20px rgba(139,111,184,0.06)' }}>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: s.bg }}>
+                  {s.icon}
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--mist)' }}>{s.label}</p>
+                  <p className="text-xl font-bold" style={{ color: 'var(--depth)' }}>{s.value}</p>
+                  <p className="text-sm" style={{ color: 'var(--mist)' }}>{s.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Row 2: 3-column main grid ── */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+
+            {/* Col 1: Daily Brief + Affirmation */}
+            <div className="space-y-4">
+              {/* Daily Brief */}
+              <div className="rounded-2xl p-6"
+                style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(139,111,184,0.1)', boxShadow: '0 2px 20px rgba(139,111,184,0.06)' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <BriefcaseIcon className="h-5 w-5" style={{ color: 'var(--violet)' }} />
+                  <p className="text-sm font-bold" style={{ color: 'var(--depth)' }}>Daily Work Brief</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <TaskDonut urgent={2} today={3} soon={4} later={6} />
+                  <div className="space-y-2">
+                    {[
+                      { color: '#E05E5E', label: '2 Urgent'  },
+                      { color: '#8B6FB8', label: '3 Today'   },
+                      { color: '#A8C4DA', label: '4 Soon'    },
+                      { color: '#C4BECE', label: '6 Later'   },
+                    ].map(({ color, label }) => (
+                      <div key={label} className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
+                        <span className="text-sm font-medium" style={{ color: 'var(--mid)' }}>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm mt-4 leading-relaxed" style={{ color: 'var(--mid)' }}>
+                  3 meetings · 2 urgent emails · 5 priority tasks
+                </p>
+                <Link href="/today">
+                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                    style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--violet)' }}>
+                    Open Today <ArrowRight className="h-4 w-4" />
+                  </div>
+                </Link>
+              </div>
+
+              {/* Affirmation */}
+              <div className="rounded-2xl p-6"
+                style={{ background: 'linear-gradient(135deg, rgba(139,111,184,0.08) 0%, rgba(168,196,218,0.08) 100%)', border: '1px solid rgba(139,111,184,0.1)' }}>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--violet)' }}>Daily Affirmation</p>
+                <p className="font-display text-lg italic leading-relaxed" style={{ color: 'var(--depth)' }}>
+                  &ldquo;{affirmation}&rdquo;
+                </p>
+              </div>
+            </div>
+
+            {/* Col 2: Meeting + Priority + Quick actions */}
+            <div className="space-y-4">
+              {/* Next Meeting */}
+              <div className="rounded-2xl p-6"
+                style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(139,111,184,0.1)', boxShadow: '0 2px 20px rgba(139,111,184,0.06)' }}>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Next Meeting</p>
+                  <Calendar className="h-4 w-4" style={{ color: 'var(--mist)' }} />
+                </div>
+                <p className="text-3xl font-bold mb-1" style={{ color: 'var(--depth)' }}>11:00 AM</p>
+                <p className="text-sm mb-4" style={{ color: 'var(--mid)' }}>DRYP Digital Weekly Strategy Call</p>
+                <Link href="/today">
+                  <div className="px-4 py-2.5 rounded-xl text-center text-sm font-semibold"
+                    style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--violet)' }}>
+                    Prep for Meeting →
+                  </div>
+                </Link>
+              </div>
+
+              {/* Priority */}
+              <div className="rounded-2xl p-6"
+                style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(139,111,184,0.1)', boxShadow: '0 2px 20px rgba(139,111,184,0.06)' }}>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Today&apos;s Priority</p>
+                  <Star className="h-4 w-4" style={{ color: '#C9A96E' }} />
+                </div>
+                <p className="text-base font-bold leading-snug mb-2" style={{ color: 'var(--depth)' }}>
+                  Review client website plan + send feedback
+                </p>
+                <p className="text-sm mb-4" style={{ color: 'var(--mist)' }}>This unlocks everything else.</p>
+                <div className="h-2 rounded-full mb-1" style={{ background: 'rgba(139,111,184,0.1)' }}>
+                  <div className="h-2 rounded-full w-0" style={{ background: 'var(--violet)' }} />
+                </div>
+                <p className="text-xs" style={{ color: 'var(--mist)' }}>0 / 3 steps</p>
+              </div>
+
+              {/* Mode buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <Link href="/late-mode">
+                  <div className="rounded-2xl p-4 flex flex-col items-center gap-2 text-center"
+                    style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(201,169,110,0.2)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ background: 'rgba(201,169,110,0.12)' }}>
+                      <Sun className="h-5 w-5" style={{ color: '#C9A96E' }} />
+                    </div>
+                    <p className="text-xs font-bold" style={{ color: 'var(--depth)' }}>I Woke Up Late</p>
+                    <p className="text-[10px]" style={{ color: 'var(--mist)' }}>Reset without guilt</p>
+                  </div>
+                </Link>
+                <Link href="/rush-mode">
+                  <div className="rounded-2xl p-4 flex flex-col items-center gap-2 text-center"
+                    style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(139,111,184,0.15)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ background: 'rgba(139,111,184,0.1)' }}>
+                      <Zap className="h-5 w-5" style={{ color: 'var(--violet)' }} />
+                    </div>
+                    <p className="text-xs font-bold" style={{ color: 'var(--depth)' }}>I&apos;m Rushing</p>
+                    <p className="text-[10px]" style={{ color: 'var(--mist)' }}>Sacred minimum</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Col 3: Spirit + Crystal + Career */}
+            <div className="space-y-4">
+              {/* Spirit Message */}
+              <div className="rounded-2xl p-6"
+                style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(139,111,184,0.1)', boxShadow: '0 2px 20px rgba(139,111,184,0.06)' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xl">🪷</span>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Spirit Today</p>
+                </div>
+                <p className="text-base leading-relaxed mb-4" style={{ color: 'var(--mid)' }}>{spiritMsg}</p>
+                <Link href="/spirit">
+                  <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                    style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--violet)' }}>
+                    Open Spirit <ArrowRight className="h-4 w-4" />
+                  </div>
+                </Link>
+              </div>
+
+              {/* Crystal */}
+              <div className="rounded-2xl p-6"
+                style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(139,111,184,0.1)', boxShadow: '0 2px 20px rgba(139,111,184,0.06)' }}>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl">🔮</span>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Crystal Today</p>
+                    <p className="text-base font-bold" style={{ color: 'var(--depth)' }}>{crystal.name}</p>
+                  </div>
+                </div>
+                <p className="text-sm" style={{ color: 'var(--mid)' }}>{crystal.tags}</p>
+              </div>
+
+              {/* Career + Tonight */}
+              <div className="rounded-2xl p-6"
+                style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(139,111,184,0.1)', boxShadow: '0 2px 20px rgba(139,111,184,0.06)' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Compass className="h-5 w-5" style={{ color: 'var(--violet)' }} />
+                  <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Career Compass</p>
+                </div>
+                <p className="text-sm mb-4" style={{ color: 'var(--mid)' }}>Align your work with recognition and highest use.</p>
+                <Link href="/career">
+                  <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                    style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--violet)' }}>
+                    Open <ArrowRight className="h-4 w-4" />
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Row 3: Full-width tonight strip ── */}
+          <Link href="/night">
+            <div className="rounded-2xl px-6 py-5 flex items-center justify-between"
+              style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(139,111,184,0.12)', boxShadow: '0 2px 20px rgba(139,111,184,0.08)' }}>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  style={{ background: 'rgba(106,79,155,0.1)' }}>
+                  <span className="text-xl">🌙</span>
+                </div>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: 'var(--violet)' }}>Tonight&apos;s Protection</p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--mist)' }}>Start wind-down by 9:30 PM · Protect your sleep</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2" style={{ color: 'var(--violet)' }}>
+                <span className="text-sm font-semibold">Plan my night</span>
+                <ArrowRight className="h-5 w-5" />
+              </div>
             </div>
           </Link>
 
