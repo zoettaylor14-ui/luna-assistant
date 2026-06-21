@@ -349,7 +349,7 @@ export default function ProfilePage() {
                 <div className="flex-1">
                   <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>{g.title}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                       style={{ background: 'rgba(90,138,90,0.1)', color: '#5A8A5A' }}>{g.timeframe}</span>
                     {g.why && <p className="text-xs italic" style={{ color: 'var(--mist)' }}>{g.why}</p>}
                   </div>

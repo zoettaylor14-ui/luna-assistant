@@ -64,6 +64,33 @@ function getTimeGreeting(hour: number): string {
   return 'Good evening'
 }
 
+// ─── Realistic CSS moon ─────────────────────────────────────
+function MoonSphere({ size = 128, glow = true }: { size?: number; glow?: boolean }) {
+  return (
+    <div style={{
+      width: size,
+      height: size,
+      borderRadius: '50%',
+      flexShrink: 0,
+      background: [
+        'radial-gradient(circle at 58% 22%, rgba(155,150,172,0.95) 0%, rgba(135,130,155,0.5) 8%, transparent 13%)',
+        'radial-gradient(circle at 26% 64%, rgba(140,135,162,0.85) 0%, transparent 10%)',
+        'radial-gradient(circle at 73% 60%, rgba(150,145,168,0.75) 0%, transparent 9%)',
+        'radial-gradient(circle at 44% 78%, rgba(125,120,148,0.9) 0%, transparent 13%)',
+        'radial-gradient(circle at 18% 38%, rgba(170,165,190,0.65) 0%, transparent 8%)',
+        'radial-gradient(circle at 84% 42%, rgba(160,155,180,0.55) 0%, transparent 7%)',
+        'radial-gradient(circle at 36% 46%, rgba(180,175,198,0.4) 0%, transparent 18%)',
+        'radial-gradient(circle at 62% 72%, rgba(148,143,168,0.5) 0%, transparent 11%)',
+        'radial-gradient(ellipse at 38% 35%, rgba(252,250,255,1) 0%, rgba(228,224,240,1) 15%, rgba(196,192,212,1) 32%, rgba(162,158,180,1) 52%, rgba(124,120,145,1) 70%, rgba(88,84,108,1) 88%)',
+      ].join(', '),
+      boxShadow: [
+        `inset ${size * 0.13}px ${size * 0.07}px ${size * 0.22}px rgba(0,0,0,0.32)`,
+        glow ? `0 0 ${size * 0.3}px ${size * 0.1}px rgba(180,160,240,0.28)` : '',
+      ].filter(Boolean).join(', '),
+    }} />
+  )
+}
+
 // ─── Donut ring ──────────────────────────────────────────────
 function Ring({ pct, size = 64, stroke = 6, color = '#8B6FB8', label }: {
   pct: number; size?: number; stroke?: number; color?: string; label?: string
@@ -110,14 +137,14 @@ function StatCard({ icon, label, value, sub, color }: {
   return (
     <div className="flex-1 min-w-0 rounded-2xl p-3 flex flex-col items-center gap-2"
       style={{ background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(139,111,184,0.08)' }}>
-      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>{label}</p>
       <div className="w-10 h-10 rounded-full flex items-center justify-center"
         style={{ background: `${color}18`, border: `2px solid ${color}40` }}>
         {icon}
       </div>
       <div className="text-center">
         <p className="text-xs font-semibold" style={{ color: 'var(--depth)' }}>{value}</p>
-        {sub && <p className="text-[10px]" style={{ color: 'var(--mist)' }}>{sub}</p>}
+        {sub && <p className="text-xs" style={{ color: 'var(--mist)' }}>{sub}</p>}
       </div>
     </div>
   )
@@ -136,7 +163,7 @@ function DCard({ children, className = '', style = {} }: {
 
 // ─── Dark card label ─────────────────────────────────────────
 function DLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>{children}</p>
+  return <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>{children}</p>
 }
 
 export default function SanctuaryPage() {
@@ -210,7 +237,7 @@ export default function SanctuaryPage() {
               style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(139,111,184,0.1)' }}>
               <span className="text-4xl flex-shrink-0">🔮</span>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--mist)' }}>Daily Affirmation</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--mist)' }}>Daily Affirmation</p>
                 <p className="text-sm font-semibold leading-relaxed" style={{ color: 'var(--depth)' }}>{affirmation}</p>
               </div>
             </div>
@@ -220,7 +247,7 @@ export default function SanctuaryPage() {
               <div className="rounded-2xl p-4"
                 style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(139,111,184,0.1)' }}>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Next Meeting</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Next Meeting</p>
                   <Calendar className="h-3.5 w-3.5" style={{ color: 'var(--mist)' }} />
                 </div>
                 <p className="text-lg font-bold mb-0.5" style={{ color: 'var(--depth)' }}>11:00 AM</p>
@@ -233,11 +260,11 @@ export default function SanctuaryPage() {
               <div className="rounded-2xl p-4"
                 style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(139,111,184,0.1)' }}>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Priority</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Priority</p>
                   <Star className="h-3.5 w-3.5" style={{ color: '#C9A96E' }} />
                 </div>
                 <p className="text-sm font-bold leading-snug mb-1" style={{ color: 'var(--depth)' }}>Review client website plan</p>
-                <p className="text-[10px]" style={{ color: 'var(--mist)' }}>This unlocks everything.</p>
+                <p className="text-xs" style={{ color: 'var(--mist)' }}>This unlocks everything.</p>
               </div>
             </div>
 
@@ -246,23 +273,23 @@ export default function SanctuaryPage() {
               <div className="rounded-2xl p-3"
                 style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(139,111,184,0.08)' }}>
                 <div className="text-base mb-2">🪷</div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Spirit</p>
-                <p className="text-[11px] leading-snug mb-2" style={{ color: 'var(--mid)' }}>{spiritMsg}</p>
-                <Link href="/spirit"><p className="text-[11px] font-semibold" style={{ color: 'var(--violet)' }}>Read →</p></Link>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Spirit</p>
+                <p className="text-sm leading-snug mb-2" style={{ color: 'var(--mid)' }}>{spiritMsg}</p>
+                <Link href="/spirit"><p className="text-sm font-semibold" style={{ color: 'var(--violet)' }}>Read →</p></Link>
               </div>
               <div className="rounded-2xl p-3 flex flex-col items-center text-center"
                 style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(139,111,184,0.08)' }}>
                 <div className="text-base mb-2">🔮</div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Crystal</p>
-                <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--depth)' }}>{crystal.name}</p>
-                <p className="text-[10px]" style={{ color: 'var(--mid)' }}>{crystal.tags}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Crystal</p>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--depth)' }}>{crystal.name}</p>
+                <p className="text-xs" style={{ color: 'var(--mid)' }}>{crystal.tags}</p>
               </div>
               <div className="rounded-2xl p-3"
                 style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(139,111,184,0.08)' }}>
                 <div className="text-base mb-2">🧭</div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Career</p>
-                <p className="text-[11px] leading-snug mb-2" style={{ color: 'var(--mid)' }}>Align work with recognition.</p>
-                <Link href="/career"><p className="text-[11px] font-semibold" style={{ color: 'var(--violet)' }}>Open →</p></Link>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Career</p>
+                <p className="text-sm leading-snug mb-2" style={{ color: 'var(--mid)' }}>Align work with recognition.</p>
+                <Link href="/career"><p className="text-sm font-semibold" style={{ color: 'var(--violet)' }}>Open →</p></Link>
               </div>
             </div>
 
@@ -276,7 +303,7 @@ export default function SanctuaryPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold" style={{ color: 'var(--depth)' }}>I Woke Up Late</p>
-                    <p className="text-[10px]" style={{ color: 'var(--mist)' }}>Reset without guilt</p>
+                    <p className="text-xs" style={{ color: 'var(--mist)' }}>Reset without guilt</p>
                   </div>
                   <ChevronRight className="h-4 w-4 ml-auto" style={{ color: 'var(--faint)' }} />
                 </div>
@@ -289,7 +316,7 @@ export default function SanctuaryPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold" style={{ color: 'var(--depth)' }}>I&apos;m Rushing</p>
-                    <p className="text-[10px]" style={{ color: 'var(--mist)' }}>Sacred minimum</p>
+                    <p className="text-xs" style={{ color: 'var(--mist)' }}>Sacred minimum</p>
                   </div>
                   <ChevronRight className="h-4 w-4 ml-auto" style={{ color: 'var(--faint)' }} />
                 </div>
@@ -304,7 +331,7 @@ export default function SanctuaryPage() {
                   <span className="text-lg">🌙</span>
                   <div>
                     <p className="text-xs font-bold" style={{ color: 'var(--violet)' }}>Tonight&apos;s Protection</p>
-                    <p className="text-[11px]" style={{ color: 'var(--mist)' }}>Start wind-down by 9:30 PM</p>
+                    <p className="text-sm" style={{ color: 'var(--mist)' }}>Start wind-down by 9:30 PM</p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4" style={{ color: 'var(--violet)' }} />
@@ -336,18 +363,9 @@ export default function SanctuaryPage() {
                 border: '1px solid rgba(139,111,184,0.2)',
                 minHeight: 160,
               }}>
-              {/* Moon glow */}
-              <div className="absolute right-0 top-0 bottom-0 w-64 pointer-events-none">
-                <div className="absolute right-8 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(200,190,240,0.9) 30%, rgba(150,130,220,0.4) 60%, transparent 80%)',
-                    boxShadow: '0 0 60px 20px rgba(180,160,240,0.25)',
-                  }} />
-                {/* Crescent shadow */}
-                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-28 h-28 rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle at 35% 50%, rgba(14,12,32,0.7) 0%, transparent 55%)',
-                  }} />
+              {/* Moon */}
+              <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none">
+                <MoonSphere size={148} glow={true} />
               </div>
 
               {/* Stars */}
@@ -412,10 +430,10 @@ export default function SanctuaryPage() {
                         : <Circle className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
                       }
                       <div className="min-w-0">
-                        <p className="text-xs font-medium" style={{ color: task.done ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.85)', textDecoration: task.done ? 'line-through' : 'none' }}>
+                        <p className="text-sm font-medium" style={{ color: task.done ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.85)', textDecoration: task.done ? 'line-through' : 'none' }}>
                           {task.title}
                         </p>
-                        <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{task.sub}</p>
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{task.sub}</p>
                       </div>
                     </button>
                   ))}
@@ -450,13 +468,13 @@ export default function SanctuaryPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>{m.name}</p>
+                          <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>{m.name}</p>
                           <div className="flex items-center gap-1.5">
-                            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.time}</p>
+                            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.time}</p>
                             {m.dot && <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#8B6FB8' }} />}
                           </div>
                         </div>
-                        <p className="text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.45)' }}>{m.msg}</p>
+                        <p className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.45)' }}>{m.msg}</p>
                       </div>
                     </div>
                   ))}
@@ -492,10 +510,10 @@ export default function SanctuaryPage() {
                     <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Google Meet</span>
                   </div>
                 </div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.3)' }}>Up next</p>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.3)' }}>Up next</p>
                 <div className="flex items-center gap-3">
-                  <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>1:00 PM</p>
-                  <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>Client Call</p>
+                  <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>1:00 PM</p>
+                  <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>Client Call</p>
                   <span className="text-xs ml-auto" style={{ color: 'rgba(255,255,255,0.35)' }}>📹 Zoom</span>
                 </div>
               </DCard>
@@ -543,10 +561,10 @@ export default function SanctuaryPage() {
                   <div className="w-2 h-2 rounded-full" style={{ background: '#5A9E5A' }} />
                   <span className="text-xs" style={{ color: '#5A9E5A' }}>On track</span>
                 </div>
-                <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>2 tasks due today</p>
+                <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>2 tasks due today</p>
                 <div className="flex items-center justify-between">
                   <Link href="/work">
-                    <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
+                    <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
                       style={{ background: 'rgba(139,111,184,0.15)', color: '#C4A9E8', border: '1px solid rgba(139,111,184,0.2)' }}>
                       Review <ArrowRight className="h-3.5 w-3.5" />
                     </button>
@@ -557,13 +575,10 @@ export default function SanctuaryPage() {
 
               {/* Energy / Moon */}
               <DCard style={{ position: 'relative', overflow: 'hidden' }}>
-                {/* Moon image placeholder */}
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(220,215,240,0.9) 20%, rgba(160,150,200,0.5) 55%, rgba(80,70,130,0.2) 80%, transparent 100%)',
-                    boxShadow: '0 0 30px 8px rgba(180,160,240,0.2)',
-                  }} />
-                <div className="absolute top-2 right-2 text-xs font-bold" style={{ color: 'rgba(255,255,255,0.6)' }}>72%</div>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <MoonSphere size={90} glow={true} />
+                </div>
+                <div className="absolute top-3 right-3 text-sm font-bold" style={{ color: 'rgba(255,255,255,0.7)' }}>72%</div>
 
                 <div className="flex items-center gap-2 mb-3">
                   <Moon className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
@@ -599,7 +614,7 @@ export default function SanctuaryPage() {
                           style={{ background: `${color}20` }}>
                           <Icon className="h-3.5 w-3.5" style={{ color }} strokeWidth={1.8} />
                         </div>
-                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</span>
+                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</span>
                       </div>
                       <span className="text-sm font-semibold text-white">{value}</span>
                     </div>

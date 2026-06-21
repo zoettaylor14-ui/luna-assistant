@@ -140,7 +140,7 @@ export default function MiddayPage() {
                           background: checks[key] ? 'var(--violet)' : 'transparent',
                           border: `1.5px solid ${checks[key] ? 'var(--violet)' : 'var(--faint)'}`,
                         }}>
-                        {checks[key] && <span className="text-white text-[10px]">✓</span>}
+                        {checks[key] && <span className="text-white text-xs">✓</span>}
                       </div>
                     </button>
                   ))}

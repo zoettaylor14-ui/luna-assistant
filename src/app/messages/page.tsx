@@ -173,7 +173,7 @@ export default function CommunicationCoach() {
                           : 'transparent'}`,
                       }}>
                       <span className="text-base">{l.emoji}</span>
-                      <span className="text-[9px] font-semibold" style={{
+                      <span className="text-xs font-semibold" style={{
                         color: activated === l.value ? (l.value >= 4 ? '#E05E5E' : 'var(--violet)') : 'var(--mist)'
                       }}>{l.label}</span>
                     </button>

@@ -284,7 +284,7 @@ export default function SpiritScreen() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Moon Phase — emoji and data both from real API */}
                   <div className="flex flex-col gap-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Phase</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Phase</p>
                     <div className="flex items-center gap-2">
                       {/* Use API emoji — not the approximate function */}
                       <span className="text-2xl animate-float">
@@ -295,7 +295,7 @@ export default function SpiritScreen() {
                           {realMoon ? realMoon.phase.name : moon.name}
                         </p>
                         {realMoon && (
-                          <p className="text-[10px]" style={{ color: 'var(--mist)' }}>
+                          <p className="text-xs" style={{ color: 'var(--mist)' }}>
                             {realMoon.phase.illumination}% illuminated
                           </p>
                         )}
@@ -306,7 +306,7 @@ export default function SpiritScreen() {
                     </p>
                     {/* Show exact phase moment if within ~48h */}
                     {realMoon?.phase.next_exact && (
-                      <p className="text-[10px] mt-1 px-2 py-1 rounded-lg" style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--violet)' }}>
+                      <p className="text-xs mt-1 px-2 py-1 rounded-lg" style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--violet)' }}>
                         {realMoon.phase.next_exact.name}: {realMoon.phase.next_exact.time}
                       </p>
                     )}
@@ -314,7 +314,7 @@ export default function SpiritScreen() {
 
                   {/* Moon Sign — SEPARATE from phase, always from API */}
                   <div className="flex flex-col gap-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Sign</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Sign</p>
                     {realMoon ? (
                       <div>
                         <div className="flex items-center gap-1.5">
@@ -326,11 +326,11 @@ export default function SpiritScreen() {
                         <p className="text-xs font-mono mt-0.5" style={{ color: 'var(--violet)' }}>
                           {realMoon.sign.formatted}
                         </p>
-                        <p className="text-[10px] mt-0.5" style={{ color: 'var(--mid)' }}>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--mid)' }}>
                           {realMoon.sign.keywords}
                         </p>
                         {realMoon.next_ingress && (
-                          <p className="text-[10px] mt-1 px-2 py-1 rounded-lg italic" style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--violet)' }}>
+                          <p className="text-xs mt-1 px-2 py-1 rounded-lg italic" style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--violet)' }}>
                             → {realMoon.next_ingress}
                           </p>
                         )}
@@ -340,7 +340,7 @@ export default function SpiritScreen() {
                         <p className="text-xs italic" style={{ color: 'var(--mist)' }}>
                           Loading exact sign...
                         </p>
-                        <p className="text-[10px] mt-1" style={{ color: 'var(--faint)' }}>
+                        <p className="text-xs mt-1" style={{ color: 'var(--faint)' }}>
                           Verify in TimePassages
                         </p>
                       </div>
@@ -350,11 +350,11 @@ export default function SpiritScreen() {
 
                 {/* Calculated time + accuracy note */}
                 <div className="mt-3 pt-2 border-t flex items-center justify-between" style={{ borderColor: 'rgba(139,111,184,0.08)' }}>
-                  <p className="text-[9px]" style={{ color: 'var(--faint)' }}>
+                  <p className="text-xs" style={{ color: 'var(--faint)' }}>
                     Live · astronomy-engine ephemeris
                     {realMoon?.calculated_at && ` · ${new Date(realMoon.calculated_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}`}
                   </p>
-                  <p className="text-[9px]" style={{ color: 'var(--faint)' }}>Cross-ref TimePassages</p>
+                  <p className="text-xs" style={{ color: 'var(--faint)' }}>Cross-ref TimePassages</p>
                 </div>
               </GlassCard>
 

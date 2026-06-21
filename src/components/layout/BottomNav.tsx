@@ -1,17 +1,20 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Sun, BriefcaseIcon, Sparkles, MoreHorizontal, Mic } from 'lucide-react'
+import {
+  Home, MessageCircle, Calendar, CheckSquare,
+  Sparkles, BookOpen, Users, Settings
+} from 'lucide-react'
 
-const LEFT_TABS = [
-  { href: '/',      label: 'Sanctuary', icon: Home },
-  { href: '/today', label: 'Today',     icon: Sun  },
-]
-
-const RIGHT_TABS = [
-  { href: '/work',   label: 'Work',   icon: BriefcaseIcon },
-  { href: '/spirit', label: 'Spirit', icon: Sparkles },
-  { href: '/more',   label: 'More',   icon: MoreHorizontal },
+const TABS = [
+  { href: '/',               label: 'Home',     icon: Home,          badge: null, dateLabel: false },
+  { href: '/messages',       label: 'Messages', icon: MessageCircle, badge: 4,    dateLabel: false },
+  { href: '/calendar',       label: 'Calendar', icon: Calendar,      badge: null, dateLabel: true  },
+  { href: '/tasks',          label: 'Tasks',    icon: CheckSquare,   badge: null, dateLabel: false },
+  { href: '/spirit',         label: 'Spirit',   icon: Sparkles,      badge: null, dateLabel: false },
+  { href: '/journal',        label: 'Journal',  icon: BookOpen,      badge: null, dateLabel: false },
+  { href: '/relationships',  label: 'People',   icon: Users,         badge: null, dateLabel: false },
+  { href: '/settings',       label: 'Settings', icon: Settings,      badge: null, dateLabel: false },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -21,6 +24,7 @@ function isActive(pathname: string, href: string) {
 
 export function BottomNav() {
   const pathname = usePathname()
+  const today = new Date().getDate()
 
   return (
     <nav
@@ -33,48 +37,46 @@ export function BottomNav() {
         borderTop: '1px solid rgba(139,111,184,0.1)',
       }}
     >
-      <div className="flex items-center justify-around h-full max-w-lg mx-auto px-1 relative">
-
-        {LEFT_TABS.map(({ href, label, icon: Icon }) => {
+      <div className="flex items-center h-full max-w-lg mx-auto px-1">
+        {TABS.map(({ href, label, icon: Icon, badge, dateLabel }) => {
           const active = isActive(pathname, href)
           return (
-            <Link key={href} href={href} className="flex flex-col items-center gap-0.5 flex-1 py-2">
-              <Icon
-                className="h-5 w-5 transition-all"
-                style={{ color: active ? 'var(--violet)' : 'var(--mist)', strokeWidth: active ? 2.2 : 1.7 }}
-              />
-              <span className="text-[10px] font-medium transition-all"
-                style={{ color: active ? 'var(--violet)' : 'var(--mist)' }}>
-                {label}
-              </span>
-            </Link>
-          )
-        })}
-
-        {/* Center dictation button */}
-        <div className="flex-1 flex justify-center">
-          <Link
-            href="/dictation"
-            className="w-14 h-14 rounded-full flex items-center justify-center -mt-6 transition-all active:scale-95"
-            style={{
-              background: 'linear-gradient(135deg, var(--violet) 0%, var(--violet-deep) 100%)',
-              boxShadow: 'var(--float-shadow)',
-            }}
-          >
-            <Mic className="h-6 w-6 text-white" strokeWidth={1.8} />
-          </Link>
-        </div>
-
-        {RIGHT_TABS.map(({ href, label, icon: Icon }) => {
-          const active = isActive(pathname, href)
-          return (
-            <Link key={href} href={href} className="flex flex-col items-center gap-0.5 flex-1 py-2">
-              <Icon
-                className="h-5 w-5 transition-all"
-                style={{ color: active ? 'var(--violet)' : 'var(--mist)', strokeWidth: active ? 2.2 : 1.7 }}
-              />
-              <span className="text-[10px] font-medium transition-all"
-                style={{ color: active ? 'var(--violet)' : 'var(--mist)' }}>
+            <Link
+              key={href}
+              href={href}
+              className="flex flex-col items-center gap-0.5 flex-1 py-2"
+            >
+              <div className="relative">
+                {dateLabel ? (
+                  <div className="relative">
+                    <Icon
+                      className="h-[18px] w-[18px] transition-all"
+                      style={{ color: active ? 'var(--violet)' : 'var(--mist)', strokeWidth: active ? 2.2 : 1.7 }}
+                    />
+                    <div
+                      className="absolute -bottom-1 -right-2 text-xs font-bold"
+                      style={{ color: active ? 'var(--violet)' : 'var(--mist)' }}
+                    >{today}</div>
+                  </div>
+                ) : (
+                  <>
+                    <Icon
+                      className="h-[18px] w-[18px] transition-all"
+                      style={{ color: active ? 'var(--violet)' : 'var(--mist)', strokeWidth: active ? 2.2 : 1.7 }}
+                    />
+                    {badge && (
+                      <div className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
+                        style={{ background: 'var(--violet)', border: '1.5px solid rgba(253,248,243,0.96)' }}>
+                        <span className="text-white font-bold" style={{ fontSize: 8 }}>{badge}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+              <span
+                className="text-xs font-medium transition-all leading-none"
+                style={{ color: active ? 'var(--violet)' : 'var(--mist)' }}
+              >
                 {label}
               </span>
             </Link>

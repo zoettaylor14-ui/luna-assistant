@@ -72,7 +72,7 @@ export function DesktopSidebar() {
         <p className="font-display text-2xl font-bold tracking-[0.12em]" style={{ color: 'var(--violet-deep)' }}>
           LUNA
         </p>
-        <p className="text-[10px] tracking-wider mt-0.5" style={{ color: 'var(--mist)' }}>
+        <p className="text-xs tracking-wider mt-0.5" style={{ color: 'var(--mist)' }}>
           YOUR SANCTUARY
         </p>
       </div>
@@ -94,7 +94,7 @@ export function DesktopSidebar() {
       <nav className="flex-1 px-2 space-y-4 pb-4">
         {NAV.map(({ group, items }) => (
           <div key={group}>
-            <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest"
+            <p className="px-3 py-1 text-xs font-bold uppercase tracking-widest"
               style={{ color: 'var(--faint)' }}>
               {group}
             </p>
@@ -130,7 +130,7 @@ export function DesktopSidebar() {
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold" style={{ color: 'var(--depth)' }}>Zoe Taylor</p>
-            <p className="text-[10px]" style={{ color: 'var(--mist)' }}>Scorpio · Projector 4/6</p>
+            <p className="text-xs" style={{ color: 'var(--mist)' }}>Scorpio · Projector 4/6</p>
           </div>
         </Link>
         <Link href="/settings"

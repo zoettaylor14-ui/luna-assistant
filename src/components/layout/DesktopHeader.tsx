@@ -49,7 +49,7 @@ export function DesktopHeader() {
           style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
           <Search className="h-3.5 w-3.5" style={{ color: 'rgba(255,255,255,0.4)' }} />
           <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Search LUNA...</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-md ml-1"
+          <span className="text-xs px-1.5 py-0.5 rounded-md ml-1"
             style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.35)' }}>⌘K</span>
         </div>
 
