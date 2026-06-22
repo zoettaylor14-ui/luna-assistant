@@ -92,23 +92,23 @@ export default function SettingsPage() {
     <AppLayout>
       <div className="space-y-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Settings</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Customize how your assistant knows you</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-1)' }}>Settings</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-2)' }}>Customize how your assistant knows you</p>
         </div>
 
         {/* Appearance */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Settings className="h-4 w-4 text-slate-500" />
+              <Settings className="h-4 w-4" style={{ color: 'var(--text-3)' }} />
               <CardTitle>Appearance</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-800">Theme</p>
-                <p className="text-xs text-slate-400">Choose light or dark mode</p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Theme</p>
+                <p className="text-xs" style={{ color: 'var(--text-3)' }}>Choose light or dark mode</p>
               </div>
               <button
                 onClick={toggle}
@@ -116,8 +116,8 @@ export default function SettingsPage() {
                 style={{ borderColor: 'rgba(139,111,184,0.3)', background: 'rgba(139,111,184,0.06)' }}
               >
                 {theme === 'dark'
-                  ? <><Sun className="h-4 w-4 text-amber-500" /><span className="text-sm font-medium text-slate-700">Light mode</span></>
-                  : <><Moon className="h-4 w-4 text-violet-600" /><span className="text-sm font-medium text-slate-700">Dark mode</span></>
+                  ? <><Sun className="h-4 w-4 text-amber-500" /><span className="text-sm font-medium" style={{ color: 'var(--text-2)' }}>Light mode</span></>
+                  : <><Moon className="h-4 w-4 text-violet-600" /><span className="text-sm font-medium" style={{ color: 'var(--text-2)' }}>Dark mode</span></>
                 }
               </button>
             </div>
@@ -128,7 +128,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-slate-500" />
+              <User className="h-4 w-4" style={{ color: 'var(--text-3)' }} />
               <CardTitle>Account</CardTitle>
             </div>
           </CardHeader>
@@ -138,8 +138,8 @@ export default function SettingsPage() {
                 <span className="text-violet-600 font-bold text-sm">{userEmail?.[0]?.toUpperCase() || 'Z'}</span>
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-800">Zoe Taylor</p>
-                <p className="text-xs text-slate-400">{userEmail}</p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Zoe Taylor</p>
+                <p className="text-xs" style={{ color: 'var(--text-3)' }}>{userEmail}</p>
               </div>
             </div>
           </CardContent>
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                 <Brain className="h-4 w-4 text-violet-500" />
                 <CardTitle>AI Profile</CardTitle>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">The AI reads this to write replies and rank tasks in your voice</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>The AI reads this to write replies and rank tasks in your voice</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
@@ -191,7 +191,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Banned phrases</CardTitle>
-              <p className="text-xs text-slate-400 mt-0.5">The AI will never use these in your replies (comma-separated)</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>The AI will never use these in your replies (comma-separated)</p>
             </CardHeader>
             <CardContent>
               <Textarea
@@ -207,7 +207,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Settings className="h-4 w-4 text-slate-500" />
+                <Settings className="h-4 w-4" style={{ color: 'var(--text-3)' }} />
                 <CardTitle>Projects & contacts</CardTitle>
               </div>
             </CardHeader>

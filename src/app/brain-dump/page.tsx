@@ -102,7 +102,7 @@ export default function BrainDumpPage() {
     <AppLayout>
       <div className="space-y-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Brain Dump</h1>
+          <h1 className="text-2xl font-bold">Brain Dump</h1>
           <p className="text-slate-500 text-sm mt-0.5">Type everything on your mind. AI turns it into organized tasks.</p>
         </div>
 
@@ -257,7 +257,7 @@ export default function BrainDumpPage() {
                       <div className="space-y-1.5 pl-2">
                         {tasks.map(task => (
                           <div key={task.title} className="flex items-center gap-2">
-                            <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', URGENCY_COLORS[task.urgency_level]?.includes('red') ? 'bg-red-400' : 'bg-slate-300')} />
+                            <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', URGENCY_COLORS[task.urgency_level]?.includes('red') ? 'bg-red-400' : 'bg-gray-400')} />
                             <p className="text-sm text-slate-700">{task.title}</p>
                           </div>
                         ))}
@@ -308,7 +308,7 @@ function TaskItem({
             </Badge>
           )}
           {task.category && (
-            <Badge className={cn('text-xs', CATEGORY_COLORS[task.category] || 'bg-slate-100 text-slate-600')}>
+            <Badge className={cn('text-xs', CATEGORY_COLORS[task.category] || 'rounded-full')}>
               {task.category}
             </Badge>
           )}

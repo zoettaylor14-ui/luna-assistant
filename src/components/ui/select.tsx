@@ -9,19 +9,29 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, error, options, placeholder, ...props }, ref) => {
+  ({ className, label, error, options, placeholder, style, ...props }, ref) => {
     return (
-      <div className="space-y-1">
-        {label && <label className="block text-sm font-medium text-slate-700">{label}</label>}
+      <div className="space-y-1.5">
+        {label && (
+          <label className="block text-sm font-semibold" style={{ color: 'var(--text-2)' }}>
+            {label}
+          </label>
+        )}
         <select
           ref={ref}
           className={cn(
-            'w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm',
-            'focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent',
+            'w-full px-4 py-3 rounded-2xl text-sm transition-all',
+            'focus:outline-none focus:ring-2 focus:ring-violet-500',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            error && 'border-red-300 focus:ring-red-500',
+            error && 'ring-2 ring-red-400',
             className
           )}
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--surface-border)',
+            color: 'var(--text-1)',
+            ...style,
+          }}
           {...props}
         >
           {placeholder && <option value="">{placeholder}</option>}
@@ -29,7 +39,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p className="text-sm" style={{ color: '#E88080' }}>{error}</p>}
       </div>
     )
   }

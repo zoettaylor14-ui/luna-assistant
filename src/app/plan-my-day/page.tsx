@@ -184,7 +184,10 @@ export default function PlanMyDayPage() {
                         <div className="flex items-center gap-2">
                           <span>{icon}</span>
                           <CardTitle className="text-sm">{label}</CardTitle>
-                          <Badge className="bg-slate-100 text-slate-600 ml-auto">{sectionTasks.length}</Badge>
+                          <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full"
+  style={{ background: 'var(--surface)', color: 'var(--text-2)', border: '1px solid var(--surface-border)' }}>
+  {sectionTasks.length}
+</span>
                         </div>
                       </CardHeader>
                       <CardContent className="p-3 space-y-1.5">

@@ -126,7 +126,7 @@ export default function NightScreen() {
                     style={{
                       background: location === l.value ? 'rgba(139,111,184,0.3)' : 'rgba(255,255,255,0.05)',
                       border: `1.5px solid ${location === l.value ? 'rgba(139,111,184,0.5)' : 'rgba(255,255,255,0.08)'}`,
-                      color: location === l.value ? '#C4B5E0' : '#9E8CB0',
+                      color: location === l.value ? 'var(--tab-active-text)' : 'var(--text-2)',
                     }}>
                     {l.label}
                   </button>
@@ -141,7 +141,7 @@ export default function NightScreen() {
               </p>
               <input type="range" min={15} max={90} step={5} value={prepMinutes}
                 onChange={e => setPrepMinutes(Number(e.target.value))} />
-              <p className="text-xs mt-2" style={{ color: '#6B6080' }}>skincare, journal, wind-down ritual</p>
+              <p className="text-xs mt-2" style={{ color: 'var(--text-3)' }}>skincare, journal, wind-down ritual</p>
             </div>
 
             {/* First meeting */}
@@ -190,7 +190,7 @@ export default function NightScreen() {
 
           {/* Wind-down reminders */}
           <div className="mt-8 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#6B6080' }}>Tonight&apos;s wind-down</p>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>Tonight&apos;s wind-down</p>
             {[
               '🕯 Dim lights and soften the room',
               '📵 Close work apps and tabs',
@@ -199,7 +199,7 @@ export default function NightScreen() {
               '💧 One last glass of water',
               '🙏 Close the loops in your mind',
             ].map((item, i) => (
-              <div key={i} className="px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(255,255,255,0.04)', color: '#9E8CB0' }}>
+              <div key={i} className="px-4 py-3 rounded-xl text-sm" style={{ background: 'var(--surface-subtle)', color: 'var(--text-2)' }}>
                 {item}
               </div>
             ))}

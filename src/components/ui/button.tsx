@@ -16,21 +16,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         className={cn(
           'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed',
-          {
-            'bg-violet-600 text-white hover:bg-violet-700 shadow-sm': variant === 'default',
-            'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50': variant === 'outline',
-            'text-slate-600 hover:bg-slate-100': variant === 'ghost',
-            'bg-red-600 text-white hover:bg-red-700': variant === 'destructive',
-            'bg-slate-100 text-slate-700 hover:bg-slate-200': variant === 'secondary',
-          },
+          variant === 'default'     && 'bg-violet-600 text-white hover:bg-violet-700 shadow-sm',
+          variant === 'destructive' && 'bg-red-600 text-white hover:bg-red-700',
           {
             'px-3 py-1.5 text-sm': size === 'sm',
-            'px-4 py-2 text-sm': size === 'md',
+            'px-4 py-2 text-sm':   size === 'md',
             'px-6 py-3 text-base': size === 'lg',
-            'p-2 w-9 h-9': size === 'icon',
+            'p-2 w-9 h-9':         size === 'icon',
           },
           className
         )}
+        style={
+          variant === 'outline'   ? { background: 'var(--surface)', border: '1px solid var(--surface-border)', color: 'var(--text-1)' } :
+          variant === 'ghost'     ? { background: 'transparent', color: 'var(--text-2)' } :
+          variant === 'secondary' ? { background: 'var(--surface)', color: 'var(--text-2)', border: '1px solid var(--surface-border)' } :
+          undefined
+        }
         {...props}
       >
         {loading && (

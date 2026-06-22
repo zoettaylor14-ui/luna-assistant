@@ -124,8 +124,8 @@ export default function ProjectsPage() {
       <div className="space-y-5">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Projects</h1>
-            <p className="text-slate-500 text-sm mt-0.5">{projects.filter(p => p.status === 'active').length} active projects</p>
+            <h1 className="text-2xl font-bold">Projects</h1>
+            <p className="text-sm mt-0.5">{projects.filter(p => p.status === 'active').length} active projects</p>
           </div>
           <Button size="sm" onClick={() => setShowForm(!showForm)} className="gap-1.5">
             <Plus className="h-4 w-4" />
@@ -139,7 +139,7 @@ export default function ProjectsPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>New project</CardTitle>
-                <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowForm(false)} className="" style={{ color: 'var(--text-3)' }}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -180,13 +180,13 @@ export default function ProjectsPage() {
             const isExpanded = expanded === project.id
 
             return (
-              <div key={project.id} className="bg-white rounded-2xl border border-slate-100 hover:border-slate-200 transition-all shadow-sm">
+              <div key={project.id} className="rounded-2xl dark-card transition-all hover:shadow-lg">
                 <div className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-slate-800 text-sm">{project.name}</h3>
+                      <h3 className="font-semibold text-sm">{project.name}</h3>
                       {project.description && (
-                        <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{project.description}</p>
+                        <p className="text-xs mt-0.5 line-clamp-1">{project.description}</p>
                       )}
                     </div>
                     <StatusIcon className={cn('h-4 w-4 flex-shrink-0 ml-2 mt-0.5', STATUS_COLORS[project.status])} />
@@ -206,12 +206,12 @@ export default function ProjectsPage() {
                   {project.next_action && (
                     <div className="flex items-start gap-2 mb-3">
                       <ChevronRight className="h-3.5 w-3.5 text-violet-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-slate-600">{project.next_action}</p>
+                      <p className="text-xs">{project.next_action}</p>
                     </div>
                   )}
 
                   {project.deadline && (
-                    <p className="text-xs text-slate-400 mb-2">
+                    <p className="text-xs mb-2">
                       <span className="font-medium">Due:</span> {new Date(project.deadline).toLocaleDateString()}
                     </p>
                   )}

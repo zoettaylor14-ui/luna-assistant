@@ -110,8 +110,8 @@ export default function TasksPage() {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Tasks</h1>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-1)' }}>Tasks</h1>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--text-2)' }}>
               {tasks.filter(t => t.status !== 'done' && t.status !== 'cancelled').length} open · {tasks.filter(t => t.status === 'done').length} done
             </p>
           </div>
@@ -139,7 +139,7 @@ export default function TasksPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>New task</CardTitle>
-                <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowForm(false)} className="" style={{ color: 'var(--text-3)' }}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -153,12 +153,12 @@ export default function TasksPage() {
         {/* AI Rankings info */}
         {aiLoading && <AIThinking message="AI is ranking your tasks..." />}
         {aiRankings && !aiLoading && (
-          <div className="bg-violet-50 border border-violet-100 rounded-xl p-3">
+          <div className="rounded-xl p-3" style={{ background: 'rgba(139,111,184,0.1)', border: '1px solid rgba(139,111,184,0.2)' }}>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-violet-700">AI ranked these tasks for you</p>
-              <button onClick={() => setAiRankings(null)} className="text-xs text-violet-400 hover:text-violet-600">Clear</button>
+              <p className="text-xs font-semibold" style={{ color: 'var(--violet)' }}>AI ranked these tasks for you</p>
+              <button onClick={() => setAiRankings(null)} className="text-xs" style={{ color: 'var(--text-3)' }}>Clear</button>
             </div>
-            <p className="text-xs text-violet-600">{aiRankings[0] && `Top priority: "${tasks.find(t => t.id === aiRankings[0].id)?.title}" — ${aiRankings[0].reason}`}</p>
+            <p className="text-xs" style={{ color: 'var(--text-2)' }}>{aiRankings[0] && `Top priority: "${tasks.find(t => t.id === aiRankings[0].id)?.title}" — ${aiRankings[0].reason}`}</p>
           </div>
         )}
 
@@ -169,12 +169,12 @@ export default function TasksPage() {
               <button
                 key={f.value}
                 onClick={() => setStatusFilter(f.value)}
-                className={cn(
-                  'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                  statusFilter === f.value
-                    ? 'bg-violet-600 text-white'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                )}
+                className="px-3 py-2 rounded-full text-sm font-semibold transition-all"
+                style={{
+                  background: statusFilter === f.value ? 'var(--violet)' : 'var(--surface)',
+                  color:      statusFilter === f.value ? '#fff' : 'var(--text-2)',
+                  border:     statusFilter === f.value ? 'none' : '1px solid var(--surface-border)',
+                }}
               >
                 {f.label}
               </button>
@@ -184,12 +184,12 @@ export default function TasksPage() {
             <div className="flex gap-1.5 flex-wrap">
               <button
                 onClick={() => setCategoryFilter('all')}
-                className={cn(
-                  'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                  categoryFilter === 'all'
-                    ? 'bg-slate-700 text-white'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                )}
+                className="px-3 py-2 rounded-full text-sm font-semibold transition-all"
+                style={{
+                  background: categoryFilter === 'all' ? 'var(--surface-strong)' : 'var(--surface)',
+                  color:      'var(--text-2)',
+                  border:     '1px solid var(--surface-border)',
+                }}
               >
                 All categories
               </button>
@@ -197,12 +197,12 @@ export default function TasksPage() {
                 <button
                   key={cat}
                   onClick={() => setCategoryFilter(cat === categoryFilter ? 'all' : cat)}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                    categoryFilter === cat
-                      ? cn(CATEGORY_COLORS[cat], 'ring-2 ring-offset-1 ring-current')
-                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                  )}
+                  className="px-3 py-2 rounded-full text-sm font-semibold capitalize transition-all"
+                  style={{
+                    background: categoryFilter === cat ? 'rgba(139,111,184,0.15)' : 'var(--surface)',
+                    color:      categoryFilter === cat ? 'var(--violet)' : 'var(--text-2)',
+                    border:     categoryFilter === cat ? '1.5px solid rgba(139,111,184,0.3)' : '1px solid var(--surface-border)',
+                  }}
                 >
                   {cat}
                 </button>
@@ -214,7 +214,7 @@ export default function TasksPage() {
         {/* Tasks list */}
         {filtered.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-slate-400 text-sm">No tasks match these filters.</p>
+            <p className="text-sm" style={{ color: 'var(--text-3)' }}>No tasks match these filters.</p>
             <Button size="sm" className="mt-3" onClick={() => setShowForm(true)}>
               <Plus className="h-4 w-4 mr-1" />
               Add your first task
@@ -225,7 +225,7 @@ export default function TasksPage() {
             {filtered.map((task, i) => (
               <div key={task.id} className="flex gap-2 items-start">
                 {aiRankings && (
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-100 text-violet-600 text-xs font-bold flex items-center justify-center mt-4">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center mt-4" style={{ background: 'rgba(139,111,184,0.15)', color: 'var(--violet)' }}>
                     {i + 1}
                   </span>
                 )}
