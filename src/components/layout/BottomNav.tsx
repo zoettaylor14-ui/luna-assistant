@@ -3,17 +3,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, MessageCircle, Calendar, CheckSquare,
-  Sparkles, BookOpen, Users, Scissors
+  Sparkles, Scissors, Moon, BookHeart
 } from 'lucide-react'
 
 const TABS = [
-  { href: '/',         label: 'Home',     icon: Home,          badge: null, dateLabel: false },
-  { href: '/messages', label: 'Messages', icon: MessageCircle, badge: 4,    dateLabel: false },
-  { href: '/calendar', label: 'Calendar', icon: Calendar,      badge: null, dateLabel: true  },
-  { href: '/tasks',    label: 'Tasks',    icon: CheckSquare,   badge: null, dateLabel: false },
-  { href: '/spirit',   label: 'Spirit',   icon: Sparkles,      badge: null, dateLabel: false },
-  { href: '/atelier',  label: 'Atelier',  icon: Scissors,      badge: null, dateLabel: false },
-  { href: '/journal',  label: 'Journal',  icon: BookOpen,      badge: null, dateLabel: false },
+  { href: '/',          label: 'Home',     icon: Home,          badge: null, dateLabel: false },
+  { href: '/messages',  label: 'Messages', icon: MessageCircle, badge: 4,    dateLabel: false },
+  { href: '/calendar',  label: 'Calendar', icon: Calendar,      badge: null, dateLabel: true  },
+  { href: '/tasks',     label: 'Tasks',    icon: CheckSquare,   badge: null, dateLabel: false },
+  { href: '/spirit',    label: 'Spirit',   icon: Sparkles,      badge: null, dateLabel: false },
+  { href: '/atelier',   label: 'Atelier',  icon: Scissors,      badge: null, dateLabel: false },
+  { href: '/night',     label: 'Night',    icon: Moon,          badge: null, dateLabel: false },
+  { href: '/memory',    label: 'Memory',   icon: BookHeart,     badge: null, dateLabel: false },
 ]
 
 function isActive(pathname: string, href: string) {

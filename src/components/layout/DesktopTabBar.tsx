@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, MessageCircle, Calendar, CheckSquare,
-  Sparkles, Settings, Scissors, Moon, Mic
+  Sparkles, Settings, Scissors, Moon, Mic, BookHeart
 } from 'lucide-react'
 
 const TABS = [
@@ -14,6 +14,7 @@ const TABS = [
   { href: '/spirit',        label: 'Spirit',   icon: Sparkles,      badge: null            },
   { href: '/atelier',       label: 'Atelier',  icon: Scissors,      badge: null            },
   { href: '/night',         label: 'Night',    icon: Moon,          badge: null            },
+  { href: '/memory',        label: 'Memory',   icon: BookHeart,     badge: null            },
   { href: '/settings',      label: 'Settings', icon: Settings,      badge: null            },
 ]
 

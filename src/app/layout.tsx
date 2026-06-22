@@ -31,7 +31,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: '#FDF8F3',
+  themeColor: '#0D0B1E',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -42,10 +42,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `
           (function(){
             try {
-              var t = localStorage.getItem('luna-theme');
-              if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+              var t = localStorage.getItem('luna-theme') || 'dark';
               document.documentElement.setAttribute('data-theme', t);
-            } catch(e){}
+            } catch(e){
+              document.documentElement.setAttribute('data-theme', 'dark');
+            }
           })();
         `}} />
       </head>

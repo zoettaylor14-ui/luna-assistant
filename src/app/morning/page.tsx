@@ -1,8 +1,43 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { Sun, ArrowRight, Sparkles, ChevronLeft } from 'lucide-react'
+import { Sun, ArrowRight, Sparkles, ChevronLeft, Moon } from 'lucide-react'
 import { format } from 'date-fns'
+
+type CheckInType = 'morning' | 'midday' | 'night'
+
+function getCheckInType(): CheckInType {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'morning'
+  if (h >= 12 && h < 18) return 'midday'
+  return 'night'
+}
+
+const CHECK_IN_CONFIG: Record<CheckInType, {
+  label: string; emoji: string; headline: string; subtitle: string; color: string
+}> = {
+  morning: {
+    label: 'Morning Check-In',
+    emoji: '🌅',
+    headline: 'Good morning, beautiful.',
+    subtitle: 'Before the world gets your energy, come back to yourself.',
+    color: 'var(--lunar)',
+  },
+  midday: {
+    label: 'Midday Wellness Check',
+    emoji: '☀️',
+    headline: 'How is your soul right now?',
+    subtitle: 'Pause. Breathe. Check in with yourself.',
+    color: 'var(--golden)',
+  },
+  night: {
+    label: 'Night Time Reflection',
+    emoji: '🌙',
+    headline: 'Let the day settle.',
+    subtitle: 'Release what happened. Honor what you felt.',
+    color: 'var(--violet-mid)',
+  },
+}
 
 const SUPPORT_NEEDS = [
   { value: 'calm',       label: '🌊 Calm',       desc: 'I need stillness' },
@@ -29,6 +64,7 @@ interface CheckInData {
 type Step = 'wake' | 'sleep' | 'energy' | 'mood' | 'dream' | 'feeling' | 'support' | 'goal' | 'result'
 
 export default function MorningCheckIn() {
+  const [checkInType, setCheckInType] = useState<CheckInType>('morning')
   const [step, setStep] = useState<Step>('wake')
   const [data, setData] = useState<CheckInData>({
     wakeTime: '', sleepRating: 7, energyRating: 7, moodRating: 7,
@@ -43,6 +79,8 @@ export default function MorningCheckIn() {
     self_care_action: string; ai_message: string;
   } | null>(null)
 
+  useEffect(() => { setCheckInType(getCheckInType()) }, [])
+
   function update<K extends keyof CheckInData>(key: K, value: CheckInData[K]) {
     setData(prev => ({ ...prev, [key]: value }))
   }
@@ -50,27 +88,37 @@ export default function MorningCheckIn() {
   async function finish() {
     setStep('result')
     setLoading(true)
+    let aiResult = null
     try {
       const res = await fetch('/api/ai/daily-brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ checkIn: data }),
+        body: JSON.stringify({ checkIn: data, type: checkInType }),
       })
-      const json = await res.json()
-      setResult(json)
+      aiResult = await res.json()
+      setResult(aiResult)
     } catch {
-      setResult({
-        greeting: 'Good morning, beautiful. You showed up. That is enough.',
-        top_3: ['Take one grounding breath', 'Check your calendar', 'Choose one clear priority'],
-        first_step: 'Sit still for 60 seconds before you open anything.',
-        spiritual_message: 'Today asks you to move with intention before speed.',
+      aiResult = {
+        greeting: CHECK_IN_CONFIG[checkInType].headline + ' You showed up. That is enough.',
+        top_3: ['Take one grounding breath', 'Check in with your body', 'Choose one clear intention'],
+        first_step: 'Sit still for 60 seconds before you move.',
+        spiritual_message: checkInType === 'night'
+          ? 'Release what you are holding. Tomorrow is new.'
+          : 'Move with intention before speed.',
         affirmation: 'I am exactly where I need to be.',
-        human_design_message: 'As a Projector, wait for recognition. Do not force. Choose your highest-use work today.',
+        human_design_message: 'As a Projector, wait for recognition. Do not force.',
         chart_reflection: 'Your Scorpio Sun wants to go deep. Your Cancer Moon needs to feel safe first.',
-        self_care_action: 'Drink water before you open your phone.',
-        ai_message: 'You are becoming the woman you see in your future. Begin from here.',
-      })
+        self_care_action: checkInType === 'night' ? 'No screens for 30 min. Let your mind exhale.' : 'Drink water first.',
+        ai_message: 'You are becoming the woman you see in your future.',
+      }
+      setResult(aiResult)
     } finally {
+      // Save to Supabase in background — don't block UI
+      fetch('/api/check-ins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, type: checkInType, aiResponse: aiResult }),
+      }).catch(() => {})
       setLoading(false)
     }
   }
@@ -97,19 +145,22 @@ export default function MorningCheckIn() {
   }
 
   return (
-    <div style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #EDE5F5 100%)', minHeight: '100vh' }}>
-      <AppLayout noPad>
+    <AppLayout noPad>
         <div className="px-5 pt-14 pb-nav">
 
           {/* Header */}
           {step !== 'result' && (
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(168,196,218,0.2)' }}>
-                <Sun className="h-5 w-5" style={{ color: 'var(--lunar)' }} />
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                style={{ background: 'rgba(139,111,184,0.15)' }}>
+                <span className="text-xl">{CHECK_IN_CONFIG[checkInType].emoji}</span>
               </div>
               <div>
-                <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--lunar)' }}>Morning Check-In</p>
-                <p className="text-xs" style={{ color: 'var(--mist)' }}>{today}</p>
+                <p className="text-sm font-semibold uppercase tracking-wider"
+                  style={{ color: CHECK_IN_CONFIG[checkInType].color }}>
+                  {CHECK_IN_CONFIG[checkInType].label}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--text-3)' }}>{today}</p>
               </div>
             </div>
           )}
@@ -117,11 +168,11 @@ export default function MorningCheckIn() {
           {/* Step: Wake time */}
           {step === 'wake' && (
             <div className="animate-fade-up">
-              <h2 className="font-display text-2xl font-semibold mb-2" style={{ color: 'var(--depth)' }}>
-                Good morning, beautiful.
+              <h2 className="font-display text-2xl font-semibold mb-2" style={{ color: 'var(--text-1)' }}>
+                {CHECK_IN_CONFIG[checkInType].headline}
               </h2>
-              <p className="text-base mb-8" style={{ color: 'var(--mid)' }}>
-                Before the world gets your energy, come back to yourself.
+              <p className="text-base mb-8" style={{ color: 'var(--text-2)' }}>
+                {CHECK_IN_CONFIG[checkInType].subtitle}
               </p>
               <div className="glass-card p-5 mb-6">
                 <p className="text-sm font-semibold mb-3" style={{ color: 'var(--depth)' }}>What time did you wake up?</p>
@@ -421,6 +472,5 @@ export default function MorningCheckIn() {
 
         </div>
       </AppLayout>
-    </div>
   )
 }

@@ -118,17 +118,13 @@ html {
 }
 
 body {
-  background-color: var(--cream);
+  background-color: var(--app-bg-to);
   color: var(--text-1);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 1rem;
   line-height: 1.65;
-}
-
-[data-theme="dark"] body {
-  background-color: var(--app-bg-to);
 }
 
 * { box-sizing: border-box; }

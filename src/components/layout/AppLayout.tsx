@@ -1,6 +1,7 @@
 import { BottomNav } from './BottomNav'
 import { DesktopHeader } from './DesktopHeader'
 import { DesktopTabBar } from './DesktopTabBar'
+import { SwipeContainer } from './SwipeContainer'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -11,7 +12,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, noPad, className, darkDesktop }: AppLayoutProps) {
   return (
-    <div className="min-h-full bg-app">
+    <SwipeContainer className="min-h-full bg-app">
       {/* Desktop top header — hidden on mobile/tablet */}
       <DesktopHeader />
 
@@ -34,6 +35,6 @@ export function AppLayout({ children, noPad, className, darkDesktop }: AppLayout
       <BottomNav />
       {/* Desktop bottom tab bar */}
       <DesktopTabBar />
-    </div>
+    </SwipeContainer>
   )
 }

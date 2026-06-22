@@ -159,7 +159,7 @@ export default function CalendarPage() {
               <button key={event.id} onClick={() => setSelectedEvent(event === selectedEvent ? null : event)}
                 className="w-full text-left rounded-2xl p-4 transition-all"
                 style={{
-                  background: selectedEvent?.id === event.id ? EVENT_BG[event.type] : 'rgba(255,255,255,0.8)',
+                  background: selectedEvent?.id === event.id ? EVENT_BG[event.type] : 'var(--surface)',
                   border: `1.5px solid ${selectedEvent?.id === event.id ? EVENT_COLORS[event.type] + '40' : 'rgba(139,111,184,0.08)'}`,
                   boxShadow: '0 2px 16px rgba(139,111,184,0.05)',
                 }}>
@@ -270,7 +270,7 @@ export default function CalendarPage() {
             </div>
           ) : (
             <div className="hidden lg:flex mt-0 rounded-2xl p-8 items-center justify-center flex-col gap-3"
-              style={{ background: 'rgba(255,255,255,0.5)', border: '1.5px dashed rgba(139,111,184,0.15)', minHeight: 300 }}>
+              style={{ background: 'var(--surface-subtle)', border: '1.5px dashed rgba(139,111,184,0.2)', minHeight: 300 }}>
               <Calendar className="h-10 w-10 opacity-20" style={{ color: 'var(--violet)' }} />
               <p className="text-sm" style={{ color: 'var(--text-3)' }}>Select an event to see details and prep notes</p>
             </div>

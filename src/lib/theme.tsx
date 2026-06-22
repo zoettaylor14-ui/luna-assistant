@@ -9,12 +9,11 @@ const ThemeCtx = createContext<{ theme: Theme; toggle: () => void }>({
 })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light')
+  const [theme, setTheme] = useState<Theme>('dark')
 
   useEffect(() => {
     const saved = localStorage.getItem('luna-theme') as Theme | null
-    const sys: Theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    const init = saved ?? sys
+    const init = saved ?? 'dark'
     setTheme(init)
     document.documentElement.setAttribute('data-theme', init)
   }, [])
