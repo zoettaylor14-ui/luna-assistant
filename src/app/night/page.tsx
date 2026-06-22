@@ -13,12 +13,12 @@ const LOCATIONS = [
 ]
 
 const RITUAL_ITEMS = [
-  '🕯 Dim lights and soften the room',
-  '📵 Close work apps and tabs',
-  '📓 Journal what you\'re releasing',
-  '🧖 Skincare — love your face',
-  '💧 One last glass of water',
-  '🙏 Close the loops in your mind',
+  { emoji: '🕯', label: 'Dim lights and soften the room', mins: 5  },
+  { emoji: '📵', label: 'Close work apps and tabs',        mins: 5  },
+  { emoji: '📓', label: 'Journal what you\'re releasing',  mins: 10 },
+  { emoji: '🧖', label: 'Skincare — love your face',       mins: 10 },
+  { emoji: '💧', label: 'One last glass of water',         mins: 3  },
+  { emoji: '🙏', label: 'Close the loops in your mind',    mins: 7  },
 ]
 
 function timeToMinutes(t: string): number {
@@ -35,11 +35,18 @@ function minutesToTime(mins: number): string {
   return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`
 }
 
+function minutesToInput(mins: number): string {
+  const h = Math.floor(((mins % 1440) + 1440) % 1440 / 60)
+  const m = ((mins % 1440) + 1440) % 1440 % 60
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+}
+
 interface Plan {
   stopWorkTime: string
   leaveTime: string | null
   homeTime: string | null
   bedTime: string
+  bedMinRaw: number
   lightsOutTime: string
   message: string
 }
@@ -61,6 +68,10 @@ export default function NightScreen() {
   const [firstMeeting, setFirstMeeting]   = useState('')
   const [plan, setPlan]                   = useState<Plan | null>(null)
   const [checked, setChecked]             = useState<Set<number>>(new Set())
+  const [manualRitual, setManualRitual]   = useState(() => {
+    const now = new Date()
+    return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`
+  })
 
   const calculate = useCallback(() => {
     const wakeMin     = timeToMinutes(wakeGoal) + 24 * 60
@@ -85,9 +96,11 @@ export default function NightScreen() {
       leaveTime:     leaveMin !== null ? minutesToTime(leaveMin) : null,
       homeTime:      homeMin !== null  ? minutesToTime(homeMin)  : null,
       bedTime:       minutesToTime(bedMin),
+      bedMinRaw:     bedMin,
       lightsOutTime: minutesToTime(lightsOut),
       message,
     })
+    setManualRitual(minutesToInput(bedMin))
     setTab('tomorrow')
   }, [wakeGoal, sleepHours, location, prepMinutes])
 
@@ -264,33 +277,107 @@ export default function NightScreen() {
           {/* ── Ritual tab ── */}
           {tab === 'ritual' && (
             <div className="space-y-3 animate-fade-up">
-              <p className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                Tonight&apos;s wind-down checklist
+
+              {/* Start time picker */}
+              <div style={card} className="p-4 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    Ritual starts at
+                  </p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    {plan ? 'Auto-set from Sleep plan' : 'Set your start time'}
+                  </p>
+                </div>
+                <input
+                  type="time"
+                  value={manualRitual}
+                  onChange={e => setManualRitual(e.target.value)}
+                  className="bg-transparent outline-none font-display text-2xl font-bold text-right"
+                  style={{ color: '#D4BBFF', colorScheme: 'dark', width: 110 }}
+                />
+              </div>
+
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Night Ritual Checklist
               </p>
-              {RITUAL_ITEMS.map((item, i) => (
-                <button key={i} onClick={() => toggleCheck(i)}
-                  className="w-full text-left px-5 py-4 rounded-2xl transition-all flex items-center gap-4"
-                  style={{
-                    background: checked.has(i) ? 'rgba(139,111,184,0.25)' : 'rgba(255,255,255,0.08)',
-                    border: `1.5px solid ${checked.has(i) ? 'rgba(139,111,184,0.5)' : 'rgba(255,255,255,0.10)'}`,
-                    opacity: checked.has(i) ? 0.7 : 1,
-                  }}>
-                  <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
-                    style={{
-                      background: checked.has(i) ? '#8B6FB8' : 'rgba(255,255,255,0.1)',
-                      border: `1.5px solid ${checked.has(i) ? '#8B6FB8' : 'rgba(255,255,255,0.2)'}`,
-                    }}>
-                    {checked.has(i) && <span className="text-white text-xs">✓</span>}
+
+              {/* Timed checklist */}
+              {(() => {
+                const startMin = timeToMinutes(manualRitual)
+                let cursor = startMin
+                return RITUAL_ITEMS.map((item, i) => {
+                  const itemTime = minutesToTime(cursor)
+                  cursor += item.mins
+                  const done = checked.has(i)
+                  return (
+                    <button key={i} onClick={() => toggleCheck(i)}
+                      className="w-full text-left rounded-2xl transition-all flex items-center gap-4 overflow-hidden"
+                      style={{
+                        background: done ? 'rgba(139,111,184,0.22)' : 'rgba(255,255,255,0.08)',
+                        border: `1.5px solid ${done ? 'rgba(139,111,184,0.45)' : 'rgba(255,255,255,0.10)'}`,
+                        opacity: done ? 0.72 : 1,
+                        transition: 'all 0.2s ease',
+                      }}>
+
+                      {/* Time stripe */}
+                      <div className="flex flex-col items-center justify-center flex-shrink-0 self-stretch px-3 py-4"
+                        style={{
+                          background: done ? 'rgba(139,111,184,0.3)' : 'rgba(255,255,255,0.06)',
+                          borderRight: '1px solid rgba(255,255,255,0.08)',
+                          minWidth: 72,
+                        }}>
+                        <span className="font-display text-sm font-bold tabular-nums"
+                          style={{ color: done ? '#D4BBFF' : 'rgba(255,255,255,0.6)' }}>
+                          {itemTime}
+                        </span>
+                        <span className="text-xs mt-0.5"
+                          style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10 }}>
+                          {item.mins} min
+                        </span>
+                      </div>
+
+                      {/* Checkbox + label */}
+                      <div className="flex items-center gap-3 flex-1 py-4 pr-4">
+                        <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
+                          style={{
+                            background: done ? '#8B6FB8' : 'rgba(255,255,255,0.1)',
+                            border: `1.5px solid ${done ? '#8B6FB8' : 'rgba(255,255,255,0.2)'}`,
+                          }}>
+                          {done && <span className="text-white font-bold" style={{ fontSize: 10 }}>✓</span>}
+                        </div>
+                        <div>
+                          <span className="text-base leading-snug" style={{
+                            color: '#FFFFFF',
+                            textDecoration: done ? 'line-through' : 'none',
+                            display: 'block',
+                          }}>
+                            {item.emoji} {item.label}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })
+              })()}
+
+              {/* Lights-out indicator */}
+              {plan && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                  style={{ background: 'rgba(139,111,184,0.12)', border: '1px solid rgba(139,111,184,0.25)' }}>
+                  <span className="text-lg">✨</span>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: '#D4BBFF' }}>
+                      Lights out: {plan.lightsOutTime}
+                    </p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                      Wake: {wakeGoal ? (() => { const m=timeToMinutes(wakeGoal); return minutesToTime(m) })() : '—'} · {sleepHours}h sleep
+                    </p>
                   </div>
-                  <span className="text-base" style={{
-                    color: '#FFFFFF',
-                    textDecoration: checked.has(i) ? 'line-through' : 'none',
-                  }}>{item}</span>
-                </button>
-              ))}
+                </div>
+              )}
 
               {checked.size === RITUAL_ITEMS.length && (
-                <div className="text-center py-6 animate-fade-up">
+                <div className="text-center py-6">
                   <span className="text-4xl block mb-2">🌙</span>
                   <p className="font-display text-lg italic" style={{ color: '#D4BBFF' }}>
                     You are ready for rest. Sleep well.
