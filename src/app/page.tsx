@@ -382,7 +382,7 @@ export default function SanctuaryPage() {
               ))}
 
               <div className="relative z-10 px-10 py-10">
-                <p className="text-sm font-medium mb-2" style={{ color: 'var(--text-2)' }}>{today}</p>
+                <p className="text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>{today}</p>
                 <h1 className="font-display text-5xl font-bold mb-2" style={{ color: 'white' }}>
                   ✦ {greeting}, Zoe ✦
                 </h1>
@@ -411,7 +411,7 @@ export default function SanctuaryPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                    <span className="text-sm font-semibold text-t1">Today&apos;s Priorities</span>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Today&apos;s Priorities</span>
                   </div>
                   <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
                     style={{ background: 'rgba(139,111,184,0.2)', color: '#C4A9E8' }}>
@@ -447,7 +447,7 @@ export default function SanctuaryPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <MessageCircle className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                    <span className="text-sm font-semibold text-t1">Messages</span>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Messages</span>
                   </div>
                   <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
                     style={{ background: 'rgba(139,111,184,0.2)', color: '#C4A9E8' }}>4</span>
@@ -490,7 +490,7 @@ export default function SanctuaryPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                    <span className="text-sm font-semibold text-t1">Next Event</span>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Next Event</span>
                   </div>
                   <MoreHorizontal className="h-4 w-4" style={{ color: 'var(--text-3)' }} />
                 </div>
@@ -498,7 +498,7 @@ export default function SanctuaryPage() {
                 <div className="rounded-2xl p-4 mb-3"
                   style={{ background: 'rgba(139,111,184,0.12)', border: '1px solid rgba(139,111,184,0.2)' }}>
                   <p className="text-sm font-bold mb-1" style={{ color: '#A98FD8' }}>11:00 AM</p>
-                  <p className="text-xl font-bold text-t1 mb-3">DRYP Weekly Sync</p>
+                  <p className="text-xl font-bold mb-3" style={{ color: 'var(--text-1)' }}>DRYP Weekly Sync</p>
                   <div className="flex items-center gap-2 mb-1.5">
                     <Clock className="h-3.5 w-3.5" style={{ color: 'var(--text-3)' }} />
                     <span className="text-xs" style={{ color: 'var(--text-2)' }}>45 min</span>
@@ -551,10 +551,10 @@ export default function SanctuaryPage() {
               <DCard>
                 <div className="flex items-center gap-2 mb-4">
                   <BriefcaseIcon className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                  <span className="text-sm font-semibold text-t1">Work Brief</span>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Work Brief</span>
                 </div>
                 <DLabel>Top Focus</DLabel>
-                <p className="text-2xl font-bold text-t1 mb-1">Q2 Launch</p>
+                <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>Q2 Launch</p>
                 <div className="flex items-center gap-1.5 mb-3">
                   <div className="w-2 h-2 rounded-full" style={{ background: '#5A9E5A' }} />
                   <span className="text-xs" style={{ color: '#5A9E5A' }}>On track</span>
@@ -580,10 +580,10 @@ export default function SanctuaryPage() {
 
                 <div className="flex items-center gap-2 mb-3">
                   <Moon className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                  <span className="text-sm font-semibold text-t1">Energy / Moon</span>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Energy / Moon</span>
                 </div>
                 <p className="text-xs mb-1" style={{ color: 'var(--text-3)' }}>{moon.name}</p>
-                <p className="text-xl font-bold text-t1 mb-2">{moon.keyword}</p>
+                <p className="text-xl font-bold mb-2" style={{ color: 'var(--text-1)' }}>{moon.keyword}</p>
                 <p className="text-xs leading-relaxed pr-24" style={{ color: 'var(--text-2)' }}>
                   {affirmation.split('.')[0]}.
                 </p>
@@ -592,7 +592,7 @@ export default function SanctuaryPage() {
               {/* Energy stat */}
               <DCard>
                 <DLabel>Energy</DLabel>
-                <p className="text-5xl font-bold text-t1 mb-1">78%</p>
+                <p className="text-5xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>78%</p>
                 <p className="text-sm mb-4" style={{ color: 'var(--text-3)' }}>Steady</p>
                 <Sparkline values={[60, 65, 70, 62, 75, 78, 74, 80]} color="#8B6FB8" />
               </DCard>
@@ -614,7 +614,7 @@ export default function SanctuaryPage() {
                         </div>
                         <span className="text-sm" style={{ color: 'var(--text-2)' }}>{label}</span>
                       </div>
-                      <span className="text-sm font-semibold text-t1">{value}</span>
+                      <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{value}</span>
                     </div>
                   ))}
                 </div>

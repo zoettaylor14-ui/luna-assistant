@@ -4,11 +4,11 @@
 :root, [data-theme="light"] {
   color-scheme: light;
 
-  /* semantic text tokens */
-  --text-1: #231A3A;
-  --text-2: #6B6080;
-  --text-3: #9E95AC;
-  --text-4: #C4BECE;
+  /* semantic text tokens — intentionally high contrast */
+  --text-1: #1A1228;
+  --text-2: #4A4060;
+  --text-3: #837899;
+  --text-4: #B8AECE;
 
   /* surface / card */
   --surface:        rgba(255,255,255,0.80);
@@ -241,9 +241,9 @@ body {
 }
 
 /* ─── Theme-aware text utilities ───────────────────────────── */
-.text-t1 { color: var(--text-1); }
-.text-t2 { color: var(--text-2); }
-.text-t3 { color: var(--text-3); }
+.text-t1 { color: var(--text-1) !important; }
+.text-t2 { color: var(--text-2) !important; }
+.text-t3 { color: var(--text-3) !important; }
 
 /* ─── Bottom nav safe area ──────────────────────────────────── */
 .pb-nav { padding-bottom: calc(var(--nav-h) + 16px); }
