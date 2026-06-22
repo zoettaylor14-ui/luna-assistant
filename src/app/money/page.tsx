@@ -1,318 +1,461 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { GlassCard } from '@/components/ui/GlassCard'
-import { DollarSign, TrendingUp, TrendingDown, Plus, AlertTriangle, Check } from 'lucide-react'
-import { format } from 'date-fns'
-import { SmartInput } from '@/components/ui/SmartInput'
+import { formatCurrency } from '@/lib/money'
+import { DollarSign, AlertTriangle, TrendingUp, TrendingDown, CreditCard, RefreshCw } from 'lucide-react'
 
-type MoneyTab = 'daily' | 'trading' | 'goals'
+const BG = 'linear-gradient(180deg, #1A1240 0%, #100C30 35%, #0A0820 65%, #060418 100%)'
+const GOLDEN = '#C9A96E'
+const GREEN = '#5A8A6A'
+const RED = '#C96B5A'
+const AMBER = '#C9923A'
 
-const TRADING_RULES = [
-  { rule: 'No trading when emotional', icon: '🧘' },
-  { rule: 'No revenge trading after a loss', icon: '❌' },
-  { rule: 'No oversized trades', icon: '⚖️' },
-  { rule: 'Write the setup before entering', icon: '📝' },
-  { rule: 'No trading because I feel behind', icon: '🛑' },
+const CARD: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.11)',
+  borderRadius: 18,
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)',
+}
+
+const LABEL_STYLE: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'rgba(255,255,255,0.42)',
+}
+
+interface Transaction {
+  id: string
+  plaid_transaction_id?: string
+  merchant_name?: string | null
+  name?: string | null
+  amount: number
+  transaction_date: string
+  expense_type?: string | null
+  is_income?: boolean
+  account_name?: string | null
+  pending?: boolean
+  category_primary?: string | null
+}
+
+interface BillDue {
+  id: string
+  name?: string | null
+  merchant_name?: string | null
+  amount_estimate?: number | null
+  due_date?: string | null
+  autopay?: boolean | null
+  status: string
+}
+
+interface ActiveSub {
+  id: string
+  merchant_name?: string | null
+  amount_estimate?: number | null
+}
+
+interface TopCategory {
+  category: string
+  amount: number
+  count: number
+}
+
+interface Alert {
+  id: string
+  title?: string | null
+  body?: string | null
+  severity?: string | null
+}
+
+interface SummaryData {
+  total_available_balance: number
+  total_current_balance: number
+  spending_this_month: number
+  spending_this_week: number
+  income_this_month: number
+  top_categories: TopCategory[]
+  recent_transactions: Transaction[]
+  bills_due_soon: BillDue[]
+  active_subscriptions: {
+    count: number
+    total: number
+    items: ActiveSub[]
+  }
+  accounts: unknown[]
+  needs_review_count: number
+  alerts: Alert[]
+  plaid_connected: boolean
+  last_synced_at: string | null
+}
+
+const QUICK_NAV = [
+  { label: 'Accounts',      href: '/money/accounts',          icon: CreditCard },
+  { label: 'Transactions',  href: '/money/transactions',      icon: TrendingDown },
+  { label: 'Bills',         href: '/money/bills',             icon: AlertTriangle },
+  { label: 'Subscriptions', href: '/money/subscriptions',     icon: RefreshCw },
+  { label: 'Insights',      href: '/money/insights',          icon: TrendingUp },
+  { label: 'Business',      href: '/money/business-expenses', icon: DollarSign },
+  { label: 'Planning',      href: '/money/planning',          icon: TrendingUp },
+  { label: 'Review',        href: '/money/review',            icon: AlertTriangle },
 ]
 
-const MONEY_CATEGORIES = ['Food', 'Transport', 'Business', 'Self-care', 'Subscriptions', 'Personal', 'Investment', 'Other']
-
-interface SpendLog {
-  id: string
-  type: 'expense' | 'income' | 'saving'
-  amount: string
-  category: string
-  note: string
+function SkeletonCard({ width = '100%', height = 80 }: { width?: string | number; height?: number }) {
+  return (
+    <div style={{
+      ...CARD,
+      width,
+      height,
+      animation: 'pulse 1.8s ease-in-out infinite',
+    }} />
+  )
 }
 
-interface TradeEntry {
-  asset: string
-  setup: string
-  result: '' | 'win' | 'loss' | 'breakeven' | 'open'
-  emotion_before: string
-  emotion_after: string
-  lesson: string
-  followed_rules: boolean
-}
+export default function MoneyCommandCenter() {
+  const [summary, setSummary] = useState<SummaryData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
+  const [linkToken, setLinkToken] = useState<string | null>(null)
+  const [linkReady, setLinkReady] = useState(false)
 
-export default function MoneyScreen() {
-  const [tab, setTab]           = useState<MoneyTab>('daily')
-  const [logs, setLogs]         = useState<SpendLog[]>([])
-  const [newLog, setNewLog]     = useState<Partial<SpendLog>>({ type: 'expense', category: 'Other' })
-  const [addingLog, setAddingLog] = useState(false)
-  const [trade, setTrade]       = useState<TradeEntry>({
-    asset: '', setup: '', result: '', emotion_before: '', emotion_after: '', lesson: '', followed_rules: true,
-  })
-  const [rulesChecked, setRulesChecked] = useState<Set<number>>(new Set())
-  const today = format(new Date(), 'MMM d')
+  const loadSummary = useCallback(async () => {
+    try {
+      const res = await fetch('/api/money/summary')
+      if (res.ok) {
+        const data = await res.json() as SummaryData
+        setSummary(data)
+      }
+    } catch (e) {
+      console.error('[money] summary fetch failed', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-  function addLog() {
-    if (!newLog.amount) return
-    setLogs(prev => [...prev, { id: Date.now().toString(), type: newLog.type ?? 'expense', amount: newLog.amount ?? '0', category: newLog.category ?? 'Other', note: newLog.note ?? '' }])
-    setNewLog({ type: 'expense', category: 'Other' })
-    setAddingLog(false)
+  useEffect(() => { loadSummary() }, [loadSummary])
+
+  async function initPlaidLink() {
+    const res = await fetch('/api/plaid/create-link-token', { method: 'POST' })
+    const { link_token } = await res.json() as { link_token: string }
+    setLinkToken(link_token)
+
+    const win = window as unknown as { Plaid?: { create: (config: object) => { open: () => void } } }
+    if (!win.Plaid) {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js'
+      script.onload = () => setLinkReady(true)
+      document.head.appendChild(script)
+    } else {
+      setLinkReady(true)
+    }
   }
 
-  const totalExpenses = logs.filter(l => l.type === 'expense').reduce((s, l) => s + Number(l.amount), 0)
-  const totalIncome   = logs.filter(l => l.type === 'income').reduce((s, l) => s + Number(l.amount), 0)
+  function openPlaidLink() {
+    if (!linkToken || !linkReady) return
+    const PlaidWindow = (window as unknown as { Plaid?: { create: (config: object) => { open: () => void } } }).Plaid
+    if (!PlaidWindow) return
+    const handler = PlaidWindow.create({
+      token: linkToken,
+      onSuccess: async (public_token: string, metadata: { institution: { name: string; institution_id: string } }) => {
+        await fetch('/api/plaid/exchange-public-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            public_token,
+            institution_id: metadata.institution.institution_id,
+            institution_name: metadata.institution.name,
+          }),
+        })
+        loadSummary()
+      },
+      onExit: () => {},
+    })
+    handler.open()
+  }
 
-  return (
-    <div className="bg-sanctuary min-h-screen">
-      <AppLayout noPad className="pt-16">
-        <div className="px-6 pb-nav">
+  const isConnected = summary?.plaid_connected === true
 
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(90,138,90,0.1)' }}>
-              <DollarSign className="h-5 w-5 text-green-700" />
+  // ─── NOT CONNECTED STATE ──────────────────────────────────────────────────────
+  if (!loading && !isConnected) {
+    return (
+      <div style={{ background: BG, minHeight: '100vh' }}>
+        <AppLayout noPad className="pt-16">
+          <div style={{ padding: '20px 16px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', minHeight: '80vh', justifyContent: 'center', gap: 24 }}>
+
+            {/* Gold icon */}
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: `radial-gradient(circle, rgba(201,169,110,0.22) 0%, rgba(201,169,110,0.06) 70%)`,
+              border: `1.5px solid rgba(201,169,110,0.3)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 0 32px rgba(201,169,110,0.18)',
+            }}>
+              <DollarSign style={{ width: 36, height: 36, color: GOLDEN }} />
             </div>
-            <p className="text-sm font-medium uppercase tracking-wider text-green-700">Money</p>
-          </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--depth)' }}>
-            Wealth through calm choices.
-          </h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--mid)' }}>
-            Not panic moves. Track simply. Move intentionally.
-          </p>
-
-          {/* Tabs */}
-          <div className="flex gap-2 mb-6">
-            {(['daily', 'trading', 'goals'] as const).map(t => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`tab-pill ${tab === t ? 'active' : ''}`}>
-                {t === 'daily' ? '📊 Daily' : t === 'trading' ? '📈 Trading' : '🎯 Goals'}
-              </button>
-            ))}
-          </div>
-
-          {/* Daily tab */}
-          {tab === 'daily' && (
-            <div className="space-y-4 animate-fade-up">
-              {/* Summary */}
-              {logs.length > 0 && (
-                <div className="grid grid-cols-2 gap-3">
-                  <GlassCard className="text-center p-4!">
-                    <TrendingDown className="h-4 w-4 mx-auto mb-1" style={{ color: '#E05E5E' }} />
-                    <p className="text-xs" style={{ color: 'var(--mist)' }}>Spent today</p>
-                    <p className="font-display text-xl font-semibold" style={{ color: 'var(--depth)' }}>
-                      ${totalExpenses.toFixed(2)}
-                    </p>
-                  </GlassCard>
-                  <GlassCard className="text-center p-4!">
-                    <TrendingUp className="h-4 w-4 mx-auto mb-1 text-green-600" />
-                    <p className="text-xs" style={{ color: 'var(--mist)' }}>Income today</p>
-                    <p className="font-display text-xl font-semibold" style={{ color: 'var(--depth)' }}>
-                      ${totalIncome.toFixed(2)}
-                    </p>
-                  </GlassCard>
-                </div>
-              )}
-
-              {/* Daily check-in */}
-              <GlassCard>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--golden)' }}>Daily money check</p>
-                {[
-                  'Did I spend today?',
-                  'Did I track it?',
-                  'Did I save anything?',
-                  'What is one money move I can make today?',
-                ].map((q, i) => (
-                  <div key={i} className="flex items-center gap-2 py-2" style={{ borderBottom: i < 3 ? '1px solid rgba(139,111,184,0.06)' : 'none' }}>
-                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--golden)' }} />
-                    <p className="text-sm" style={{ color: 'var(--mid)' }}>{q}</p>
-                  </div>
-                ))}
-              </GlassCard>
-
-              {/* Log entries */}
-              {logs.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>{today}&apos;s log</p>
-                  {logs.map(log => (
-                    <div key={log.id} className="glass-card p-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: 'var(--depth)' }}>{log.category}{log.note ? ` — ${log.note}` : ''}</p>
-                        <p className="text-xs" style={{ color: 'var(--mist)' }}>{log.type}</p>
-                      </div>
-                      <p className="font-semibold" style={{ color: log.type === 'income' ? '#5A8A5A' : log.type === 'saving' ? 'var(--golden)' : '#E05E5E' }}>
-                        {log.type === 'expense' ? '-' : '+'}${log.amount}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Add log */}
-              {addingLog ? (
-                <GlassCard>
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--golden)' }}>Add entry</p>
-                  <div className="space-y-3">
-                    <div className="flex gap-2">
-                      {(['expense','income','saving'] as const).map(t => (
-                        <button key={t} onClick={() => setNewLog(p => ({ ...p, type: t }))}
-                          className="flex-1 py-2 rounded-xl text-xs font-medium capitalize transition-all"
-                          style={{
-                            background: newLog.type === t ? 'var(--violet)' : 'rgba(139,111,184,0.08)',
-                            color: newLog.type === t ? 'white' : 'var(--mid)',
-                          }}>
-                          {t}
-                        </button>
-                      ))}
-                    </div>
-                    <input
-                      type="number" placeholder="Amount ($)"
-                      value={newLog.amount ?? ''}
-                      onChange={e => setNewLog(p => ({ ...p, amount: e.target.value }))}
-                      className="w-full bg-transparent outline-none text-2xl font-display font-semibold"
-                      style={{ color: 'var(--depth)' }}
-                    />
-                    <select
-                      value={newLog.category ?? 'Other'}
-                      onChange={e => setNewLog(p => ({ ...p, category: e.target.value }))}
-                      className="w-full bg-transparent outline-none text-sm py-2 rounded-xl"
-                      style={{ color: 'var(--mid)', border: '1px solid rgba(139,111,184,0.15)' }}>
-                      {MONEY_CATEGORIES.map(c => <option key={c}>{c}</option>)}
-                    </select>
-                    <input
-                      type="text" placeholder="Note (optional)"
-                      value={newLog.note ?? ''}
-                      onChange={e => setNewLog(p => ({ ...p, note: e.target.value }))}
-                      className="w-full bg-transparent outline-none text-sm"
-                      style={{ color: 'var(--depth)' }}
-                    />
-                    <div className="flex gap-2">
-                      <button onClick={() => setAddingLog(false)} className="flex-1 py-3 rounded-xl font-semibold" style={{ background: 'rgba(139,111,184,0.08)', color: 'var(--mist)' }}>Cancel</button>
-                      <button onClick={addLog} className="flex-1 py-3 rounded-xl font-semibold text-white" style={{ background: 'linear-gradient(135deg, var(--violet), var(--violet-deep))' }}>Save</button>
-                    </div>
-                  </div>
-                </GlassCard>
-              ) : (
-                <button onClick={() => setAddingLog(true)}
-                  className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 font-semibold transition-all"
-                  style={{ background: 'rgba(201,169,110,0.08)', color: 'var(--golden)', border: '1.5px dashed rgba(201,169,110,0.2)' }}>
-                  <Plus className="h-4 w-4" /> Log a transaction
-                </button>
-              )}
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 700, color: GOLDEN, marginBottom: 8, letterSpacing: '-0.02em' }}>Finance Command Center</h1>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>Your money needs visibility, not fear.</p>
             </div>
-          )}
 
-          {/* Trading tab */}
-          {tab === 'trading' && (
-            <div className="space-y-4 animate-fade-up">
-              {/* Rules */}
-              <GlassCard>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#E05E5E' }}>Trading rules (check before entering)</p>
-                {TRADING_RULES.map((r, i) => {
-                  const checked = rulesChecked.has(i)
-                  return (
-                    <button key={i} onClick={() => setRulesChecked(prev => { const n = new Set(prev); n.has(i) ? n.delete(i) : n.add(i); return n })}
-                      className="w-full flex items-center gap-3 py-2.5 text-left" style={{ borderBottom: i < 4 ? '1px solid rgba(139,111,184,0.06)' : 'none' }}>
-                      <span className="text-base flex-shrink-0">{r.icon}</span>
-                      <p className="text-sm flex-1" style={{ color: checked ? 'var(--mist)' : 'var(--depth)', textDecoration: checked ? 'line-through' : 'none' }}>{r.rule}</p>
-                      <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
-                        style={{ background: checked ? 'var(--violet)' : 'transparent', border: checked ? 'none' : '1.5px solid rgba(139,111,184,0.2)' }}>
-                        {checked && <Check className="h-3 w-3 text-white" />}
-                      </div>
-                    </button>
-                  )
-                })}
-              </GlassCard>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: 320 }}>
+              Connect both banks through Plaid and LUNA will track every dollar — expenses, bills, subscriptions, money leaks, and your path to wealth.
+            </p>
 
-              {/* Trade journal */}
-              <GlassCard>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--golden)' }}>Log a trade</p>
-                <div className="space-y-3">
-                  <input
-                    placeholder="Asset (BTC, ETH, AAPL...)"
-                    value={trade.asset}
-                    onChange={e => setTrade(p => ({ ...p, asset: e.target.value }))}
-                    className="w-full bg-transparent outline-none text-sm py-2 rounded-xl px-3"
-                    style={{ border: '1px solid rgba(139,111,184,0.15)', color: 'var(--depth)' }}
-                  />
-                  <SmartInput
-                    context="trade setup — why am I taking this trade, what is the thesis, what do I see in the chart"
-                    placeholder="Why are you taking this trade?"
-                    value={trade.setup}
-                    onChange={v => setTrade(p => ({ ...p, setup: v }))}
-                    patternType="money"
-                    rows={3}
-                    autoSuggest={false}
-                  />
-                  <input
-                    placeholder="Emotion before entering"
-                    value={trade.emotion_before}
-                    onChange={e => setTrade(p => ({ ...p, emotion_before: e.target.value }))}
-                    className="w-full bg-transparent outline-none text-sm py-2 rounded-xl px-3"
-                    style={{ border: '1px solid rgba(139,111,184,0.15)', color: 'var(--depth)' }}
-                  />
-                  <div className="flex gap-2">
-                    {(['win','loss','breakeven','open'] as const).map(r => (
-                      <button key={r} onClick={() => setTrade(p => ({ ...p, result: r }))}
-                        className="flex-1 py-2 rounded-xl text-xs font-medium capitalize"
-                        style={{
-                          background: trade.result === r ? (r === 'win' ? '#5A8A5A' : r === 'loss' ? '#E05E5E' : 'var(--violet)') : 'rgba(139,111,184,0.08)',
-                          color: trade.result === r ? 'white' : 'var(--mid)',
-                        }}>
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                  <SmartInput
-                    context="lesson from this trade — what I learned, what I would do differently"
-                    placeholder="What did this trade teach me?"
-                    value={trade.lesson}
-                    onChange={v => setTrade(p => ({ ...p, lesson: v }))}
-                    patternType="money"
-                    rows={2}
-                    autoSuggest={false}
-                  />
-                  <button className="w-full py-3.5 rounded-2xl font-semibold text-white"
-                    style={{ background: 'linear-gradient(135deg, var(--violet), var(--violet-deep))' }}>
-                    Save trade
-                  </button>
-                </div>
-              </GlassCard>
+            <button
+              onClick={() => { void initPlaidLink().then(openPlaidLink) }}
+              style={{
+                width: '100%', maxWidth: 320, height: 48, borderRadius: 14, border: 'none', cursor: 'pointer',
+                background: `linear-gradient(135deg, #C9A96E 0%, #B8903A 100%)`,
+                color: '#1A1240', fontSize: 15, fontWeight: 700, letterSpacing: '0.02em',
+              }}>
+              Connect Bank
+            </button>
 
-              <p className="text-xs text-center italic" style={{ color: 'var(--mist)' }}>
-                &ldquo;Wealth is built through calm choices, not panic moves.&rdquo;
+            {/* Preview card */}
+            <div style={{
+              ...CARD,
+              padding: '14px 20px',
+              border: `1px solid rgba(201,169,110,0.22)`,
+              background: 'rgba(201,169,110,0.06)',
+              maxWidth: 320, width: '100%',
+            }}>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+                19 known subscriptions from April &mdash; <span style={{ color: GOLDEN, fontWeight: 700 }}>$437/mo estimated</span>
               </p>
             </div>
-          )}
 
-          {/* Goals tab */}
-          {tab === 'goals' && (
-            <div className="space-y-4 animate-fade-up">
-              <GlassCard soul>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Saturn in Taurus reminder</p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--mid)' }}>
-                  Zoe is learning money discipline, self-worth, saving, and slow wealth. Not fast. Not frantic. Steady. Your Saturn placement teaches that consistent, grounded action builds the wealth that lasts.
-                </p>
-              </GlassCard>
-              {[
-                { label: 'Emergency fund', target: '$5,000', desc: 'Build the foundation first' },
-                { label: 'Monthly savings goal', target: '10% of income', desc: 'Automatic, no exceptions' },
-                { label: 'Trading capital protected', target: 'Risk < 2% per trade', desc: 'Discipline over profit' },
-                { label: 'Subscription audit', target: 'Monthly', desc: 'What is actually useful?' },
-              ].map((g, i) => (
-                <div key={i} className="glass-card p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>{g.label}</p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--mist)' }}>{g.desc}</p>
-                    </div>
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: 'rgba(201,169,110,0.1)', color: 'var(--golden)' }}>
-                      {g.target}
-                    </span>
-                  </div>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6, maxWidth: 280 }}>
+              Your data is encrypted. LUNA never sells your information.
+            </p>
+          </div>
+        </AppLayout>
+      </div>
+    )
+  }
+
+  // ─── LOADING STATE ────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div style={{ background: BG, minHeight: '100vh' }}>
+        <AppLayout noPad className="pt-16">
+          <div style={{ padding: '20px 16px 120px' }}>
+            <div style={{ marginBottom: 24 }}>
+              <SkeletonCard height={24} width={160} />
+            </div>
+            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', marginBottom: 20, paddingBottom: 4 }}>
+              {[1,2,3,4,5].map(i => <SkeletonCard key={i} width={160} height={90} />)}
+            </div>
+            <SkeletonCard height={300} />
+            <div style={{ marginTop: 12 }}>
+              <SkeletonCard height={200} />
+            </div>
+          </div>
+        </AppLayout>
+      </div>
+    )
+  }
+
+  // ─── CONNECTED STATE ──────────────────────────────────────────────────────────
+  const alerts = (summary?.alerts ?? []).filter(a => !dismissedAlerts.has(a.id))
+  const recentTxns = (summary?.recent_transactions ?? []).slice(0, 8)
+  const topCategories = summary?.top_categories ?? []
+  const maxCatAmount = topCategories.length > 0 ? Math.max(...topCategories.map(c => c.amount)) : 1
+  const billsDue = summary?.bills_due_soon ?? []
+
+  return (
+    <div style={{ background: BG, minHeight: '100vh' }}>
+      <AppLayout noPad className="pt-16">
+        <div style={{ padding: '20px 16px 120px' }}>
+
+          {/* Header */}
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ ...LABEL_STYLE, color: GOLDEN, marginBottom: 4 }}>MONEY COMMAND CENTER</p>
+            <h1 style={{ fontSize: 26, fontWeight: 700, color: 'white', letterSpacing: '-0.02em', marginBottom: 2 }}>Finance Command Center</h1>
+          </div>
+
+          {/* Top stat cards */}
+          <div style={{ display: 'flex', gap: 10, overflowX: 'auto', marginBottom: 20, paddingBottom: 6 }}>
+            <div style={{ ...CARD, minWidth: 160, padding: 16, flexShrink: 0 }}>
+              <p style={{ ...LABEL_STYLE, marginBottom: 6 }}>Total Cash</p>
+              <p style={{ fontSize: 22, fontWeight: 700, color: GREEN }}>{formatCurrency(summary?.total_available_balance ?? 0)}</p>
+            </div>
+            <div style={{ ...CARD, minWidth: 160, padding: 16, flexShrink: 0 }}>
+              <p style={{ ...LABEL_STYLE, marginBottom: 6 }}>Month Spending</p>
+              <p style={{ fontSize: 22, fontWeight: 700, color: GOLDEN }}>{formatCurrency(summary?.spending_this_month ?? 0)}</p>
+            </div>
+            <div style={{ ...CARD, minWidth: 160, padding: 16, flexShrink: 0 }}>
+              <p style={{ ...LABEL_STYLE, marginBottom: 6 }}>Month Income</p>
+              <p style={{ fontSize: 22, fontWeight: 700, color: GREEN }}>{formatCurrency(summary?.income_this_month ?? 0)}</p>
+            </div>
+            <div style={{ ...CARD, minWidth: 160, padding: 16, flexShrink: 0 }}>
+              <p style={{ ...LABEL_STYLE, marginBottom: 6 }}>Bills Due</p>
+              <p style={{ fontSize: 22, fontWeight: 700, color: AMBER }}>{billsDue.length}</p>
+            </div>
+            <div style={{ ...CARD, minWidth: 160, padding: 16, flexShrink: 0 }}>
+              <p style={{ ...LABEL_STYLE, marginBottom: 6 }}>Subscriptions</p>
+              <p style={{ fontSize: 22, fontWeight: 700, color: GOLDEN }}>
+                {summary?.active_subscriptions?.count ?? 0} subs &middot; {formatCurrency(summary?.active_subscriptions?.total ?? 0)}/mo
+              </p>
+            </div>
+          </div>
+
+          {/* Alert strip */}
+          {alerts.length > 0 && (
+            <div style={{
+              border: `1px solid rgba(201,146,58,0.4)`,
+              background: 'rgba(201,146,58,0.08)',
+              borderRadius: 14,
+              padding: '12px 14px',
+              marginBottom: 16,
+              display: 'flex',
+              gap: 8,
+              flexWrap: 'wrap',
+            }}>
+              <AlertTriangle style={{ width: 14, height: 14, color: AMBER, flexShrink: 0, marginTop: 2 }} />
+              {alerts.map(alert => (
+                <div key={alert.id} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(201,146,58,0.14)', borderRadius: 20, padding: '4px 10px' }}>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>{alert.title}</span>
+                  <button onClick={() => setDismissedAlerts(p => new Set([...p, alert.id]))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.45)', fontSize: 14, lineHeight: 1, padding: 0 }}>
+                    ×
+                  </button>
                 </div>
               ))}
             </div>
           )}
 
+          {/* Recent Transactions */}
+          <div style={{ ...CARD, padding: 18, marginBottom: 14 }}>
+            <p style={{ ...LABEL_STYLE, marginBottom: 14 }}>Recent Transactions</p>
+            {recentTxns.length === 0 ? (
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '16px 0' }}>No transactions yet — connect a bank to begin.</p>
+            ) : (
+              recentTxns.map(txn => {
+                const label = txn.merchant_name ?? txn.name ?? 'Unknown'
+                const isIncome = txn.is_income === true
+                const amtColor = isIncome ? GREEN : RED
+                return (
+                  <div key={txn.id} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 10, paddingBottom: 10, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{
+                      width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                      background: 'rgba(255,255,255,0.08)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)',
+                    }}>
+                      {label.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</p>
+                      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.42)' }}>{txn.category_primary ?? txn.expense_type ?? ''} &middot; {txn.transaction_date}</p>
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: amtColor, flexShrink: 0 }}>
+                      {isIncome ? '+' : '-'}{formatCurrency(txn.amount)}
+                    </p>
+                  </div>
+                )
+              })
+            )}
+          </div>
+
+          {/* Spending by Category */}
+          {topCategories.length > 0 && (
+            <div style={{ ...CARD, padding: 18, marginBottom: 14 }}>
+              <p style={{ ...LABEL_STYLE, marginBottom: 14 }}>Spending by Category</p>
+              {topCategories.map(cat => {
+                const pct = maxCatAmount > 0 ? (cat.amount / maxCatAmount) * 100 : 0
+                return (
+                  <div key={cat.category} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', textTransform: 'capitalize' }}>{cat.category}</span>
+                      <span style={{ fontSize: 12, color: GOLDEN, fontWeight: 600 }}>{formatCurrency(cat.amount)}</span>
+                    </div>
+                    <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: `linear-gradient(90deg, ${GOLDEN} 0%, #B8903A 100%)`, borderRadius: 3 }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Bills Due Soon */}
+          {billsDue.length > 0 && (
+            <div style={{ ...CARD, padding: 18, marginBottom: 14 }}>
+              <p style={{ ...LABEL_STYLE, marginBottom: 14 }}>Bills Due Soon</p>
+              {billsDue.map(bill => {
+                const today = new Date(); today.setHours(0,0,0,0)
+                const due = bill.due_date ? new Date(bill.due_date) : null
+                const days = due ? Math.ceil((due.getTime() - today.getTime()) / (1000*60*60*24)) : null
+                const urgencyColor = days !== null && days <= 3 ? RED : days !== null && days <= 7 ? AMBER : GOLDEN
+                return (
+                  <div key={bill.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>{bill.name ?? bill.merchant_name ?? 'Unknown'}</p>
+                      <p style={{ fontSize: 11, color: urgencyColor }}>
+                        {days !== null ? (days <= 0 ? 'Due today' : `Due in ${days} day${days !== 1 ? 's' : ''}`) : bill.due_date}
+                      </p>
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: urgencyColor }}>{formatCurrency(bill.amount_estimate ?? 0)}</p>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Active Subscriptions (top 5) */}
+          {(summary?.active_subscriptions?.items?.length ?? 0) > 0 && (
+            <div style={{ ...CARD, padding: 18, marginBottom: 14 }}>
+              <p style={{ ...LABEL_STYLE, marginBottom: 14 }}>Active Subscriptions</p>
+              {(summary?.active_subscriptions?.items ?? []).slice(0, 5).map(sub => (
+                <div key={sub.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>{sub.merchant_name ?? 'Unknown'}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: GOLDEN }}>{formatCurrency(sub.amount_estimate ?? 0)}/mo</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* LUNA Money Move */}
+          <div style={{ ...CARD, padding: 18, border: `1px solid rgba(201,169,110,0.22)`, background: 'rgba(201,169,110,0.05)', marginBottom: 20 }}>
+            <p style={{ ...LABEL_STYLE, color: GOLDEN, marginBottom: 8 }}>One Money Move Today</p>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', lineHeight: 1.65 }}>
+              Review your subscriptions and cancel one thing you haven&rsquo;t used in 30 days. Every $10 saved compounds to over $120/year — and that&rsquo;s before investing it.
+            </p>
+          </div>
+
+          {/* Quick Nav Grid */}
+          <p style={{ ...LABEL_STYLE, marginBottom: 12 }}>Navigate</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 28 }}>
+            {QUICK_NAV.map(({ label, href, icon: Icon }) => (
+              <a key={href} href={href} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  ...CARD,
+                  padding: '14px 8px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  cursor: 'pointer',
+                }}>
+                  <Icon style={{ width: 18, height: 18, color: GOLDEN }} />
+                  <p style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.65)', textAlign: 'center' }}>{label}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          {/* Bottom quote */}
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textAlign: 'center', fontStyle: 'italic', lineHeight: 1.7 }}>
+            &ldquo;Wealth is built through calm choices, not panic moves.&rdquo;
+          </p>
         </div>
       </AppLayout>
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 0.25; }
+        }
+      `}</style>
     </div>
   )
 }

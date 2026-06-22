@@ -6,7 +6,8 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { LoadingPage } from '@/components/ui/loading'
 import { createClient } from '@/lib/supabase/client'
 import { AssistantProfile } from '@/types'
-import { Sparkles, Save, User, Brain, Sun, Moon, Mail, Calendar, Plug, LogOut, Check, RefreshCw, AlertTriangle, X, ExternalLink } from 'lucide-react'
+import { Sparkles, Save, User, Brain, Sun, Moon, Mail, Calendar, Plug, LogOut, Check, RefreshCw, AlertTriangle, X, ExternalLink, DollarSign } from 'lucide-react'
+import Link from 'next/link'
 import { useTheme } from '@/lib/theme'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -174,6 +175,10 @@ export default function SettingsPage() {
   const [calendarCount, setCalendarCount] = useState<number | null>(null)
   const [checkingCal, setCheckingCal]     = useState(false)
   const [connecting, setConnecting]       = useState<string | null>(null)
+  const [plaidBanks, setPlaidBanks]       = useState<{ institution_name?: string | null; name?: string | null; mask?: string | null }[]>([])
+  const [plaidLinkToken, setPlaidLinkToken] = useState<string | null>(null)
+  const [plaidLinkReady, setPlaidLinkReady] = useState(false)
+  const [syncingPlaid, setSyncingPlaid]   = useState(false)
   const supabase = createClient()
 
   // Known accounts for Zoe
@@ -181,6 +186,62 @@ export default function SettingsPage() {
     { email: 'info@drypdigital.com', label: 'Primary Business', connected: connStatus.accounts.some(a => a.email === 'info@drypdigital.com'), calendarConnected: calendarCount !== null },
     { email: 'zoe@drypdigital.com',  label: 'Personal + Calendar', connected: connStatus.accounts.some(a => a.email === 'zoe@drypdigital.com'), calendarConnected: calendarCount !== null },
   ]
+
+  const loadPlaidBanks = useCallback(async () => {
+    try {
+      const res = await fetch('/api/plaid/accounts')
+      if (res.ok) {
+        const d = await res.json() as { accounts?: { institution_name?: string | null; name?: string | null; mask?: string | null }[] }
+        setPlaidBanks(d.accounts ?? [])
+      }
+    } catch {
+      // silent
+    }
+  }, [])
+
+  async function handleConnectBank() {
+    const res = await fetch('/api/plaid/create-link-token', { method: 'POST' })
+    const { link_token } = await res.json() as { link_token: string }
+    setPlaidLinkToken(link_token)
+
+    const win = window as unknown as { Plaid?: { create: (config: object) => { open: () => void } } }
+    if (!win.Plaid) {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js'
+      script.onload = () => setPlaidLinkReady(true)
+      document.head.appendChild(script)
+    } else {
+      setPlaidLinkReady(true)
+    }
+
+    if (plaidLinkReady && link_token) {
+      const PlaidWindow = (window as unknown as { Plaid?: { create: (config: object) => { open: () => void } } }).Plaid
+      if (!PlaidWindow) return
+      const handler = PlaidWindow.create({
+        token: link_token,
+        onSuccess: async (public_token: string, metadata: { institution: { name: string; institution_id: string } }) => {
+          await fetch('/api/plaid/exchange-public-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ public_token, institution_id: metadata.institution.institution_id, institution_name: metadata.institution.name }),
+          })
+          loadPlaidBanks()
+        },
+        onExit: () => {},
+      })
+      handler.open()
+    }
+  }
+
+  async function handleSyncPlaid() {
+    setSyncingPlaid(true)
+    try {
+      await fetch('/api/plaid/transactions/sync', { method: 'POST' })
+    } catch {
+      // silent
+    }
+    setSyncingPlaid(false)
+  }
 
   const loadProfile = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -218,7 +279,8 @@ export default function SettingsPage() {
     loadProfile()
     checkConnections()
     checkCalendar()
-  }, [loadProfile, checkConnections, checkCalendar])
+    loadPlaidBanks()
+  }, [loadProfile, checkConnections, checkCalendar, loadPlaidBanks])
 
   async function handleDisconnect(email: string) {
     // Disconnect a specific account (simplified: disconnect all for now)
@@ -275,6 +337,55 @@ export default function SettingsPage() {
           <Suspense fallback={null}>
             <OAuthBanner />
           </Suspense>
+
+          {/* ── FINANCE & BANKING ────────────────────────────────── */}
+          <div style={CARD}>
+            <SectionLabel icon={<DollarSign className="h-4 w-4" style={{ color: 'rgba(201,169,110,0.7)' }} />} text="Finance & Banking" sub="Plaid-connected accounts" />
+
+            {plaidBanks.length === 0 ? (
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 14 }}>No banks connected yet.</p>
+            ) : (
+              <div style={{ marginBottom: 14 }}>
+                {plaidBanks.map((bank, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(90,138,106,0.2)', border: '1px solid rgba(90,138,106,0.4)' }}>
+                        <DollarSign className="h-4 w-4" style={{ color: '#8AB88A' }} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>{bank.institution_name ?? bank.name ?? 'Bank Account'}</p>
+                        {bank.mask && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>····{bank.mask}</p>}
+                      </div>
+                    </div>
+                    <p style={{ fontSize: 11, color: '#8AB88A', fontWeight: 600 }}>Connected</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <button
+                onClick={() => { void handleConnectBank() }}
+                style={{ flex: 1, height: 38, borderRadius: 12, border: '1px solid rgba(201,169,110,0.4)', background: 'rgba(201,169,110,0.1)', color: '#C9A96E', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                Connect Bank
+              </button>
+              <button
+                onClick={() => { void handleSyncPlaid() }}
+                disabled={syncingPlaid || plaidBanks.length === 0}
+                style={{ flex: 1, height: 38, borderRadius: 12, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 700, cursor: syncingPlaid || plaidBanks.length === 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <RefreshCw className={`h-3.5 w-3.5 ${syncingPlaid ? 'animate-spin' : ''}`} />
+                {syncingPlaid ? 'Syncing...' : 'Sync Now'}
+              </button>
+            </div>
+
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', lineHeight: 1.55, marginBottom: 10 }}>
+              Secured via Plaid. Your banking credentials are never stored by LUNA — only read-only access tokens.
+            </p>
+
+            <Link href="/money" style={{ fontSize: 12, color: '#C9A96E', fontWeight: 600, textDecoration: 'none' }}>
+              Go to Money Command Center →
+            </Link>
+          </div>
 
           {/* ── CONNECTIONS ───────────────────────────────────────── */}
           <div style={CARD}>
