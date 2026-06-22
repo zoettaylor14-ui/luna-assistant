@@ -31,8 +31,8 @@ export default function RushModeScreen() {
 
   return (
     <div style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5EEE0 100%)', minHeight: '100vh' }}>
-      <AppLayout noPad>
-        <div className="px-5 pt-14 pb-nav">
+      <AppLayout noPad className="pt-16">
+        <div className="px-6 pb-nav">
 
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">

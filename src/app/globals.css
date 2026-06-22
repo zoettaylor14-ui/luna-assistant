@@ -51,11 +51,11 @@
   --text-3: rgba(255,255,255,0.62);
   --text-4: rgba(255,255,255,0.38);
 
-  /* surfaces */
-  --surface:        rgba(255,255,255,0.07);
-  --surface-border: rgba(255,255,255,0.10);
-  --surface-strong: rgba(255,255,255,0.12);
-  --surface-subtle: rgba(255,255,255,0.04);
+  /* surfaces — boosted so cards are readable against dark bg */
+  --surface:        rgba(255,255,255,0.10);
+  --surface-border: rgba(255,255,255,0.14);
+  --surface-strong: rgba(255,255,255,0.18);
+  --surface-subtle: rgba(255,255,255,0.06);
 
   /* app background — deep navy */
   --app-bg-from: #1E1A38;
@@ -154,6 +154,21 @@ body {
   box-shadow: var(--card-shadow);
   border-radius: 16px;
   color: var(--text-1);
+}
+
+/* Dark mode glass cards must be clearly visible against dark bg */
+[data-theme="dark"] .glass-card,
+[data-theme="dark"] .glass-card-sm {
+  background: rgba(255,255,255,0.13);
+  border-color: rgba(255,255,255,0.20);
+}
+
+[data-theme="dark"] .glass-card p,
+[data-theme="dark"] .glass-card span,
+[data-theme="dark"] .glass-card label,
+[data-theme="dark"] .glass-card-sm p,
+[data-theme="dark"] .glass-card-sm span {
+  color: #FFFFFF !important;
 }
 
 /* ─── Violet glow card ──────────────────────────────────────── */
@@ -314,7 +329,7 @@ input, textarea, select {
   background-color: var(--surface);
   border-color: var(--surface-border);
 }
-input::placeholder, textarea::placeholder { color: var(--text-4); }
+input::placeholder, textarea::placeholder { color: var(--text-3); }
 
 /* ─── Headings — never too small ────────────────────────────── */
 h1 { font-size: clamp(1.5rem, 3vw, 2.5rem); line-height: 1.2; }

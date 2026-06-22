@@ -18,12 +18,13 @@ export function AppLayout({ children, noPad, className, darkDesktop }: AppLayout
 
       {/* Main content */}
       <main className={[
-        // Mobile: centered narrow column
-        'max-w-lg mx-auto',
-        // Desktop: full width, top padding for header
-        'lg:max-w-none lg:pt-14',
-        // Padding
-        noPad ? '' : 'px-5 lg:px-8',
+        // Always centered with a readable max-width
+        'mx-auto w-full',
+        'max-w-xl',           // Mobile: 576px — breathing room without feeling cramped
+        'lg:max-w-3xl',       // Desktop: 768px — comfortable reading width, not wall-to-wall
+        'lg:pt-16',
+        // Padding — horizontal breathing room
+        noPad ? '' : 'px-6 lg:px-10',
         // Bottom spacing
         'pb-nav lg:pb-[100px]',
         className ?? '',

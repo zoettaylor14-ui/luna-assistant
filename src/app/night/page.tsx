@@ -1,15 +1,24 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { Moon, Clock, Home, Sparkles } from 'lucide-react'
+import { Moon, Clock, Home, Sparkles, Sunset, Sun } from 'lucide-react'
 
 const LOCATIONS = [
-  { value: 'home',         label: '🏠 Home',        drive: 0  },
-  { value: 'office',       label: '🏢 Office',      drive: 20 },
-  { value: 'kalebs',       label: '💜 Kaleb\'s',    drive: 15 },
-  { value: 'friends',      label: '👯 Friends\'',   drive: 25 },
-  { value: 'out',          label: '✨ Out',          drive: 30 },
+  { value: 'home',         label: '🏠 Home',         drive: 0  },
+  { value: 'office',       label: '🏢 Office',       drive: 20 },
+  { value: 'kalebs',       label: '💜 Kaleb\'s',     drive: 15 },
+  { value: 'friends',      label: '👯 Friends\'',    drive: 25 },
+  { value: 'out',          label: '✨ Out',           drive: 30 },
   { value: 'working_late', label: '💼 Working late', drive: 20 },
+]
+
+const RITUAL_ITEMS = [
+  '🕯 Dim lights and soften the room',
+  '📵 Close work apps and tabs',
+  '📓 Journal what you\'re releasing',
+  '🧖 Skincare — love your face',
+  '💧 One last glass of water',
+  '🙏 Close the loops in your mind',
 ]
 
 function timeToMinutes(t: string): number {
@@ -35,23 +44,33 @@ interface Plan {
   message: string
 }
 
+type Tab = 'sleep' | 'tomorrow' | 'ritual'
+
+const TABS: { value: Tab; label: string; emoji: string }[] = [
+  { value: 'sleep',    label: 'Sleep',    emoji: '🌙' },
+  { value: 'tomorrow', label: 'Tomorrow', emoji: '☀️' },
+  { value: 'ritual',   label: 'Ritual',   emoji: '🕯' },
+]
+
 export default function NightScreen() {
-  const [wakeGoal, setWakeGoal]         = useState('08:00')
-  const [sleepHours, setSleepHours]     = useState(8)
-  const [location, setLocation]         = useState('home')
-  const [prepMinutes, setPrepMinutes]   = useState(45)
-  const [firstMeeting, setFirstMeeting] = useState('')
-  const [plan, setPlan]                 = useState<Plan | null>(null)
+  const [tab, setTab]                     = useState<Tab>('sleep')
+  const [wakeGoal, setWakeGoal]           = useState('08:00')
+  const [sleepHours, setSleepHours]       = useState(8)
+  const [location, setLocation]           = useState('home')
+  const [prepMinutes, setPrepMinutes]     = useState(45)
+  const [firstMeeting, setFirstMeeting]   = useState('')
+  const [plan, setPlan]                   = useState<Plan | null>(null)
+  const [checked, setChecked]             = useState<Set<number>>(new Set())
 
   const calculate = useCallback(() => {
-    const wakeMin      = timeToMinutes(wakeGoal) + 24 * 60 // next day
-    const lightsOut    = wakeMin - sleepHours * 60
-    const bedMin       = lightsOut - prepMinutes
-    const loc          = LOCATIONS.find(l => l.value === location)
-    const driveMin     = loc?.drive ?? 0
-    const leaveMin     = driveMin > 0 ? lightsOut - driveMin - 15 : null
-    const homeMin      = leaveMin !== null ? leaveMin + driveMin : null
-    const stopWorkMin  = (leaveMin ?? lightsOut) - 15
+    const wakeMin     = timeToMinutes(wakeGoal) + 24 * 60
+    const lightsOut   = wakeMin - sleepHours * 60
+    const bedMin      = lightsOut - prepMinutes
+    const loc         = LOCATIONS.find(l => l.value === location)
+    const driveMin    = loc?.drive ?? 0
+    const leaveMin    = driveMin > 0 ? lightsOut - driveMin - 15 : null
+    const homeMin     = leaveMin !== null ? leaveMin + driveMin : null
+    const stopWorkMin = (leaveMin ?? lightsOut) - 15
 
     let message = `Your lights-out is ${minutesToTime(lightsOut)}.`
     if (leaveMin !== null) {
@@ -69,141 +88,217 @@ export default function NightScreen() {
       lightsOutTime: minutesToTime(lightsOut),
       message,
     })
+    setTab('tomorrow')
   }, [wakeGoal, sleepHours, location, prepMinutes])
 
-  const selectedLoc = LOCATIONS.find(l => l.value === location)
+  function toggleCheck(i: number) {
+    setChecked(prev => {
+      const next = new Set(prev)
+      next.has(i) ? next.delete(i) : next.add(i)
+      return next
+    })
+  }
+
+  const card = {
+    background: 'rgba(255,255,255,0.13)',
+    border: '1px solid rgba(255,255,255,0.20)',
+    borderRadius: 20,
+  }
+
+  const selectedLocStyle = (val: string) => ({
+    background: location === val ? 'rgba(139,111,184,0.35)' : 'rgba(255,255,255,0.07)',
+    border: `1.5px solid ${location === val ? 'rgba(139,111,184,0.6)' : 'rgba(255,255,255,0.10)'}`,
+    color: '#FFFFFF',
+    borderRadius: 12,
+    padding: '10px 12px',
+    fontSize: '0.9rem',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    textAlign: 'left' as const,
+  })
 
   return (
     <div className="bg-night min-h-screen">
-      <AppLayout noPad>
-        <div className="px-5 pt-14 pb-nav">
+      <AppLayout noPad className="pt-16">
+        <div className="px-6 pb-nav">
 
           {/* Header */}
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(139,111,184,0.2)' }}>
-              <Moon className="h-5 w-5 text-purple-200" />
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+              style={{ background: 'rgba(139,111,184,0.25)' }}>
+              <Moon className="h-5 w-5" style={{ color: '#D4BBFF' }} />
             </div>
-            <p className="text-sm font-medium uppercase tracking-wider text-purple-200">Night Mode</p>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: '#D4BBFF' }}>Night Mode</p>
+            </div>
           </div>
 
-          <h1 className="font-display text-3xl font-semibold mb-2 text-white">
+          <h1 className="font-display text-3xl font-bold mb-1" style={{ color: '#FFFFFF' }}>
             Protect tomorrow.
           </h1>
-          <p className="text-base mb-8 text-purple-200">
+          <p className="text-base mb-6" style={{ color: 'rgba(255,255,255,0.65)' }}>
             Your morning starts tonight.
           </p>
 
-          {/* Inputs */}
-          <div className="space-y-4 mb-6">
-
-            {/* Wake goal */}
-            <div className="glass-card p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Clock className="h-4 w-4" style={{ color: 'var(--violet)' }} />
-                <p className="text-sm font-semibold text-white">What time do you want to wake up?</p>
-              </div>
-              <input type="time" value={wakeGoal} onChange={e => setWakeGoal(e.target.value)}
-                className="text-2xl font-display font-semibold bg-transparent outline-none" style={{ color: 'var(--violet-mid)' }} />
-            </div>
-
-            {/* Sleep hours */}
-            <div className="glass-card p-5">
-              <p className="text-sm font-semibold text-white mb-3">Sleep goal: <span style={{ color: 'var(--violet-mid)' }}>{sleepHours} hours</span></p>
-              <input type="range" min={5} max={10} step={0.5} value={sleepHours}
-                onChange={e => setSleepHours(Number(e.target.value))} />
-            </div>
-
-            {/* Location */}
-            <div className="glass-card p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Home className="h-4 w-4" style={{ color: 'var(--violet)' }} />
-                <p className="text-sm font-semibold text-white">Where are you right now?</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {LOCATIONS.map(l => (
-                  <button key={l.value} onClick={() => setLocation(l.value)}
-                    className="px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all"
-                    style={{
-                      background: location === l.value ? 'rgba(139,111,184,0.3)' : 'rgba(255,255,255,0.05)',
-                      border: `1.5px solid ${location === l.value ? 'rgba(139,111,184,0.5)' : 'rgba(255,255,255,0.08)'}`,
-                      color: location === l.value ? 'var(--tab-active-text)' : 'var(--text-2)',
-                    }}>
-                    {l.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Prep time */}
-            <div className="glass-card p-5">
-              <p className="text-sm font-semibold text-white mb-3">
-                Bedtime prep time: <span style={{ color: 'var(--violet-mid)' }}>{prepMinutes} min</span>
-              </p>
-              <input type="range" min={15} max={90} step={5} value={prepMinutes}
-                onChange={e => setPrepMinutes(Number(e.target.value))} />
-              <p className="text-xs mt-2" style={{ color: 'var(--text-3)' }}>skincare, journal, wind-down ritual</p>
-            </div>
-
-            {/* First meeting */}
-            <div className="glass-card p-5">
-              <p className="text-sm font-semibold text-white mb-3">First meeting tomorrow? (optional)</p>
-              <input type="time" value={firstMeeting} onChange={e => setFirstMeeting(e.target.value)}
-                className="bg-transparent outline-none text-xl font-display" style={{ color: 'var(--violet-mid)' }} />
-            </div>
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6">
+            {TABS.map(t => (
+              <button key={t.value} onClick={() => setTab(t.value)}
+                className="flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all"
+                style={{
+                  background: tab === t.value ? 'rgba(139,111,184,0.5)' : 'rgba(255,255,255,0.08)',
+                  border: `1.5px solid ${tab === t.value ? 'rgba(139,111,184,0.7)' : 'rgba(255,255,255,0.10)'}`,
+                  color: '#FFFFFF',
+                }}>
+                {t.emoji} {t.label}
+              </button>
+            ))}
           </div>
 
-          {/* Calculate */}
-          <button onClick={calculate}
-            className="w-full py-4 rounded-2xl font-semibold text-white mb-6 transition-all active:scale-95"
-            style={{ background: 'linear-gradient(135deg, var(--violet) 0%, #4A3080 100%)' }}>
-            <Sparkles className="inline h-4 w-4 mr-2" />
-            Calculate my night
-          </button>
+          {/* ── Sleep tab ── */}
+          {tab === 'sleep' && (
+            <div className="space-y-4 animate-fade-up">
 
-          {/* Result */}
-          {plan && (
-            <div className="space-y-3 animate-fade-up">
-              <p className="text-white text-base font-medium text-center mb-4 leading-relaxed">
-                {plan.message}
-              </p>
-
-              {[
-                { label: '🛑 Stop work',  value: plan.stopWorkTime,  show: true },
-                { label: '🚗 Leave by',   value: plan.leaveTime,     show: !!plan.leaveTime },
-                { label: '🏠 Home by',    value: plan.homeTime,      show: !!plan.homeTime },
-                { label: '🌙 Begin prep', value: plan.bedTime,       show: true },
-                { label: '✨ Lights out', value: plan.lightsOutTime, show: true },
-              ].filter(r => r.show).map((row, i) => (
-                <div key={i} className="flex items-center justify-between glass-card p-4">
-                  <span className="text-sm text-purple-200">{row.label}</span>
-                  <span className="font-display text-xl font-semibold text-white">{row.value}</span>
+              <div style={card} className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock className="h-4 w-4" style={{ color: '#D4BBFF' }} />
+                  <p className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>What time do you want to wake up?</p>
                 </div>
-              ))}
-
-              <div className="text-center pt-4">
-                <p className="font-display italic text-purple-200 text-base">
-                  &ldquo;Tomorrow-you is asking for rest.&rdquo;
-                </p>
+                <input type="time" value={wakeGoal} onChange={e => setWakeGoal(e.target.value)}
+                  className="text-3xl font-display font-bold bg-transparent outline-none w-full"
+                  style={{ color: '#D4BBFF', colorScheme: 'dark' }} />
               </div>
+
+              <div style={card} className="p-5">
+                <p className="text-sm font-semibold mb-3" style={{ color: '#FFFFFF' }}>
+                  Sleep goal: <span style={{ color: '#D4BBFF' }}>{sleepHours} hours</span>
+                </p>
+                <input type="range" min={5} max={10} step={0.5} value={sleepHours}
+                  onChange={e => setSleepHours(Number(e.target.value))} />
+                <div className="flex justify-between mt-1">
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>5h</span>
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>10h</span>
+                </div>
+              </div>
+
+              <div style={card} className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Home className="h-4 w-4" style={{ color: '#D4BBFF' }} />
+                  <p className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>Where are you right now?</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {LOCATIONS.map(l => (
+                    <button key={l.value} onClick={() => setLocation(l.value)} style={selectedLocStyle(l.value)}>
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={card} className="p-5">
+                <p className="text-sm font-semibold mb-3" style={{ color: '#FFFFFF' }}>
+                  Bedtime prep time: <span style={{ color: '#D4BBFF' }}>{prepMinutes} min</span>
+                </p>
+                <input type="range" min={15} max={90} step={5} value={prepMinutes}
+                  onChange={e => setPrepMinutes(Number(e.target.value))} />
+                <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>skincare · journal · wind-down</p>
+              </div>
+
+              <div style={card} className="p-5">
+                <p className="text-sm font-semibold mb-3" style={{ color: '#FFFFFF' }}>First meeting tomorrow? <span style={{ color: 'rgba(255,255,255,0.5)' }}>(optional)</span></p>
+                <input type="time" value={firstMeeting} onChange={e => setFirstMeeting(e.target.value)}
+                  className="bg-transparent outline-none text-2xl font-display font-bold w-full"
+                  style={{ color: '#D4BBFF', colorScheme: 'dark' }} />
+              </div>
+
+              <button onClick={calculate}
+                className="w-full py-4 rounded-2xl font-bold text-white transition-all active:scale-95"
+                style={{ background: 'linear-gradient(135deg, #8B6FB8 0%, #5A3A90 100%)', fontSize: '1rem' }}>
+                <Sparkles className="inline h-4 w-4 mr-2" />
+                Calculate my night
+              </button>
             </div>
           )}
 
-          {/* Wind-down reminders */}
-          <div className="mt-8 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>Tonight&apos;s wind-down</p>
-            {[
-              '🕯 Dim lights and soften the room',
-              '📵 Close work apps and tabs',
-              '📓 Journal what you&apos;re releasing',
-              '🧖 Skincare — love your face',
-              '💧 One last glass of water',
-              '🙏 Close the loops in your mind',
-            ].map((item, i) => (
-              <div key={i} className="px-4 py-3 rounded-xl text-sm" style={{ background: 'var(--surface-subtle)', color: 'var(--text-2)' }}>
-                {item}
-              </div>
-            ))}
-          </div>
+          {/* ── Tomorrow tab ── */}
+          {tab === 'tomorrow' && (
+            <div className="space-y-4 animate-fade-up">
+              {!plan ? (
+                <div className="text-center py-12">
+                  <span className="text-5xl block mb-4">🌙</span>
+                  <p className="text-base font-semibold mb-2" style={{ color: '#FFFFFF' }}>Fill in Sleep first</p>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>Go to the Sleep tab and calculate your night.</p>
+                  <button onClick={() => setTab('sleep')} className="mt-4 px-5 py-2.5 rounded-xl text-sm font-semibold"
+                    style={{ background: 'rgba(139,111,184,0.3)', color: '#FFFFFF', border: '1px solid rgba(139,111,184,0.4)' }}>
+                    Set up sleep
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div style={{ ...card, padding: 20, textAlign: 'center' }}>
+                    <p className="text-base font-medium leading-relaxed" style={{ color: '#FFFFFF' }}>{plan.message}</p>
+                    <p className="mt-3 font-display italic" style={{ color: 'rgba(212,187,255,0.8)' }}>
+                      &ldquo;Tomorrow-you is asking for rest.&rdquo;
+                    </p>
+                  </div>
+
+                  {[
+                    { label: '🛑 Stop work',  value: plan.stopWorkTime,  show: true },
+                    { label: '🚗 Leave by',   value: plan.leaveTime,     show: !!plan.leaveTime },
+                    { label: '🏠 Home by',    value: plan.homeTime,      show: !!plan.homeTime },
+                    { label: '🌙 Begin prep', value: plan.bedTime,       show: true },
+                    { label: '✨ Lights out', value: plan.lightsOutTime, show: true },
+                  ].filter(r => r.show).map((row, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl"
+                      style={card}>
+                      <span className="text-base" style={{ color: 'rgba(255,255,255,0.75)' }}>{row.label}</span>
+                      <span className="font-display text-2xl font-bold" style={{ color: '#D4BBFF' }}>{row.value}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ── Ritual tab ── */}
+          {tab === 'ritual' && (
+            <div className="space-y-3 animate-fade-up">
+              <p className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Tonight&apos;s wind-down checklist
+              </p>
+              {RITUAL_ITEMS.map((item, i) => (
+                <button key={i} onClick={() => toggleCheck(i)}
+                  className="w-full text-left px-5 py-4 rounded-2xl transition-all flex items-center gap-4"
+                  style={{
+                    background: checked.has(i) ? 'rgba(139,111,184,0.25)' : 'rgba(255,255,255,0.08)',
+                    border: `1.5px solid ${checked.has(i) ? 'rgba(139,111,184,0.5)' : 'rgba(255,255,255,0.10)'}`,
+                    opacity: checked.has(i) ? 0.7 : 1,
+                  }}>
+                  <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
+                    style={{
+                      background: checked.has(i) ? '#8B6FB8' : 'rgba(255,255,255,0.1)',
+                      border: `1.5px solid ${checked.has(i) ? '#8B6FB8' : 'rgba(255,255,255,0.2)'}`,
+                    }}>
+                    {checked.has(i) && <span className="text-white text-xs">✓</span>}
+                  </div>
+                  <span className="text-base" style={{
+                    color: '#FFFFFF',
+                    textDecoration: checked.has(i) ? 'line-through' : 'none',
+                  }}>{item}</span>
+                </button>
+              ))}
+
+              {checked.size === RITUAL_ITEMS.length && (
+                <div className="text-center py-6 animate-fade-up">
+                  <span className="text-4xl block mb-2">🌙</span>
+                  <p className="font-display text-lg italic" style={{ color: '#D4BBFF' }}>
+                    You are ready for rest. Sleep well.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
       </AppLayout>

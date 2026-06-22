@@ -77,8 +77,8 @@ export default function MiddayPage() {
 
   return (
     <div className="bg-sanctuary min-h-screen">
-      <AppLayout noPad>
-        <div className="px-5 pt-14 pb-nav">
+      <AppLayout noPad className="pt-16">
+        <div className="px-6 pb-nav">
 
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center"

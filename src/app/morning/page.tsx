@@ -145,8 +145,8 @@ export default function MorningCheckIn() {
   }
 
   return (
-    <AppLayout noPad>
-        <div className="px-5 pt-14 pb-nav">
+    <AppLayout noPad className="pt-16">
+        <div className="px-6 pb-nav">
 
           {/* Header */}
           {step !== 'result' && (

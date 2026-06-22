@@ -46,8 +46,8 @@ const SECTIONS = [
 export default function MoreScreen() {
   return (
     <div className="bg-sanctuary min-h-screen">
-      <AppLayout noPad>
-        <div className="px-5 pt-14 pb-nav">
+      <AppLayout noPad className="pt-16">
+        <div className="px-6 pb-nav">
 
           <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--depth)' }}>
             More

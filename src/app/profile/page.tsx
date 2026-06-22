@@ -235,8 +235,8 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-sanctuary min-h-screen">
-      <AppLayout noPad>
-        <div className="px-5 pt-14 pb-nav">
+      <AppLayout noPad className="pt-16">
+        <div className="px-6 pb-nav">
 
           {/* Header */}
           <div className="flex items-center justify-between mb-2">
