@@ -31,10 +31,10 @@ export function BottomNav() {
       className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
       style={{
         height: 'var(--nav-h)',
-        background: 'rgba(253,248,243,0.96)',
+        background: 'var(--nav-bg)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(139,111,184,0.1)',
+        borderTop: '1px solid var(--nav-border)',
       }}
     >
       <div className="flex items-center h-full max-w-lg mx-auto px-1">

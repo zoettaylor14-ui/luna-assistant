@@ -11,7 +11,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, noPad, className, darkDesktop }: AppLayoutProps) {
   return (
-    <div className={['min-h-full', darkDesktop ? 'lg:bg-[#0D0B1E]' : 'bg-sanctuary'].join(' ')}>
+    <div className="min-h-full bg-app">
       {/* Desktop top header — hidden on mobile/tablet */}
       <DesktopHeader />
 

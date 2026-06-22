@@ -1,5 +1,82 @@
 @import "tailwindcss";
 
+/* ─── Design tokens — Light mode (default) ──────────────────── */
+:root, [data-theme="light"] {
+  color-scheme: light;
+
+  /* semantic text tokens */
+  --text-1: #231A3A;
+  --text-2: #6B6080;
+  --text-3: #9E95AC;
+  --text-4: #C4BECE;
+
+  /* surface / card */
+  --surface:        rgba(255,255,255,0.80);
+  --surface-border: rgba(139,111,184,0.12);
+  --surface-strong: rgba(255,255,255,0.92);
+  --surface-subtle: rgba(255,255,255,0.50);
+
+  /* app background gradient stops */
+  --app-bg-from: #EDE8F5;
+  --app-bg-mid:  #F5F0FC;
+  --app-bg-to:   #FDF8F3;
+
+  /* nav / header / dock */
+  --nav-bg:        rgba(253,248,243,0.96);
+  --nav-border:    rgba(139,111,184,0.10);
+  --header-bg:     rgba(253,248,243,0.88);
+  --header-border: rgba(139,111,184,0.10);
+  --dock-bg:       rgba(253,248,243,0.95);
+  --dock-border:   rgba(139,111,184,0.12);
+
+  /* tab/dock states */
+  --tab-active-bg:     rgba(139,111,184,0.85);
+  --tab-active-text:   #ffffff;
+  --tab-inactive-text: #9E95AC;
+}
+
+/* ─── Dark mode ─────────────────────────────────────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* override existing depth/mid/mist so all var(--depth) etc. auto-adapt */
+  --depth: rgba(255,255,255,0.90);
+  --mid:   rgba(255,255,255,0.60);
+  --mist:  rgba(255,255,255,0.40);
+  --faint: rgba(255,255,255,0.20);
+
+  --text-1: rgba(255,255,255,0.90);
+  --text-2: rgba(255,255,255,0.60);
+  --text-3: rgba(255,255,255,0.40);
+  --text-4: rgba(255,255,255,0.20);
+
+  --surface:        rgba(255,255,255,0.05);
+  --surface-border: rgba(255,255,255,0.08);
+  --surface-strong: rgba(255,255,255,0.10);
+  --surface-subtle: rgba(255,255,255,0.03);
+
+  --app-bg-from: #1E1A38;
+  --app-bg-mid:  #141030;
+  --app-bg-to:   #0D0B1E;
+
+  --nav-bg:        rgba(13,11,30,0.92);
+  --nav-border:    rgba(255,255,255,0.06);
+  --header-bg:     rgba(13,11,30,0.88);
+  --header-border: rgba(255,255,255,0.06);
+  --dock-bg:       rgba(14,11,30,0.90);
+  --dock-border:   rgba(255,255,255,0.10);
+
+  --tab-active-bg:     rgba(139,111,184,0.85);
+  --tab-active-text:   #ffffff;
+  --tab-inactive-text: rgba(255,255,255,0.50);
+}
+
+/* ─── App background utility ────────────────────────────────── */
+.bg-app {
+  background: linear-gradient(180deg, var(--app-bg-from) 0%, var(--app-bg-mid) 50%, var(--app-bg-to) 100%);
+  transition: background 0.3s ease;
+}
+
 /* ─── Design tokens ─────────────────────────────────────────── */
 :root {
   --cream:       #FDF8F3;
@@ -163,6 +240,11 @@ body {
   user-select: none;
 }
 
+/* ─── Theme-aware text utilities ───────────────────────────── */
+.text-t1 { color: var(--text-1); }
+.text-t2 { color: var(--text-2); }
+.text-t3 { color: var(--text-3); }
+
 /* ─── Bottom nav safe area ──────────────────────────────────── */
 .pb-nav { padding-bottom: calc(var(--nav-h) + 16px); }
 
@@ -171,17 +253,17 @@ body {
   .pb-nav { padding-bottom: 3rem; }
 }
 
-/* ─── Dark glass card (desktop CarPlay) ─────────────────────────────── */
+/* ─── Card — adapts to theme ────────────────────────────────── */
 .dark-card {
-  background: rgba(255,255,255,0.05);
+  background: var(--surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid var(--surface-border);
   border-radius: 20px;
-  transition: background 0.2s ease;
+  transition: background 0.25s ease, border-color 0.25s ease;
 }
 .dark-card:hover {
-  background: rgba(255,255,255,0.08);
+  background: var(--surface-strong);
 }
 
 /* ─── Recording dot ─────────────────────────────────────────── */

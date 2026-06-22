@@ -9,7 +9,8 @@ import { Select } from '@/components/ui/select'
 import { LoadingPage } from '@/components/ui/loading'
 import { createClient } from '@/lib/supabase/client'
 import { AssistantProfile } from '@/types'
-import { Sparkles, Save, CheckCircle, User, Settings, Brain } from 'lucide-react'
+import { Sparkles, Save, CheckCircle, User, Settings, Brain, Sun, Moon } from 'lucide-react'
+import { useTheme } from '@/lib/theme'
 
 const DEFAULT_PROFILE: Omit<AssistantProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
   preferred_tone: 'Clear, warm, human, and confident. Not too formal. Gets to the point.',
@@ -24,6 +25,7 @@ const DEFAULT_PROFILE: Omit<AssistantProfile, 'id' | 'user_id' | 'created_at' | 
 }
 
 export default function SettingsPage() {
+  const { theme, toggle } = useTheme()
   const [profile, setProfile] = useState(DEFAULT_PROFILE)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -93,6 +95,34 @@ export default function SettingsPage() {
           <h1 className="text-2xl font-bold text-slate-800">Settings</h1>
           <p className="text-slate-500 text-sm mt-0.5">Customize how your assistant knows you</p>
         </div>
+
+        {/* Appearance */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Settings className="h-4 w-4 text-slate-500" />
+              <CardTitle>Appearance</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-800">Theme</p>
+                <p className="text-xs text-slate-400">Choose light or dark mode</p>
+              </div>
+              <button
+                onClick={toggle}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border transition-all"
+                style={{ borderColor: 'rgba(139,111,184,0.3)', background: 'rgba(139,111,184,0.06)' }}
+              >
+                {theme === 'dark'
+                  ? <><Sun className="h-4 w-4 text-amber-500" /><span className="text-sm font-medium text-slate-700">Light mode</span></>
+                  : <><Moon className="h-4 w-4 text-violet-600" /><span className="text-sm font-medium text-slate-700">Dark mode</span></>
+                }
+              </button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Account */}
         <Card>

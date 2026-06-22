@@ -43,11 +43,11 @@ export function DesktopTabBar() {
         style={{ pointerEvents: 'none' }}>
         <div className="flex items-center gap-0.5 px-2 py-2 rounded-[28px]"
           style={{
-            background: 'rgba(14,11,30,0.90)',
+            background: 'var(--dock-bg)',
             backdropFilter: 'blur(32px)',
             WebkitBackdropFilter: 'blur(32px)',
-            border: '1px solid rgba(255,255,255,0.10)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.6), 0 2px 0 rgba(255,255,255,0.04) inset',
+            border: '1px solid var(--dock-border)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
             pointerEvents: 'all',
           }}>
           {TABS.map(({ href, label, icon: Icon, badge, dateLabel }) => {
@@ -56,23 +56,23 @@ export function DesktopTabBar() {
               <Link key={href} href={href}
                 className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-[20px] transition-all duration-200 group"
                 style={{
-                  background: active ? 'rgba(139,111,184,0.85)' : 'transparent',
+                  background: active ? 'var(--tab-active-bg)' : 'transparent',
                   minWidth: 60,
                 }}>
                 <div className="relative">
                   {dateLabel ? (
                     <div className="relative">
-                      <Icon className="h-5 w-5" style={{ color: active ? '#fff' : 'rgba(255,255,255,0.5)' }} strokeWidth={1.6} />
+                      <Icon className="h-5 w-5" style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }} strokeWidth={1.6} />
                       <div className="absolute -bottom-1 -right-2 text-xs font-bold"
-                        style={{ color: active ? '#fff' : 'rgba(255,255,255,0.5)' }}>{today}</div>
+                        style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }}>{today}</div>
                     </div>
                   ) : (
                     <>
                       <Icon className="h-5 w-5 transition-transform duration-150 group-hover:scale-110"
-                        style={{ color: active ? '#fff' : 'rgba(255,255,255,0.5)' }} strokeWidth={1.6} />
+                        style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }} strokeWidth={1.6} />
                       {badge && (
                         <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
-                          style={{ background: '#8B6FB8', border: '1.5px solid rgba(14,11,30,0.9)' }}>
+                          style={{ background: '#8B6FB8', border: '1.5px solid var(--dock-bg)' }}>
                           <span className="text-white font-bold" style={{ fontSize: 9 }}>{badge}</span>
                         </div>
                       )}
@@ -80,7 +80,7 @@ export function DesktopTabBar() {
                   )}
                 </div>
                 <span className="text-xs font-medium whitespace-nowrap transition-colors"
-                  style={{ color: active ? '#fff' : 'rgba(255,255,255,0.45)' }}>
+                  style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }}>
                   {label}
                 </span>
               </Link>
