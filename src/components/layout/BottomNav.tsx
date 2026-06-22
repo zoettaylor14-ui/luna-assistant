@@ -1,20 +1,14 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  Home, Sparkles, BriefcaseIcon, MessageCircle,
-  Star, Scissors, Archive, Moon
-} from 'lucide-react'
+import { Home, Sparkles, Star, BookHeart, BriefcaseIcon } from 'lucide-react'
 
 const TABS = [
   { href: '/',          label: 'Home',      icon: Home          },
-  { href: '/morning',   label: 'Morning',   icon: Sparkles      },
-  { href: '/work',      label: 'Work',      icon: BriefcaseIcon },
-  { href: '/messages',  label: 'Messages',  icon: MessageCircle, badge: 4 },
+  { href: '/morning',   label: 'Check-in',  icon: Sparkles      },
   { href: '/astrology', label: 'Astrology', icon: Star          },
-  { href: '/atelier',   label: 'Atelier',   icon: Scissors      },
-  { href: '/vault',     label: 'Vault',     icon: Archive       },
-  { href: '/night',     label: 'Night',     icon: Moon          },
+  { href: '/memory',    label: 'Memory',    icon: BookHeart     },
+  { href: '/work',      label: 'Work',      icon: BriefcaseIcon },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -36,7 +30,7 @@ export function BottomNav() {
         borderTop: '1px solid var(--nav-border)',
       }}>
       <div className="flex items-center h-full max-w-xl mx-auto px-1">
-        {TABS.map(({ href, label, icon: Icon, badge }) => {
+        {TABS.map(({ href, label, icon: Icon }) => {
           const active = isActive(pathname, href)
           return (
             <Link key={href} href={href}
@@ -56,12 +50,6 @@ export function BottomNav() {
                       color: active ? 'var(--violet)' : 'var(--tab-inactive-text)',
                       strokeWidth: active ? 2.2 : 1.6,
                     }} />
-                  {badge && (
-                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
-                      style={{ background: 'var(--violet)', border: '1.5px solid var(--nav-bg)' }}>
-                      <span className="text-white font-bold" style={{ fontSize: 8 }}>{badge}</span>
-                    </span>
-                  )}
                 </div>
                 <span style={{
                   fontSize: 9,

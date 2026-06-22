@@ -110,11 +110,13 @@
 }
 
 /* ─── Base ──────────────────────────────────────────────────── */
-html, body { height: 100%; }
+html, body { min-height: 100%; }
 
 html {
   /* Mobile: 17px base. Desktop bumped down from 19px for proper proportions */
   font-size: 17px;
+  /* Fallback so uncovered viewport never shows white */
+  background-color: var(--app-bg-to);
 }
 
 @media (min-width: 1024px) {
@@ -122,6 +124,7 @@ html {
 }
 
 body {
+  min-height: 100vh;
   background-color: var(--app-bg-to);
   color: var(--text-1);
   font-family: var(--font-sans);
@@ -135,6 +138,10 @@ body {
 
 /* ─── Scrollbar ─────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 0px; height: 0px; }
+
+/* ─── Dark inputs (SmartInput, journal write) ───────────────── */
+.luna-input::placeholder { color: rgba(255,255,255,0.3); }
+.luna-input:focus { border-color: rgba(139,111,184,0.5) !important; outline: none; }
 
 /* ─── Typography helpers ────────────────────────────────────── */
 .font-display { font-family: var(--font-display); }

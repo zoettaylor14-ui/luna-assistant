@@ -1,183 +1,214 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Sparkles, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Calendar, Sparkles, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
+import { useLocation } from '@/hooks/useLocation'
+import type { WeeklyForecast, DayForecast } from '@/app/api/astrology/weekly-forecast/route'
 
-type Forecast = {
-  period: 'weekly' | 'monthly'
-  headline: string
-  body: string
-  themes: string[]
-  dates?: string
+// ─── Design ──────────────────────────────────────────────────────────────────
+const GLASS: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.10)',
+  borderRadius: 22,
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
 }
 
-const STATIC_WEEKLY_FORECAST: Forecast = {
-  period: 'weekly',
-  headline: 'Voice leads. Silence follows.',
-  dates: 'This Week',
-  themes: ['Expression', 'Alignment', 'Integration'],
-  body: `This week activates your Gemini placements — Rising and Jupiter — which means your natural gifts around communication, curiosity, and connection are front and center. Speaking first and editing second is the move. Your Scorpio Sun and Mercury want to prepare perfectly before opening your mouth, but this week the invitation is different: start the conversation, start the pitch, start the collaboration. Your clarity emerges in the doing.
-
-The Cancer Moon energy mid-week may bring a wave of emotional sensitivity — specifically around what you are building and whether it feels like enough. That is the not-self theme of your South Node Capricorn: measuring yourself by output. Pause and reorient to feeling-check. Does what you are building feel true to who you are becoming?
-
-By end of week, Scorpio energy strengthens again — a good window for anything requiring deep focus, research, or truth-telling. Use it for the work that needs your full attention and emotional precision.`,
+function Label({ text, color = 'rgba(255,255,255,0.38)' }: { text: string; color?: string }) {
+  return <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color, marginBottom: 6 }}>{text}</p>
 }
 
-const STATIC_MONTHLY_FORECAST: Forecast = {
-  period: 'monthly',
-  headline: 'The season of precise action and quiet power.',
-  dates: 'This Month',
-  themes: ['Visibility', 'Depth', 'Receiving'],
-  body: `This month is an unusual mix of Gemini-speed and Scorpio-depth — and you were built to navigate exactly that. The early part of the month favors output: ideas, communication, connections, and projects in motion. Your Jupiter in Gemini is activated. The things you put out into the world — words, work, vision — have more reach than usual.
-
-Mid-month, a slower, more reflective window opens. Your Scorpio placements are more comfortable here than anyone around you. Use this time to go deeper rather than wider. The best work of your month may be done in quiet rooms with no audience. What are you creating that has real substance beneath the surface?
-
-Late month activates your North Node direction: Cancer. Watch for moments where you are invited to receive — care, recognition, money, love. Notice if your instinct is to deflect or minimize. Practice saying thank you and letting it land. This is where your soul is growing.
-
-One financial note: Saturn in Taurus energy is present this month as a quiet undercurrent. A decision about slow, stable wealth versus a quick but uncertain opportunity may surface. Trust the slower path.`,
+function Shimmer({ h = 120 }: { h?: number }) {
+  return <div style={{ height: h, borderRadius: 22, background: 'rgba(255,255,255,0.05)', marginBottom: 12 }} className="shimmer" />
 }
 
-export default function ForecastsPage() {
-  const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly')
-  const [forecast, setForecast] = useState<Forecast | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [aiLoaded, setAiLoaded] = useState(false)
+function IntensityPips({ value }: { value: number }) {
+  return (
+    <div style={{ display: 'flex', gap: 2 }}>
+      {Array.from({ length: 10 }, (_, i) => (
+        <div key={i} style={{ width: 12, height: 3, borderRadius: 2, background: i < value ? 'rgba(196,169,232,0.8)' : 'rgba(255,255,255,0.1)' }} />
+      ))}
+    </div>
+  )
+}
 
-  const loadForecast = async (target: 'weekly' | 'monthly', useAI = false) => {
-    if (useAI) {
-      setLoading(true)
-      try {
-        const res = await fetch(`/api/astrology/forecast?period=${target}`)
-        if (res.ok) {
-          const data = await res.json()
-          setForecast(data)
-          setAiLoaded(true)
-          return
-        }
-      } catch { /* fallback */ }
-      setLoading(false)
-    }
-    setForecast(target === 'weekly' ? STATIC_WEEKLY_FORECAST : STATIC_MONTHLY_FORECAST)
-    setAiLoaded(false)
-  }
-
-  useEffect(() => {
-    loadForecast(period)
-  }, [period])
-
-  const displayed = forecast ?? (period === 'weekly' ? STATIC_WEEKLY_FORECAST : STATIC_MONTHLY_FORECAST)
+// ─── Day card ─────────────────────────────────────────────────────────────────
+function DayCard({ day, isFirst }: { day: DayForecast; isFirst: boolean }) {
+  const [open, setOpen] = useState(isFirst)
 
   return (
-    <div className="min-h-screen bg-app">
-      <AppLayout>
-        <div className="flex items-center gap-3 mb-5 pt-2">
-          <Link href="/astrology">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-              <ArrowLeft className="h-4 w-4" style={{ color: 'var(--text-3)' }} />
-            </div>
-          </Link>
-          <div>
-            <h1 className="font-display text-xl font-bold" style={{ color: 'var(--text-1)' }}>Forecasts</h1>
-            <p className="text-xs" style={{ color: 'var(--text-4)' }}>Your personalized cosmic outlook</p>
+    <div style={{ ...GLASS, marginBottom: 10, overflow: 'hidden' }}>
+      {/* Header row */}
+      <button onClick={() => setOpen(v => !v)} style={{ width: '100%', padding: '16px 18px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: isFirst ? '#C4A9E8' : 'white' }}>{day.dayLabel}</p>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{day.date}</span>
+          </div>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.45 }}>{day.theme}</p>
+          <div style={{ marginTop: 6 }}>
+            <IntensityPips value={day.intensity} />
           </div>
         </div>
-
-        {/* Period tabs */}
-        <div className="flex gap-2 mb-5">
-          {(['weekly','monthly'] as const).map(p => (
-            <button key={p} onClick={() => { setPeriod(p); setAiLoaded(false) }}
-              className="px-4 py-2 rounded-full text-xs font-semibold capitalize transition-all"
-              style={{
-                background: period === p ? 'var(--violet)' : 'var(--surface)',
-                color: period === p ? 'white' : 'var(--text-3)',
-                border: `1px solid ${period === p ? 'var(--violet)' : 'var(--surface-border)'}`,
-              }}>
-              {p === 'weekly' ? 'This Week' : 'This Month'}
-            </button>
-          ))}
+        <div style={{ marginLeft: 12, color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>
+          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </div>
+      </button>
 
-        {/* AI refresh button */}
-        <div className="flex justify-end mb-4">
-          <button onClick={() => loadForecast(period, true)} disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-            style={{
-              background: aiLoaded ? 'rgba(90,140,120,0.15)' : 'var(--surface)',
-              color: aiLoaded ? '#5A8A7A' : 'var(--text-3)',
-              border: `1px solid ${aiLoaded ? 'rgba(90,140,120,0.3)' : 'var(--surface-border)'}`,
-            }}>
-            <Sparkles className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Generating...' : aiLoaded ? 'AI · Regenerate' : 'Ask LUNA for today'}
-          </button>
-        </div>
+      {open && (
+        <div style={{ padding: '0 18px 18px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          {/* Energy */}
+          <div style={{ padding: '14px 0 10px' }}>
+            <Label text="Energy" />
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 1.65 }}>{day.energy}</p>
+          </div>
 
-        {/* Forecast card */}
-        <div className="relative rounded-[22px] overflow-hidden mb-4"
-          style={{ background: 'linear-gradient(145deg, #16133A 0%, #1F1848 60%, #16133A 100%)', border: '1px solid rgba(139,111,184,0.25)' }}>
-          <div className="absolute top-0 right-0 w-40 h-40 pointer-events-none"
-            style={{ background: 'radial-gradient(circle at 100% 0%, rgba(139,111,184,0.2) 0%, transparent 60%)', filter: 'blur(24px)' }} />
-          <div className="relative z-10 p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-4 w-4" style={{ color: 'rgba(196,169,232,0.6)' }} />
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(196,169,232,0.5)' }}>
-                {displayed.dates ?? (period === 'weekly' ? 'This Week' : 'This Month')}
-              </p>
-              {aiLoaded && (
-                <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
-                  style={{ background: 'rgba(90,140,120,0.2)', color: '#5A8A7A' }}>
-                  AI · Live
-                </span>
-              )}
+          {/* Love + Career grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+            <div style={{ padding: 14, borderRadius: 16, background: 'rgba(200,120,160,0.1)', border: '1px solid rgba(200,120,160,0.2)' }}>
+              <Label text="Love" color="rgb(220,130,170)" />
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.55 }}>{day.love}</p>
             </div>
-            <p className="font-display text-xl font-bold text-white leading-tight mb-4">
-              {displayed.headline}
-            </p>
-            {displayed.themes.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {displayed.themes.map(t => (
-                  <span key={t} className="px-2.5 py-1 rounded-full text-xs font-bold"
-                    style={{ background: 'rgba(139,111,184,0.2)', color: 'rgba(196,169,232,0.9)', border: '1px solid rgba(139,111,184,0.3)' }}>
-                    {t}
-                  </span>
-                ))}
+            <div style={{ padding: 14, borderRadius: 16, background: 'rgba(90,138,164,0.1)', border: '1px solid rgba(90,138,164,0.2)' }}>
+              <Label text="Career" color="#7BAEC8" />
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.55 }}>{day.career}</p>
+            </div>
+          </div>
+
+          {/* Guidance */}
+          <div style={{ marginBottom: 12 }}>
+            <Label text="Guidance for This Day" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {(day.guidance ?? []).map((tip, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <div style={{ width: 20, height: 20, borderRadius: 10, background: 'rgba(139,111,184,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#9B7FC8', flexShrink: 0, marginTop: 1 }}>{i + 1}</div>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.55 }}>{tip}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Watch for */}
+          <div style={{ padding: 12, borderRadius: 14, background: 'rgba(180,80,60,0.07)', border: '1px solid rgba(180,80,60,0.15)', marginBottom: 12 }}>
+            <Label text="Watch For" color="#C96B5A" />
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>{day.watch_for}</p>
+          </div>
+
+          {/* Affirmation */}
+          <div style={{ padding: 14, borderRadius: 16, background: 'rgba(139,111,184,0.08)', border: '1px solid rgba(139,111,184,0.18)', textAlign: 'center' }}>
+            <p style={{ fontSize: 12, color: '#C4A9E8', fontStyle: 'italic', lineHeight: 1.55 }}>"{day.affirmation}"</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+export default function ForecastsPage() {
+  const location = useLocation()
+  const [forecast, setForecast] = useState<WeeklyForecast | null>(null)
+  const [loading,  setLoading]  = useState(true)
+  const [tab,      setTab]      = useState<'week' | 'month'>('week')
+
+  const loadWeekly = useCallback(async (forceRefresh = false) => {
+    setLoading(true)
+    try {
+      const tz   = Intl.DateTimeFormat().resolvedOptions().timeZone
+      const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+      const url  = `/api/astrology/weekly-forecast?tz=${encodeURIComponent(tz)}&date=${encodeURIComponent(date)}${forceRefresh ? '&refresh=1' : ''}`
+      const res  = await fetch(url)
+      if (!res.ok) throw new Error()
+      setForecast(await res.json())
+    } catch { /* keep previous */ }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    if (location.localTime) loadWeekly()
+  }, [location.localTime, loadWeekly])
+
+  return (
+    <div className="bg-app min-h-screen">
+      <AppLayout noPad className="pt-16">
+        <div style={{ padding: '0 0 120px' }}>
+
+          {/* Header */}
+          <div style={{ padding: '20px 20px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Link href="/astrology" style={{ width: 32, height: 32, borderRadius: 11, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                  <ArrowLeft className="h-4 w-4" style={{ color: 'rgba(255,255,255,0.45)' }} />
+                </Link>
+                <div>
+                  <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'white' }}>Forecasts</h1>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)' }}>Your cosmic outlook — day by day</p>
+                </div>
+              </div>
+              <button onClick={() => loadWeekly(true)} disabled={loading} style={{ width: 32, height: 32, borderRadius: 11, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} style={{ color: 'rgba(255,255,255,0.4)' }} />
+              </button>
+            </div>
+          </div>
+
+          <div style={{ padding: '0 16px' }}>
+
+            {/* Week overview card */}
+            {!loading && forecast && (
+              <div style={{ ...GLASS, padding: 18, marginBottom: 16, background: 'linear-gradient(135deg, rgba(80,40,130,0.3), rgba(20,10,40,0.2))' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  <Sparkles className="h-4 w-4" style={{ color: '#C4A9E8' }} />
+                  <Label text="This Week's Theme" color="#C4A9E8" />
+                </div>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.9)', lineHeight: 1.6, marginBottom: 14 }}>{forecast.week_theme}</p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {[
+                    { label: 'Power Day',   value: forecast.power_window, color: '#C9A96E' },
+                    { label: 'Love Window', value: forecast.love_window,  color: 'rgb(220,130,170)' },
+                    { label: 'Best Day',    value: forecast.best_day,     color: '#8AB88A' },
+                    { label: 'Rest Day',    value: forecast.rest_day,     color: '#7BAEC8' },
+                  ].map(item => (
+                    <div key={item.label} style={{ padding: '10px 12px', borderRadius: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 3 }}>{item.label}</p>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: item.color }}>{item.value}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Forecast body */}
-        <div className="rounded-[20px] p-5 mb-4"
-          style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-          {displayed.body.split('\n\n').map((para, i) => (
-            para.trim() ? (
-              <p key={i} className={`text-sm leading-relaxed ${i > 0 ? 'mt-4' : ''}`} style={{ color: 'var(--text-1)' }}>
-                {para.trim()}
-              </p>
-            ) : null
-          ))}
-        </div>
-
-        {/* Chart context reminder */}
-        <div className="rounded-[18px] p-4"
-          style={{ background: 'rgba(139,111,184,0.08)', border: '1px solid rgba(139,111,184,0.15)' }}>
-          <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Your Reading Is Personalized To</p>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: 'Sun', val: 'Scorpio 22°', emoji: '☀️' },
-              { label: 'Moon', val: 'Cancer 4°', emoji: '🌙' },
-              { label: 'Rising', val: 'Gemini 12°', emoji: '✨' },
-              { label: 'Mercury', val: 'Scorpio', emoji: '☿' },
-              { label: 'North Node', val: 'Cancer', emoji: '☊' },
-              { label: 'Midheaven', val: 'Virgo', emoji: '⬆' },
-            ].map(p => (
-              <div key={p.label} className="text-center">
-                <p className="text-sm mb-0.5">{p.emoji}</p>
-                <p style={{ fontSize: '0.65rem', color: 'var(--text-4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{p.label}</p>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-2)' }}>{p.val}</p>
+            {/* 7-day list */}
+            {loading ? (
+              <><Shimmer h={100} /><Shimmer h={100} /><Shimmer h={100} /><Shimmer h={100} /><Shimmer h={100} /></>
+            ) : forecast ? (
+              <div>
+                <Label text={`7-Day Forecast · ${forecast.days.length} Days`} color="rgba(255,255,255,0.35)" />
+                <div style={{ marginTop: 10 }}>
+                  {forecast.days.map((day, i) => (
+                    <DayCard key={day.date} day={day} isFirst={i === 0} />
+                  ))}
+                </div>
               </div>
-            ))}
+            ) : (
+              <div style={{ ...GLASS, padding: 24, textAlign: 'center' }}>
+                <Calendar className="h-8 w-8" style={{ color: 'rgba(255,255,255,0.2)', margin: '0 auto 12px' }} />
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>Tap ↻ to generate your 7-day forecast</p>
+              </div>
+            )}
+
+            {/* Chart note */}
+            {forecast && (
+              <div style={{ ...GLASS, padding: 14, marginTop: 16, background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.15)' }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#8B6FB8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Reading personalized to your chart</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {[['☀️','Scorpio 22°'],['🌙','Cancer 4°'],['✨','Gemini Rising'],['♀','Sag Venus 29°'],['♂','Libra Mars 6°'],['☊','Cancer N.Node']].map(([e, v]) => (
+                    <span key={v} style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, background: 'rgba(139,111,184,0.15)', color: 'rgba(196,169,232,0.8)', border: '1px solid rgba(139,111,184,0.2)' }}>{e} {v}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </AppLayout>

@@ -59,6 +59,37 @@ const TABS: { value: Tab; label: string; emoji: string }[] = [
   { value: 'ritual',   label: 'Ritual',   emoji: '🕯' },
 ]
 
+// Sleep cycle math — 90-min cycles + 15 min to fall asleep
+function getSleepCycles(wakeMins: number): { label: string; time: string; cycles: number; hrs: string }[] {
+  const FALL_ASLEEP = 15
+  const results = []
+  for (let cycles = 6; cycles >= 3; cycles--) {
+    const sleepMins = wakeMins - cycles * 90 - FALL_ASLEEP
+    results.push({
+      label:  `${cycles} cycles`,
+      time:   minutesToTime(sleepMins),
+      cycles,
+      hrs:    `${(cycles * 1.5).toFixed(1)}h`,
+    })
+  }
+  return results
+}
+
+function nowMinutes(): number {
+  const now = new Date()
+  return now.getHours() * 60 + now.getMinutes()
+}
+
+function minsUntil(targetMins: number): string {
+  const now  = nowMinutes()
+  let diff   = ((targetMins % 1440) + 1440) % 1440 - now
+  if (diff < 0) diff += 1440
+  const h = Math.floor(diff / 60)
+  const m = diff % 60
+  if (h === 0) return `${m}m`
+  return `${h}h ${m}m`
+}
+
 export default function NightScreen() {
   const [tab, setTab]                     = useState<Tab>('sleep')
   const [wakeGoal, setWakeGoal]           = useState('08:00')
@@ -73,8 +104,31 @@ export default function NightScreen() {
     return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`
   })
 
+  // Live calculation — always treat wake time as the NEXT future occurrence
+  const nowMin       = nowMinutes()
+  const rawWakeMin   = wakeGoal ? timeToMinutes(wakeGoal) : 8 * 60
+  // If wake time has already passed today, it means tomorrow morning
+  const minsUntilWake = rawWakeMin > nowMin ? rawWakeMin - nowMin : rawWakeMin + 1440 - nowMin
+  // Absolute wake time in minutes from NOW (not from midnight)
+  const wakeAbsolute = nowMin + minsUntilWake
+
+  // Max sleep possible = time until wake minus 15 min to fall asleep, floored to nearest 0.5h
+  const maxSleepHours = Math.max(1, Math.floor((minsUntilWake - 15) / 30) * 0.5)
+  // Clamp the selected sleep hours to what's actually possible
+  const clampedSleepHours = Math.min(sleepHours, maxSleepHours)
+
+  const liveSleepMin = wakeAbsolute - Math.round(clampedSleepHours * 60)
+  const liveBedMin   = liveSleepMin - 15
+  const minsUntilBed = liveBedMin - nowMin   // negative = should be in bed now
+  const liveTimeStr  = minutesToTime(liveSleepMin)
+  const liveBedStr   = minutesToTime(liveBedMin)
+  const sleepCycles  = getSleepCycles(wakeAbsolute)
+
   const calculate = useCallback(() => {
-    const wakeMin     = timeToMinutes(wakeGoal) + 24 * 60
+    const _now        = nowMinutes()
+    const _raw        = timeToMinutes(wakeGoal)
+    const _until      = _raw > _now ? _raw - _now : _raw + 1440 - _now
+    const wakeMin     = _now + _until
     const lightsOut   = wakeMin - sleepHours * 60
     const bedMin      = lightsOut - prepMinutes
     const loc         = LOCATIONS.find(l => l.value === location)
@@ -185,15 +239,81 @@ export default function NightScreen() {
 
               <div style={card} className="p-5">
                 <p className="text-sm font-semibold mb-3" style={{ color: '#FFFFFF' }}>
-                  Sleep goal: <span style={{ color: '#D4BBFF' }}>{sleepHours} hours</span>
+                  Sleep goal: <span style={{ color: '#D4BBFF' }}>{clampedSleepHours}h</span>
+                  {clampedSleepHours < sleepHours && (
+                    <span style={{ fontSize: 11, color: 'rgba(212,187,255,0.5)', marginLeft: 6 }}>
+                      (max available before {minutesToTime(rawWakeMin)})
+                    </span>
+                  )}
                 </p>
-                <input type="range" min={5} max={10} step={0.5} value={sleepHours}
+                <input type="range" min={1} max={maxSleepHours} step={0.5} value={clampedSleepHours}
                   onChange={e => setSleepHours(Number(e.target.value))} />
                 <div className="flex justify-between mt-1">
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>5h</span>
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>10h</span>
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>1h</span>
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{maxSleepHours}h max</span>
                 </div>
               </div>
+
+              {/* ── Live bedtime result ── */}
+              {wakeGoal && (
+                <div style={{ borderRadius: 20, overflow: 'hidden', background: 'linear-gradient(145deg, rgba(139,111,184,0.25) 0%, rgba(90,58,144,0.2) 100%)', border: '1.5px solid rgba(139,111,184,0.4)' }}>
+                  <div style={{ padding: '18px 20px', textAlign: 'center' }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(212,187,255,0.6)', marginBottom: 6 }}>
+                      Asleep by — for {clampedSleepHours}h
+                    </p>
+                    {minsUntilBed <= 0 ? (
+                      <>
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 800, color: '#D4BBFF', lineHeight: 1, marginBottom: 6 }}>
+                          Get in bed now
+                        </p>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+                          You&apos;ll wake at <span style={{ color: '#D4BBFF', fontWeight: 700 }}>{minutesToTime(rawWakeMin)}</span> with {clampedSleepHours}h of sleep
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: 42, fontWeight: 800, color: '#D4BBFF', lineHeight: 1, marginBottom: 4 }}>
+                          {liveTimeStr}
+                        </p>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+                          In bed by <span style={{ color: '#D4BBFF', fontWeight: 700 }}>{liveBedStr}</span>
+                          {' · '}
+                          {(() => {
+                            const h = Math.floor(minsUntilBed / 60)
+                            const m = minsUntilBed % 60
+                            return h > 0 ? `${h}h ${m}m from now` : `${m}m from now`
+                          })()}
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Sleep cycle options — only show future ones */}
+                  <div style={{ borderTop: '1px solid rgba(139,111,184,0.25)', padding: '12px 16px' }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(212,187,255,0.45)', marginBottom: 10 }}>
+                      Sleep cycle options (90-min cycles)
+                    </p>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {sleepCycles.filter(c => {
+                        // Only show cycles where bed time is in the future
+                        const bedMins = wakeAbsolute - c.cycles * 90 - 15
+                        return bedMins >= nowMin
+                      }).map(c => {
+                        const isBest = c.cycles === 5 || c.cycles === 4
+                        return (
+                          <div key={c.cycles} style={{ flex: 1, textAlign: 'center', padding: '8px 6px', borderRadius: 12, background: isBest ? 'rgba(139,111,184,0.25)' : 'rgba(255,255,255,0.05)', border: `1px solid ${isBest ? 'rgba(139,111,184,0.45)' : 'rgba(255,255,255,0.08)'}` }}>
+                            <p style={{ fontSize: 13, fontWeight: 800, color: isBest ? '#D4BBFF' : 'rgba(255,255,255,0.5)' }}>{c.time}</p>
+                            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{c.hrs}</p>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 8, textAlign: 'center' }}>
+                      +15 min to fall asleep included
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div style={card} className="p-5">
                 <div className="flex items-center gap-2 mb-3">

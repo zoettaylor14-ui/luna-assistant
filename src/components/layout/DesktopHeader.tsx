@@ -1,9 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Search, Bell, Sun, Moon, Zap } from 'lucide-react'
+import { Search, Bell, Sun, Moon, Zap, Settings, LogOut } from 'lucide-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTheme } from '@/lib/theme'
+import { LunaSearchOverlay } from '@/components/ui/LunaSearch'
+import { createClient } from '@/lib/supabase/client'
 
 const MOON_PHASES = [
   { name: 'New Moon',        emoji: '🌑' },
@@ -24,15 +27,25 @@ function getCurrentMoonPhase() {
 
 export function DesktopHeader() {
   const [time, setTime]   = useState('')
+  const [ampm, setAmpm]   = useState('')
   const [date, setDate]   = useState('')
   const [seconds, setSeconds] = useState(0)
+  const [showMenu, setShowMenu] = useState(false)
   const { theme, toggle } = useTheme()
   const moon = getCurrentMoonPhase()
+  const router = useRouter()
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/auth/login')
+  }
 
   useEffect(() => {
     function tick() {
       const now = new Date()
       setTime(format(now, 'h:mm'))
+      setAmpm(format(now, 'a'))
       setDate(format(now, 'EEE, MMM d'))
       setSeconds(now.getSeconds())
     }
@@ -40,8 +53,16 @@ export function DesktopHeader() {
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [])
+  const [searchOpen, setSearchOpen] = useState(false)
 
-  const ampm = time ? (parseInt(time) >= 12 ? 'PM' : 'AM') : ''
+  // ⌘K shortcut
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(true) }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <header
@@ -101,6 +122,7 @@ export function DesktopHeader() {
 
         {/* Search */}
         <button
+          onClick={() => setSearchOpen(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all hover:scale-105 tap-scale"
           style={{
             background: 'var(--surface)',
@@ -111,6 +133,7 @@ export function DesktopHeader() {
           <span className="text-xs px-1 py-0.5 rounded ml-0.5"
             style={{ background: 'var(--surface-border)', color: 'var(--text-4)', fontSize: 10 }}>⌘K</span>
         </button>
+        {searchOpen && <LunaSearchOverlay onClose={() => setSearchOpen(false)} />}
 
         {/* Theme toggle */}
         <button onClick={toggle}
@@ -129,17 +152,36 @@ export function DesktopHeader() {
             style={{ background: '#8B6FB8' }} />
         </button>
 
-        {/* Avatar */}
-        <Link href="/profile">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center tap-scale flex-shrink-0"
-            style={{
-              background: 'linear-gradient(135deg, #8B6FB8, #6A4F9B)',
-              border: '2px solid rgba(139,111,184,0.4)',
-              boxShadow: '0 0 12px rgba(139,111,184,0.3)',
-            }}>
-            <span className="text-white font-bold" style={{ fontSize: 11 }}>Z</span>
+        {/* Settings */}
+        <Link href="/settings">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center tap-scale"
+            style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+            <Settings className="h-3.5 w-3.5" style={{ color: 'rgba(255,255,255,0.55)' }} strokeWidth={1.8} />
           </div>
         </Link>
+
+        {/* Avatar + logout menu */}
+        <div style={{ position: 'relative' }}>
+          <button onClick={() => setShowMenu(v => !v)}
+            className="w-8 h-8 rounded-full flex items-center justify-center tap-scale flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #8B6FB8, #6A4F9B)', border: '2px solid rgba(139,111,184,0.4)', boxShadow: '0 0 12px rgba(139,111,184,0.3)', cursor: 'pointer' }}>
+            <span className="text-white font-bold" style={{ fontSize: 11 }}>Z</span>
+          </button>
+          {showMenu && (
+            <>
+              <div onClick={() => setShowMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
+              <div style={{ position: 'absolute', top: '110%', right: 0, zIndex: 50, background: 'rgba(20,16,48,0.97)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: 6, minWidth: 160, backdropFilter: 'blur(20px)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                <Link href="/settings" onClick={() => setShowMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 10, color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                  <Settings className="h-3.5 w-3.5" /> Settings
+                </Link>
+                <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '4px 0' }} />
+                <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 10, color: '#E05E5E', fontSize: 13, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', width: '100%' }}>
+                  <LogOut className="h-3.5 w-3.5" /> Sign out
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </header>
   )

@@ -9,6 +9,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Mic, MicOff, Sparkles, RotateCcw, ArrowRight, Check } from 'lucide-react'
 import { addPattern } from '@/lib/patterns'
+import { useAutosave } from '@/hooks/useAutosave'
 
 interface SmartInputProps {
   context:       string          // the field label / question (used for suggestions)
@@ -21,6 +22,8 @@ interface SmartInputProps {
   rows?:         number
   history?:      string[]               // recent answers to this field for better suggestions
   autoSuggest?:  boolean               // auto-load suggestions on mount (default true)
+  autosave?:     boolean               // auto-save draft to localStorage (default true)
+  autosaveKey?:  string                // override the storage key (defaults to context slug)
   className?:    string
   style?:        React.CSSProperties
 }
@@ -53,8 +56,15 @@ declare global {
 export function SmartInput({
   context, placeholder, value, onChange, onSubmit,
   patternType = 'general', multiline = true, rows = 3,
-  history = [], autoSuggest = true, className, style,
+  history = [], autoSuggest = true, autosave = true,
+  autosaveKey, className, style,
 }: SmartInputProps) {
+  const storageKey = autosaveKey ?? context.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 40)
+  const { status: saveStatus } = useAutosave(
+    autosave
+      ? { key: storageKey, value, onRestore: (v) => { if (!value) onChange(v) } }
+      : { key: storageKey, value: '' }
+  )
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [loadingSug, setLoadingSug] = useState(false)
   const [listening, setListening] = useState(false)
@@ -188,9 +198,9 @@ export function SmartInput({
               <button key={s} onClick={() => selectSuggestion(s)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                 style={{
-                  background: selected ? 'var(--violet)' : 'var(--surface)',
-                  color: selected ? 'white' : 'var(--text-2)',
-                  border: `1px solid ${selected ? 'var(--violet)' : 'var(--surface-border)'}`,
+                  background: selected ? 'rgba(139,111,184,0.85)' : 'rgba(255,255,255,0.07)',
+                  color: selected ? 'white' : 'rgba(255,255,255,0.75)',
+                  border: `1px solid ${selected ? 'rgba(139,111,184,0.8)' : 'rgba(255,255,255,0.12)'}`,
                   transform: selected ? 'scale(1.02)' : undefined,
                 }}>
                 {selected && <Check className="h-3 w-3" />}
@@ -210,15 +220,16 @@ export function SmartInput({
             onBlur={handleBlur}
             placeholder={listening ? '🎙 Listening...' : (placeholder ?? `Or speak / type your own...`)}
             rows={rows}
-            className="w-full rounded-[16px] px-4 py-3 text-sm resize-none focus:outline-none transition-all"
+            className="w-full rounded-[16px] px-4 py-3 text-sm resize-none focus:outline-none transition-all luna-input"
             style={{
-              background: 'var(--surface)',
-              border: `1px solid ${listening ? 'rgba(139,111,184,0.5)' : 'var(--surface-border)'}`,
-              color: 'var(--text-1)',
+              background: 'rgba(255,255,255,0.07)',
+              border: `1px solid ${listening ? 'rgba(139,111,184,0.55)' : 'rgba(255,255,255,0.12)'}`,
+              color: '#ffffff',
               paddingRight: 48,
               fontFamily: 'inherit',
               lineHeight: 1.6,
-              boxShadow: listening ? '0 0 0 3px rgba(139,111,184,0.1)' : undefined,
+              colorScheme: 'dark',
+              boxShadow: listening ? '0 0 0 3px rgba(139,111,184,0.15)' : undefined,
             }}
           />
         ) : (
@@ -228,13 +239,14 @@ export function SmartInput({
             onChange={e => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder={listening ? '🎙 Listening...' : (placeholder ?? `Or speak / type...`)}
-            className="w-full rounded-[16px] px-4 py-3 text-sm focus:outline-none transition-all"
+            className="w-full rounded-[16px] px-4 py-3 text-sm focus:outline-none transition-all luna-input"
             style={{
-              background: 'var(--surface)',
-              border: `1px solid ${listening ? 'rgba(139,111,184,0.5)' : 'var(--surface-border)'}`,
-              color: 'var(--text-1)',
+              background: 'rgba(255,255,255,0.07)',
+              border: `1px solid ${listening ? 'rgba(139,111,184,0.55)' : 'rgba(255,255,255,0.12)'}`,
+              color: '#ffffff',
               paddingRight: 48,
               fontFamily: 'inherit',
+              colorScheme: 'dark',
             }}
           />
         )}
@@ -270,6 +282,20 @@ export function SmartInput({
             ))}
           </div>
           <p className="text-xs" style={{ color: 'var(--violet)' }}>Listening — speak now</p>
+        </div>
+      )}
+
+      {/* Autosave indicator */}
+      {autosave && value.trim() && (
+        <div className="flex items-center gap-1 mt-1.5" style={{ height: 14 }}>
+          {saveStatus === 'saving' && (
+            <p style={{ fontSize: 10, color: 'var(--text-4)' }}>Saving draft…</p>
+          )}
+          {saveStatus === 'saved' && (
+            <p style={{ fontSize: 10, color: 'var(--text-4)', display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Check style={{ display: 'inline', width: 10, height: 10, color: '#5A8A5A' }} /> Draft saved
+            </p>
+          )}
         </div>
       )}
 

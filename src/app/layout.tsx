@@ -36,7 +36,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${playfair.variable} h-full`}>
+    <html lang="en" className={`${dmSans.variable} ${playfair.variable} h-full`} suppressHydrationWarning>
       {/* Inline script runs before paint — eliminates dark/light flash */}
       <head>
         <script dangerouslySetInnerHTML={{ __html: `

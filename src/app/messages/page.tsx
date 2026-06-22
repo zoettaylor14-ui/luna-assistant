@@ -1,26 +1,44 @@
 'use client'
 import { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { MessageSquare, Sparkles, Copy, Check, AlertTriangle, Shield, ChevronDown, ChevronUp } from 'lucide-react'
+import { MessageSquare, Sparkles, Copy, Check, AlertTriangle, Shield, ChevronDown, ChevronUp, ArrowLeft, ArrowRight } from 'lucide-react'
 import { SmartInput } from '@/components/ui/SmartInput'
 
 const ACTIVATED_LEVELS = [
-  { value: 1, label: 'Calm',      emoji: '😌' },
-  { value: 2, label: 'Mild',      emoji: '🌀' },
-  { value: 3, label: 'Stirred',   emoji: '😤' },
-  { value: 4, label: 'Activated', emoji: '🔥' },
-  { value: 5, label: 'Reactive',  emoji: '⚡' },
+  { value: 1, label: 'Calm',      emoji: '😌', color: '#8AB88A' },
+  { value: 2, label: 'Mild',      emoji: '🌀', color: '#8B9BC4' },
+  { value: 3, label: 'Stirred',   emoji: '😤', color: '#C9A96E' },
+  { value: 4, label: 'Activated', emoji: '🔥', color: '#E05E5E' },
+  { value: 5, label: 'Reactive',  emoji: '⚡', color: '#E05E5E' },
 ]
 
 const RELATIONSHIP_TYPES = [
-  '💼 Client', '🤝 Business partner', '👨‍👩‍👧 Family', '💕 Partner / romantic',
-  '👯 Friend', '👥 Team member', '🙍 Acquaintance',
+  { label: '💼 Client',             short: 'Client'   },
+  { label: '🤝 Business partner',   short: 'Business' },
+  { label: '👨‍👩‍👧 Family',           short: 'Family'   },
+  { label: '💕 Partner / romantic', short: 'Romantic' },
+  { label: '👯 Friend',             short: 'Friend'   },
+  { label: '👥 Team member',        short: 'Team'     },
+  { label: '🙍 Acquaintance',       short: 'Acquaint' },
 ]
+
+const STEPS = [
+  { id: 1, label: 'Sender',       question: 'Who sent this?'                    },
+  { id: 2, label: 'Relationship', question: 'What is your relationship?'        },
+  { id: 3, label: 'Your energy',  question: 'How activated are you right now?'  },
+  { id: 4, label: 'The message',  question: 'Paste or speak the message'        },
+]
+
+const GLASS: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.11)',
+  borderRadius: 20,
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+}
 
 interface CoachResult {
   what_they_mean?: string
-  summary?: string
-  urgency?: string
   emotional_tone?: string
   reactive_warning?: 'yes' | 'no'
   reactive_reason?: string
@@ -33,8 +51,8 @@ interface CoachResult {
   reflection?: string
 }
 
-function ReplyCard({ label, text, id, highlight, accent }: {
-  label: string; text: string; id: string; highlight?: boolean; accent?: string
+function ReplyCard({ label, text, highlight, onEdit }: {
+  label: string; text: string; highlight?: boolean; onEdit: (t: string) => void
 }) {
   const [copied, setCopied] = useState(false)
   function copy() {
@@ -43,57 +61,136 @@ function ReplyCard({ label, text, id, highlight, accent }: {
     setTimeout(() => setCopied(false), 2000)
   }
   return (
-    <div className="rounded-2xl p-4" style={{
-      background: highlight ? `${accent ?? 'rgba(139,111,184'}0.06)` : 'rgba(255,255,255,0.65)',
-      border: `1.5px solid ${highlight ? (accent ?? 'rgba(139,111,184,0.2)') : 'rgba(255,255,255,0.5)'}`,
-    }}>
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: highlight ? 'var(--violet)' : 'var(--mist)' }}>
-          {label}
-        </p>
-        <button onClick={copy} className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-3)' }}>
-          {copied ? <Check className="h-3.5 w-3.5" style={{ color: '#5A8A5A' }} /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? 'Copied' : 'Copy'}
-        </button>
+    <div style={{ ...GLASS, padding: '16px', background: highlight ? 'rgba(139,111,184,0.12)' : 'rgba(255,255,255,0.06)', border: `1.5px solid ${highlight ? 'rgba(139,111,184,0.3)' : 'rgba(255,255,255,0.1)'}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: highlight ? '#C4A8E8' : 'rgba(255,255,255,0.45)' }}>{label}</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => onEdit(text)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 8, background: 'rgba(139,111,184,0.15)', color: '#C4A8E8', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            Edit & Use
+          </button>
+          <button onClick={copy} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer' }}>
+            {copied ? <Check style={{ width: 14, height: 14, color: '#7FD97F' }} /> : <Copy style={{ width: 14, height: 14 }} />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
       </div>
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{text}</p>
+      <p style={{ fontSize: 14, lineHeight: 1.65, color: 'rgba(255,255,255,0.88)' }}>{text}</p>
     </div>
   )
 }
 
+// ─── Progress bar with completed answers ─────────────────────────────────────
+function ProgressBar({ step, sender, relationship, activated }: {
+  step: number; sender: string; relationship: string; activated: number
+}) {
+  const activatedInfo = ACTIVATED_LEVELS.find(l => l.value === activated)
+  const relShort = RELATIONSHIP_TYPES.find(r => r.label === relationship)?.short ?? relationship.split(' ').slice(-1)[0] ?? ''
+
+  const answers = [
+    sender || null,
+    relShort || null,
+    activatedInfo ? `${activatedInfo.emoji} ${activatedInfo.label}` : null,
+    null,
+  ]
+
+  return (
+    <div style={{ marginBottom: 28 }}>
+      {/* Segment bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 14 }}>
+        {STEPS.map((s, i) => {
+          const done    = step > s.id
+          const current = step === s.id
+          return (
+            <div key={s.id} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+              {/* Connector line before */}
+              {i > 0 && (
+                <div style={{ flex: 1, height: 2, background: done || current ? 'rgba(139,111,184,0.7)' : 'rgba(255,255,255,0.1)', transition: 'background 0.3s ease' }} />
+              )}
+              {/* Step dot */}
+              <div style={{
+                width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: done ? 'rgba(139,111,184,0.9)' : current ? 'rgba(139,111,184,0.15)' : 'rgba(255,255,255,0.07)',
+                border: done ? '2px solid #8B6FB8' : current ? '2px solid rgba(139,111,184,0.8)' : '2px solid rgba(255,255,255,0.12)',
+                transition: 'all 0.3s ease',
+                boxShadow: current ? '0 0 12px rgba(139,111,184,0.35)' : undefined,
+              }}>
+                {done ? (
+                  <Check style={{ width: 13, height: 13, color: 'white' }} />
+                ) : (
+                  <span style={{ fontSize: 11, fontWeight: 800, color: current ? '#C4A8E8' : 'rgba(255,255,255,0.3)' }}>{s.id}</span>
+                )}
+              </div>
+              {/* Connector line after (last step) */}
+              {i === STEPS.length - 1 && (
+                <div style={{ flex: 1, height: 2, background: 'rgba(255,255,255,0.1)' }} />
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Answer chips */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {answers.map((ans, i) => {
+          if (!ans || i >= step - 1) return null
+          return (
+            <span key={i} style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(139,111,184,0.15)', border: '1px solid rgba(139,111,184,0.25)', color: '#C4A8E8' }}>
+              {ans}
+            </span>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Main component ──────────────────────────────────────────────────────────
 export default function CommunicationCoach() {
-  const [message, setMessage]       = useState('')
-  const [sender, setSender]         = useState('')
+  const [step,         setStep]         = useState(1)
+  const [sender,       setSender]       = useState('')
   const [relationship, setRelationship] = useState('')
-  const [activated, setActivated]   = useState(1)
-  const [loading, setLoading]       = useState(false)
-  const [result, setResult]         = useState<CoachResult | null>(null)
-  const [showWound, setShowWound]   = useState(false)
-  const [showNotSay, setShowNotSay] = useState(false)
+  const [activated,    setActivated]    = useState(1)
+  const [message,      setMessage]      = useState('')
+  const [loading,      setLoading]      = useState(false)
+  const [result,       setResult]       = useState<CoachResult | null>(null)
+  const [showWound,    setShowWound]    = useState(false)
+  const [showNotSay,   setShowNotSay]   = useState(false)
+  const [editText,     setEditText]     = useState('')
+  const [editCopied,   setEditCopied]   = useState(false)
+
+  function next() { if (step < 4) setStep(s => s + 1) }
+  function back() { if (step > 1) setStep(s => s - 1) }
+
+  function handleEdit(text: string) {
+    setEditText(text)
+    setTimeout(() => document.getElementById('edit-reply-box')?.focus(), 50)
+  }
+  function copyEdit() {
+    navigator.clipboard.writeText(editText)
+    setEditCopied(true)
+    setTimeout(() => setEditCopied(false), 2000)
+  }
 
   async function analyze() {
     if (!message.trim()) return
     setLoading(true)
     setResult(null)
+    setEditText('')
     try {
       const res = await fetch('/api/ai/message-suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message,
-          sender_name: sender,
-          context: relationship,
-          activated_level: activated,
-        }),
+        body: JSON.stringify({ message, sender_name: sender, context: relationship, activated_level: activated }),
       })
+      if (!res.ok) throw new Error('non-2xx')
       setResult(await res.json())
     } catch {
       setResult({
-        what_they_mean: 'I could not fully read this message right now, but take a breath before responding.',
-        summary: 'Message received.',
+        what_they_mean: 'Take a breath before responding.',
         reactive_warning: activated >= 3 ? 'yes' : 'no',
         reactive_reason: activated >= 3 ? 'Your activation level is high. Wait before sending.' : undefined,
-        soft_reply: 'Thank you for reaching out. I want to make sure I respond thoughtfully — let me get back to you with clarity.',
+        soft_reply: 'Thank you for reaching out. Let me get back to you with clarity.',
         direct_reply: "I'll look into this and follow up shortly.",
         confident_reply: 'I hear you. I will respond when I am ready.',
         wisdom_reply: 'I appreciate your message. Give me a moment to respond with intention.',
@@ -104,228 +201,244 @@ export default function CommunicationCoach() {
     }
   }
 
+  function reset() { setResult(null); setMessage(''); setSender(''); setRelationship(''); setActivated(1); setStep(1) }
+
   const isReactive = result?.reactive_warning === 'yes' || activated >= 4
+  const activatedInfo = ACTIVATED_LEVELS.find(l => l.value === activated)!
 
   return (
-    <div className="bg-sanctuary min-h-screen">
+    <div className="bg-app min-h-screen">
       <AppLayout noPad className="pt-16">
-        <div className="px-6 pb-nav">
+        <div style={{ padding: '20px 20px 120px' }}>
 
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(232,192,194,0.2)' }}>
-              <MessageSquare className="h-5 w-5" style={{ color: '#C87B7B' }} />
+          {/* Page header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(232,192,194,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MessageSquare style={{ width: 18, height: 18, color: '#C87B7B' }} />
             </div>
             <div>
-              <p className="text-sm font-medium uppercase tracking-wider" style={{ color: '#C87B7B' }}>Communication Coach</p>
-              <p className="text-xs" style={{ color: 'var(--text-3)' }}>Respond from wisdom, not wound.</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#C87B7B' }}>Communication Coach</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Respond from wisdom, not wound.</p>
             </div>
           </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'white', marginBottom: 20 }}>
             Before you respond.
           </h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--text-2)' }}>
-            Paste the message. LUNA will read it, tell you what they actually mean, and help you reply like your highest self.
-          </p>
 
           {!result ? (
-            <div className="space-y-4">
-              {/* Who sent it */}
-              <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Who sent this?</p>
-                <input type="text" value={sender} onChange={e => setSender(e.target.value)}
-                  placeholder="Kaleb, a client, mom, team member..."
-                  className="w-full bg-transparent outline-none text-sm" style={{ color: 'var(--text-1)' }} />
-              </div>
+            <>
+              {/* Progress bar */}
+              <ProgressBar step={step} sender={sender} relationship={relationship} activated={activated} />
 
-              {/* Relationship */}
-              <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>Relationship</p>
-                <div className="flex flex-wrap gap-2">
-                  {RELATIONSHIP_TYPES.map(r => (
-                    <button key={r} onClick={() => setRelationship(relationship === r ? '' : r)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-                      style={{
-                        background: relationship === r ? 'var(--violet)' : 'rgba(139,111,184,0.08)',
-                        color: relationship === r ? 'white' : 'var(--mid)',
-                      }}>
-                      {r}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* Step label */}
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.13em', color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>
+                Step {step} of 4
+              </p>
+              <h2 style={{ fontSize: 19, fontWeight: 700, color: 'white', marginBottom: 20, fontFamily: 'var(--font-display)' }}>
+                {STEPS[step - 1].question}
+              </h2>
 
-              {/* How activated */}
-              <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>
-                  How activated are you right now?
-                </p>
-                <div className="flex gap-2">
-                  {ACTIVATED_LEVELS.map(l => (
-                    <button key={l.value} onClick={() => setActivated(l.value)}
-                      className="flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 transition-all"
-                      style={{
-                        background: activated === l.value
-                          ? (l.value >= 4 ? '#E05E5E18' : l.value === 3 ? 'rgba(201,169,110,0.15)' : 'rgba(139,111,184,0.12)')
-                          : 'rgba(139,111,184,0.04)',
-                        border: `1.5px solid ${activated === l.value
-                          ? (l.value >= 4 ? '#E05E5E40' : l.value === 3 ? 'rgba(201,169,110,0.3)' : 'rgba(139,111,184,0.2)')
-                          : 'transparent'}`,
-                      }}>
-                      <span className="text-base">{l.emoji}</span>
-                      <span className="text-xs font-semibold" style={{
-                        color: activated === l.value ? (l.value >= 4 ? '#E05E5E' : 'var(--violet)') : 'var(--mist)'
-                      }}>{l.label}</span>
-                    </button>
-                  ))}
+              {/* ── Step 1: Who sent this ── */}
+              {step === 1 && (
+                <div style={{ ...GLASS, padding: '20px' }}>
+                  <input
+                    type="text"
+                    value={sender}
+                    onChange={e => setSender(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && next()}
+                    placeholder="Kaleb, a client, mom, team member…"
+                    autoFocus
+                    className="luna-input"
+                    style={{
+                      width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: 12, padding: '12px 16px', fontSize: 15, color: 'white',
+                      outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', colorScheme: 'dark',
+                    }}
+                  />
                 </div>
-                {activated >= 4 && (
-                  <div className="mt-3 px-3 py-2 rounded-xl flex items-center gap-2"
-                    style={{ background: 'rgba(224,94,94,0.06)', border: '1px solid rgba(224,94,94,0.12)' }}>
-                    <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#E05E5E' }} />
-                    <p className="text-xs" style={{ color: '#E05E5E' }}>
-                      You are activated. LUNA will add extra protection in your replies.
-                    </p>
+              )}
+
+              {/* ── Step 2: Relationship ── */}
+              {step === 2 && (
+                <div style={{ ...GLASS, padding: '20px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {RELATIONSHIP_TYPES.map(r => (
+                      <button key={r.label} onClick={() => setRelationship(relationship === r.label ? '' : r.label)}
+                        style={{
+                          padding: '9px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none',
+                          background: relationship === r.label ? 'rgba(139,111,184,0.85)' : 'rgba(255,255,255,0.07)',
+                          color: relationship === r.label ? 'white' : 'rgba(255,255,255,0.72)',
+                          outline: relationship === r.label ? '1.5px solid rgba(139,111,184,0.7)' : '1px solid rgba(255,255,255,0.1)',
+                          transition: 'all 0.15s ease',
+                        }}>
+                        {r.label}
+                      </button>
+                    ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              {/* The message */}
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2 px-1" style={{ color: 'var(--text-3)' }}>Paste the message</p>
+              {/* ── Step 3: Activation level ── */}
+              {step === 3 && (
+                <div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 12 }}>
+                    {ACTIVATED_LEVELS.map(l => (
+                      <button key={l.value} onClick={() => setActivated(l.value)}
+                        style={{
+                          padding: '14px 0', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, cursor: 'pointer', border: 'none', transition: 'all 0.15s ease',
+                          background: activated === l.value ? `${l.color}18` : 'rgba(255,255,255,0.06)',
+                          outline: activated === l.value ? `2px solid ${l.color}60` : '1px solid rgba(255,255,255,0.1)',
+                        }}>
+                        <span style={{ fontSize: 22 }}>{l.emoji}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: activated === l.value ? l.color : 'rgba(255,255,255,0.4)' }}>{l.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {activated >= 4 && (
+                    <div style={{ padding: '12px 14px', borderRadius: 14, background: 'rgba(224,94,94,0.08)', border: '1px solid rgba(224,94,94,0.2)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <AlertTriangle style={{ width: 15, height: 15, flexShrink: 0, color: '#E05E5E' }} />
+                      <p style={{ fontSize: 12, color: '#E05E5E' }}>You are activated. LUNA will add extra protection in your replies.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── Step 4: The message ── */}
+              {step === 4 && (
                 <SmartInput
                   context="a message I received that I need help responding to wisely — not reactively"
-                  placeholder="Paste or speak the message here..."
+                  placeholder="Paste or speak the message here…"
                   value={message}
                   onChange={setMessage}
                   patternType="messages"
-                  rows={5}
+                  rows={6}
                 />
+              )}
+
+              {/* Navigation */}
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                {step > 1 && (
+                  <button onClick={back} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '13px 18px', borderRadius: 16, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                    <ArrowLeft style={{ width: 16, height: 16 }} /> Back
+                  </button>
+                )}
+                {step < 4 ? (
+                  <button
+                    onClick={next}
+                    disabled={step === 1 && !sender.trim()}
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 16, background: 'linear-gradient(135deg, #8B6FB8, #6A4F9B)', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', border: 'none', opacity: step === 1 && !sender.trim() ? 0.45 : 1, boxShadow: '0 4px 20px rgba(139,111,184,0.3)', transition: 'opacity 0.2s ease' }}>
+                    Continue <ArrowRight style={{ width: 16, height: 16 }} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={analyze}
+                    disabled={!message.trim() || loading}
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 16, background: 'linear-gradient(135deg, #8B6FB8, #6A4F9B)', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', border: 'none', opacity: !message.trim() || loading ? 0.45 : 1, boxShadow: '0 4px 20px rgba(139,111,184,0.3)', transition: 'opacity 0.2s ease' }}>
+                    <Sparkles style={{ width: 16, height: 16 }} />
+                    {loading ? 'Reading between the lines…' : 'Help me respond from wisdom'}
+                  </button>
+                )}
+              </div>
+            </>
+          ) : (
+            // ── Results ────────────────────────────────────────────────────
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+              {/* Answer recap chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
+                {[sender, relationship, `${activatedInfo.emoji} ${activatedInfo.label}`].filter(Boolean).map((v, i) => (
+                  <span key={i} style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(139,111,184,0.15)', border: '1px solid rgba(139,111,184,0.25)', color: '#C4A8E8' }}>{v}</span>
+                ))}
               </div>
 
-              <button onClick={analyze} disabled={!message.trim() || loading}
-                className="w-full py-4 rounded-2xl font-semibold text-white transition-all active:scale-95 disabled:opacity-40"
-                style={{ background: 'linear-gradient(135deg, var(--violet), var(--violet-deep))' }}>
-                <Sparkles className="inline h-4 w-4 mr-2" />
-                {loading ? 'Reading between the lines...' : 'Help me respond from wisdom'}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4 animate-fade-up">
-
-              {/* ── REACTIVE WARNING ── */}
               {isReactive && (
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'rgba(224,94,94,0.06)', border: '2px solid rgba(224,94,94,0.2)' }}>
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#E05E5E' }} />
+                <div style={{ ...GLASS, padding: 16, background: 'rgba(224,94,94,0.07)', border: '1.5px solid rgba(224,94,94,0.22)' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <AlertTriangle style={{ width: 18, height: 18, flexShrink: 0, color: '#E05E5E', marginTop: 2 }} />
                     <div>
-                      <p className="text-sm font-bold mb-1" style={{ color: '#E05E5E' }}>
-                        Pause before sending.
-                      </p>
-                      <p className="text-xs leading-relaxed" style={{ color: '#C87070' }}>
-                        {result.reactive_reason ?? 'Your energy is activated. The replies below are written from your highest self — not from where you are right now. Breathe first.'}
-                      </p>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#E05E5E', marginBottom: 5 }}>Pause before sending.</p>
+                      <p style={{ fontSize: 12, color: '#C87070', lineHeight: 1.6 }}>{result.reactive_reason ?? 'Breathe first. The replies below come from your highest self.'}</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* ── REFLECTION question ── */}
               {result.reflection && (
-                <div className="rounded-2xl p-4 text-center"
-                  style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
-                  <p className="font-display text-base italic leading-relaxed" style={{ color: 'var(--text-1)' }}>
+                <div style={{ ...GLASS, padding: '18px 20px', textAlign: 'center' }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontStyle: 'italic', color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
                     &ldquo;{result.reflection}&rdquo;
                   </p>
                 </div>
               )}
 
-              {/* ── What they actually mean ── */}
               {result.what_they_mean && (
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid rgba(139,111,184,0.1)' }}>
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>
-                    What they actually mean
-                  </p>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{result.what_they_mean}</p>
+                <div style={{ ...GLASS, padding: 16 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#C4A8E8', marginBottom: 8 }}>What they actually mean</p>
+                  <p style={{ fontSize: 14, lineHeight: 1.65, color: 'rgba(255,255,255,0.85)' }}>{result.what_they_mean}</p>
                   {result.emotional_tone && (
-                    <span className="inline-block mt-2 text-xs px-2 py-1 rounded-full capitalize"
-                      style={{ background: 'rgba(139,111,184,0.08)', color: 'var(--violet)' }}>
-                      {result.emotional_tone}
-                    </span>
+                    <span style={{ display: 'inline-block', marginTop: 8, fontSize: 11, padding: '3px 10px', borderRadius: 20, background: 'rgba(139,111,184,0.12)', color: '#C4A8E8', textTransform: 'capitalize' }}>{result.emotional_tone}</span>
                   )}
                 </div>
               )}
 
-              {/* ── Do not say this ── */}
               {result.what_not_to_say && (
                 <div>
-                  <button onClick={() => setShowNotSay(!showNotSay)}
-                    className="flex items-center gap-2 text-xs font-medium mb-2"
-                    style={{ color: 'var(--text-3)' }}>
-                    <Shield className="h-3.5 w-3.5" />
+                  <button onClick={() => setShowNotSay(!showNotSay)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 8, fontWeight: 600 }}>
+                    <Shield style={{ width: 14, height: 14 }} />
                     {showNotSay ? 'Hide' : 'Show'} what not to say
-                    {showNotSay ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    {showNotSay ? <ChevronUp style={{ width: 12, height: 12 }} /> : <ChevronDown style={{ width: 12, height: 12 }} />}
                   </button>
                   {showNotSay && (
-                    <div className="rounded-2xl p-4 mb-1"
-                      style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.15)' }}>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#C9A96E' }}>
-                        Do not say this right now
-                      </p>
-                      <p className="text-sm" style={{ color: 'var(--text-2)' }}>{result.what_not_to_say}</p>
+                    <div style={{ ...GLASS, padding: 14, background: 'rgba(201,169,110,0.07)', border: '1px solid rgba(201,169,110,0.2)' }}>
+                      <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#C9A96E', marginBottom: 8 }}>Do not say this right now</p>
+                      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)' }}>{result.what_not_to_say}</p>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* ── WISDOM reply (highlighted) ── */}
-              {result.wisdom_reply && (
-                <ReplyCard label="✨ Wisdom reply — send this one" text={result.wisdom_reply} id="wisdom" highlight />
+              {result.wisdom_reply && <ReplyCard label="✨ Wisdom reply — send this one" text={result.wisdom_reply} highlight onEdit={handleEdit} />}
+
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>Or choose your tone</p>
+              {result.soft_reply      && <ReplyCard label="🌸 Soft + Warm"      text={result.soft_reply}      onEdit={handleEdit} />}
+              {result.direct_reply    && <ReplyCard label="🎯 Direct + Clear"    text={result.direct_reply}    onEdit={handleEdit} />}
+              {result.confident_reply && <ReplyCard label="🛡 Confident + Calm"  text={result.confident_reply} onEdit={handleEdit} />}
+
+              {editText && (
+                <div style={{ ...GLASS, padding: 16, background: 'rgba(90,180,90,0.07)', border: '1.5px solid rgba(90,180,90,0.2)' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7FD97F', marginBottom: 10 }}>Edit before sending</p>
+                  <textarea id="edit-reply-box" value={editText} onChange={e => setEditText(e.target.value)} rows={4}
+                    className="luna-input" style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '10px 14px', fontSize: 14, color: 'white', outline: 'none', fontFamily: 'inherit', resize: 'none', lineHeight: 1.6, colorScheme: 'dark' as React.CSSProperties['colorScheme'], boxSizing: 'border-box' }} />
+                  <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                    <button onClick={copyEdit} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 12, background: 'rgba(90,180,90,0.15)', color: '#7FD97F', border: '1px solid rgba(90,180,90,0.25)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                      {editCopied ? <><Check style={{ width: 14, height: 14 }} /> Copied!</> : <><Copy style={{ width: 14, height: 14 }} /> Copy final reply</>}
+                    </button>
+                    <button onClick={() => setEditText('')} style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer' }}>Clear</button>
+                  </div>
+                </div>
               )}
 
-              {/* ── 3 reply types ── */}
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>
-                Or choose your tone
-              </p>
-              <div className="space-y-3">
-                {result.soft_reply      && <ReplyCard label="🌸 Soft + Warm"       text={result.soft_reply}      id="soft" />}
-                {result.direct_reply    && <ReplyCard label="🎯 Direct + Clear"     text={result.direct_reply}    id="direct" />}
-                {result.confident_reply && <ReplyCard label="🛡 Confident + Calm"   text={result.confident_reply} id="confident" />}
-              </div>
-
-              {/* ── Wound reply (awareness only) ── */}
               {result.wound_reply && (
                 <div>
-                  <button onClick={() => setShowWound(!showWound)}
-                    className="flex items-center gap-2 text-xs font-medium"
-                    style={{ color: 'var(--text-3)' }}>
-                    {showWound ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                    {showWound ? 'Hide' : 'See'} wound reply (awareness only — do not send this)
+                  <button onClick={() => setShowWound(!showWound)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                    {showWound ? <ChevronUp style={{ width: 12, height: 12 }} /> : <ChevronDown style={{ width: 12, height: 12 }} />}
+                    {showWound ? 'Hide' : 'See'} wound reply (awareness only — do not send)
                   </button>
                   {showWound && (
-                    <div className="mt-2 rounded-2xl p-4"
-                      style={{ background: 'rgba(224,94,94,0.04)', border: '1px solid rgba(224,94,94,0.1)' }}>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#E05E5E' }}>
-                        Wound reply — do not send
-                      </p>
-                      <p className="text-sm italic" style={{ color: 'var(--text-2)' }}>{result.wound_reply}</p>
+                    <div style={{ ...GLASS, padding: 14, marginTop: 8, background: 'rgba(224,94,94,0.05)', border: '1px solid rgba(224,94,94,0.12)' }}>
+                      <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E05E5E', marginBottom: 8 }}>Wound reply — do not send</p>
+                      <p style={{ fontSize: 13, fontStyle: 'italic', color: 'rgba(255,255,255,0.6)' }}>{result.wound_reply}</p>
                     </div>
                   )}
                 </div>
               )}
 
-              <button onClick={() => { setResult(null); setMessage(''); setSender(''); setActivated(1) }}
-                className="w-full py-3.5 rounded-2xl font-semibold"
-                style={{ background: 'rgba(139,111,184,0.08)', color: 'var(--violet)' }}>
+              <button onClick={reset} style={{ width: '100%', padding: '14px', borderRadius: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 8 }}>
                 New message
               </button>
-
             </div>
           )}
-
         </div>
       </AppLayout>
     </div>

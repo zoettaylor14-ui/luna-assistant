@@ -131,7 +131,7 @@ export default function JournalPage() {
         {/* Mood */}
         {writeType === 'journal' && (
           <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>How are you feeling?</p>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'rgba(255,255,255,0.45)' }}>How are you feeling?</p>
             <div className="flex gap-2 flex-wrap">
               {MOODS.map(m => (
                 <button key={m.label} onClick={() => {
@@ -141,9 +141,9 @@ export default function JournalPage() {
                 }}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
                   style={{
-                    background: selectedMood === m.label ? 'rgba(139,111,184,0.15)' : 'rgba(255,255,255,0.7)',
-                    border: `1.5px solid ${selectedMood === m.label ? 'var(--violet)' : 'rgba(139,111,184,0.1)'}`,
-                    color: selectedMood === m.label ? 'var(--violet)' : 'var(--mid)',
+                    background: selectedMood === m.label ? 'rgba(139,111,184,0.2)' : 'rgba(255,255,255,0.07)',
+                    border: `1.5px solid ${selectedMood === m.label ? 'var(--violet)' : 'rgba(255,255,255,0.1)'}`,
+                    color: selectedMood === m.label ? '#C4A8E8' : 'rgba(255,255,255,0.7)',
                   }}>
                   {m.emoji} {m.label}
                 </button>
@@ -154,7 +154,7 @@ export default function JournalPage() {
 
         {/* Prompts */}
         <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
             {writeType === 'dream' ? 'What do you remember?' : 'Start with a prompt (optional)'}
           </p>
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -165,9 +165,9 @@ export default function JournalPage() {
               }}
                 className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all"
                 style={{
-                  background: 'var(--surface)',
-                  border: '1px solid rgba(139,111,184,0.1)',
-                  color: 'var(--text-2)',
+                  background: 'rgba(255,255,255,0.07)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: 'rgba(255,255,255,0.72)',
                 }}>
                 {p.emoji} {p.text}
               </button>
@@ -276,13 +276,13 @@ export default function JournalPage() {
           </div>
         ) : (
           <div className="rounded-2xl p-5 mb-5"
-            style={{ background: 'var(--surface-strong)', border: '1px solid rgba(139,111,184,0.1)' }}>
+            style={{ background: 'rgba(139,111,184,0.08)', border: '1px solid rgba(139,111,184,0.2)', backdropFilter: 'blur(14px)' }}>
             <div className="flex items-center gap-2 mb-2">
               <span>📓</span>
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>Today</p>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.45)' }}>Today</p>
               {todayEntry.mood && <span className="ml-auto text-xs px-2 py-1 rounded-full" style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--violet)' }}>{todayEntry.mood}</span>}
             </div>
-            <p className="text-sm leading-relaxed line-clamp-3" style={{ color: 'var(--text-2)' }}>{todayEntry.content}</p>
+            <p className="text-sm leading-relaxed line-clamp-3" style={{ color: 'rgba(255,255,255,0.78)' }}>{todayEntry.content}</p>
             <button onClick={() => setViewEntry(todayEntry)} className="flex items-center gap-1 mt-3 text-xs font-semibold" style={{ color: 'var(--violet)' }}>
               Read full entry <ChevronRight className="h-3.5 w-3.5" />
             </button>
@@ -299,7 +299,7 @@ export default function JournalPage() {
           ].map(({ label, emoji, type, sub }) => (
             <button key={type} onClick={() => { setWriteType(type); setView('write') }}
               className="flex flex-col items-start gap-1 p-4 rounded-2xl text-left transition-all hover:scale-[1.02]"
-              style={{ background: 'var(--surface)', border: '1px solid rgba(139,111,184,0.08)' }}>
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(139,111,184,0.15)', backdropFilter: 'blur(14px)' }}>
               <span className="text-xl">{emoji}</span>
               <p className="text-xs font-bold" style={{ color: 'var(--text-1)' }}>{label}</p>
               <p className="text-xs" style={{ color: 'var(--text-3)' }}>{sub}</p>
@@ -321,15 +321,15 @@ export default function JournalPage() {
             return (
               <button key={entry.id} onClick={() => setViewEntry(entry)}
                 className="w-full text-left rounded-2xl p-4 flex items-start gap-3 transition-all"
-                style={{ background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(139,111,184,0.07)' }}>
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(14px)' }}>
                 <span className="text-lg flex-shrink-0">{meta.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: meta.color }}>{meta.label}</span>
-                    <span className="text-xs ml-auto" style={{ color: 'var(--text-3)' }}>{entry.date}</span>
+                    <span className="text-xs ml-auto" style={{ color: 'rgba(255,255,255,0.4)' }}>{entry.date}</span>
                   </div>
-                  <p className="text-sm leading-snug truncate" style={{ color: 'var(--text-2)' }}>{entry.content}</p>
-                  {entry.mood && <span className="text-xs mt-1 inline-block" style={{ color: 'var(--text-3)' }}>{entry.mood}</span>}
+                  <p className="text-sm leading-snug truncate" style={{ color: 'rgba(255,255,255,0.75)' }}>{entry.content}</p>
+                  {entry.mood && <span className="text-xs mt-1 inline-block" style={{ color: 'rgba(255,255,255,0.45)' }}>{entry.mood}</span>}
                 </div>
                 <ChevronRight className="h-4 w-4 flex-shrink-0 mt-1" style={{ color: 'var(--text-4)' }} />
               </button>
@@ -352,9 +352,9 @@ export default function JournalPage() {
                 setView('write')
               }}
                 className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-xl"
-                style={{ background: 'rgba(255,255,255,0.5)' }}>
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <span>{p.emoji}</span>
-                <span className="text-sm" style={{ color: 'var(--text-2)' }}>{p.text}</span>
+                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>{p.text}</span>
                 <ChevronRight className="h-3.5 w-3.5 ml-auto" style={{ color: 'var(--text-4)' }} />
               </button>
             ))}
