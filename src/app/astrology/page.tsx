@@ -38,6 +38,7 @@ function MoonSphere({ size = 80 }: { size?: number }) {
 }
 
 const SECTIONS = [
+  { href: '/astrology/daily',       icon: Sun,        label: 'Daily Reading',  sub: 'Your horoscope, all life areas, HD guidance', color: '#C9A96E' },
   { href: '/astrology/birth-chart', icon: Star,       label: 'Birth Chart',    sub: 'Your natal planets, houses, and patterns', color: '#8B6FB8' },
   { href: '/astrology/moon',        icon: Moon,       label: 'Moon Portal',    sub: 'Phase, sign, house overlay, rituals',      color: '#A8C4DA' },
   { href: '/astrology/transits',    icon: Zap,        label: 'Daily Transits', sub: 'Current sky vs your natal chart',          color: '#C9A96E' },

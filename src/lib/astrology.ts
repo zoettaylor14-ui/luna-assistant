@@ -227,7 +227,7 @@ function getTransitInterpretation(aspect: string, transiting: string, natal: str
   const key2 = `${natal}-${transiting}`
   return TRANSIT_MEANINGS[aspect]?.[key1]
       || TRANSIT_MEANINGS[aspect]?.[key2]
-      || `Transiting ${transiting} ${aspect} your natal ${natal}. This activates the energy of ${natal} in your chart through the lens of ${transiting}.`
+      || `${transiting} is making a ${aspect} to the place in your chart where ${natal} lives. Pay attention to what comes up today around ${PLANET_KEYWORDS[natal] ?? natal.toLowerCase()}.`
 }
 
 export function getTransitsToNatal(date: Date): TransitAspect[] {
