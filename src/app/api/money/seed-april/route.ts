@@ -51,9 +51,13 @@ export async function POST() {
     const subsWithUser = subscriptions.map(s => ({ ...s, user_id: ZOE_USER_ID }))
     const billsWithUser = bills.map(b => ({ ...b, user_id: ZOE_USER_ID }))
 
+    // Delete existing seed data first so this is idempotent
+    await db.from('money_subscriptions').delete().eq('user_id', ZOE_USER_ID)
+    await db.from('money_bills').delete().eq('user_id', ZOE_USER_ID)
+
     const { error: subsError } = await db
       .from('money_subscriptions')
-      .upsert(subsWithUser, { onConflict: 'merchant_name,user_id' })
+      .insert(subsWithUser)
 
     if (subsError) {
       console.error('[seed-april] subscriptions error:', subsError)
@@ -62,7 +66,7 @@ export async function POST() {
 
     const { error: billsError } = await db
       .from('money_bills')
-      .upsert(billsWithUser, { onConflict: 'merchant_name,user_id' })
+      .insert(billsWithUser)
 
     if (billsError) {
       console.error('[seed-april] bills error:', billsError)
