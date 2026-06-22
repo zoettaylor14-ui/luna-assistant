@@ -6,9 +6,11 @@ const ZOE_USER_ID = '98f5b277-bb63-41d5-89ec-0edadc1e2858'
 
 export async function POST() {
   try {
-    // Only pass redirect_uri for production https URLs — sandbox doesn't need it
+    // redirect_uri is only needed for production OAuth institutions
+    // Never send it in sandbox — Plaid rejects it if it's not registered in the dashboard
+    const plaidEnv    = process.env.PLAID_ENV ?? 'sandbox'
     const redirectUri = process.env.PLAID_REDIRECT_URI
-    const useRedirect = !!redirectUri && redirectUri.startsWith('https://')
+    const useRedirect = plaidEnv === 'production' && !!redirectUri && redirectUri.startsWith('https://')
 
     const response = await plaidClient.linkTokenCreate({
       user:          { client_user_id: ZOE_USER_ID },
