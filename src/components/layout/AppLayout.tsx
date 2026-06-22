@@ -20,7 +20,7 @@ export function AppLayout({ children, noPad, className, darkDesktop }: AppLayout
       <main className={[
         // Always centered — capped at phone-app width, centered on desktop
         'mx-auto w-full',
-        'max-w-[760px]',
+        'max-w-[860px]',
         'lg:pt-16',
         // Padding — horizontal breathing room
         noPad ? '' : 'px-5',

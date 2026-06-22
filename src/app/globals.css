@@ -113,14 +113,12 @@
 html, body { min-height: 100%; }
 
 html {
-  /* Mobile: 17px base. Desktop bumped down from 19px for proper proportions */
   font-size: 17px;
-  /* Fallback so uncovered viewport never shows white */
   background-color: var(--app-bg-to);
 }
 
-@media (min-width: 1024px) {
-  html { font-size: 15px; }
+@media (min-width: 768px) {
+  html { font-size: 18px; }
 }
 
 body {
@@ -131,7 +129,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 1rem;
-  line-height: 1.65;
+  font-weight: 450;
+  line-height: 1.7;
 }
 
 * { box-sizing: border-box; }
@@ -372,10 +371,14 @@ p, li { line-height: 1.65; }
 .text-t3 { color: var(--text-3) !important; }
 
 /* ─── Minimum readable font sizes ───────────────────────────── */
-/* Tailwind's text-xs at 17.5px base = ~13px — bump to 14px min  */
-.text-xs  { font-size: 0.8rem   !important; }  /* ~14px  */
-.text-sm  { font-size: 0.9rem   !important; }  /* ~15.7px */
-.text-base{ font-size: 1rem     !important; }  /* ~17.5px */
+.text-xs  { font-size: 0.8rem  !important; }  /* ~14-15px */
+.text-sm  { font-size: 0.9rem  !important; }  /* ~16-17px */
+.text-base{ font-size: 1rem    !important; }  /* ~17-18px */
+.text-lg  { font-size: 1.15rem !important; }  /* ~20-21px */
+.text-xl  { font-size: 1.3rem  !important; }  /* ~23-24px */
+
+/* Stronger default weights for readability */
+.text-sm, .text-xs { font-weight: 500; }
 
 /* Nav tab labels always readable */
 nav .text-xs, nav .text-sm { font-size: 0.8rem !important; }
