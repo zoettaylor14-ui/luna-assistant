@@ -50,12 +50,12 @@ function ReplyCard({ label, text, id, highlight, accent }: {
         <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: highlight ? 'var(--violet)' : 'var(--mist)' }}>
           {label}
         </p>
-        <button onClick={copy} className="flex items-center gap-1 text-xs" style={{ color: 'var(--mist)' }}>
+        <button onClick={copy} className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-3)' }}>
           {copied ? <Check className="h-3.5 w-3.5" style={{ color: '#5A8A5A' }} /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--depth)' }}>{text}</p>
+      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{text}</p>
     </div>
   )
 }
@@ -117,14 +117,14 @@ export default function CommunicationCoach() {
             </div>
             <div>
               <p className="text-sm font-medium uppercase tracking-wider" style={{ color: '#C87B7B' }}>Communication Coach</p>
-              <p className="text-xs" style={{ color: 'var(--mist)' }}>Respond from wisdom, not wound.</p>
+              <p className="text-xs" style={{ color: 'var(--text-3)' }}>Respond from wisdom, not wound.</p>
             </div>
           </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--depth)' }}>
+          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>
             Before you respond.
           </h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--mid)' }}>
+          <p className="text-sm mb-6" style={{ color: 'var(--text-2)' }}>
             Paste the message. LUNA will read it, tell you what they actually mean, and help you reply like your highest self.
           </p>
 
@@ -132,15 +132,15 @@ export default function CommunicationCoach() {
             <div className="space-y-4">
               {/* Who sent it */}
               <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--mist)' }}>Who sent this?</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Who sent this?</p>
                 <input type="text" value={sender} onChange={e => setSender(e.target.value)}
                   placeholder="Kaleb, a client, mom, team member..."
-                  className="w-full bg-transparent outline-none text-sm" style={{ color: 'var(--depth)' }} />
+                  className="w-full bg-transparent outline-none text-sm" style={{ color: 'var(--text-1)' }} />
               </div>
 
               {/* Relationship */}
               <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--mist)' }}>Relationship</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>Relationship</p>
                 <div className="flex flex-wrap gap-2">
                   {RELATIONSHIP_TYPES.map(r => (
                     <button key={r} onClick={() => setRelationship(relationship === r ? '' : r)}
@@ -157,7 +157,7 @@ export default function CommunicationCoach() {
 
               {/* How activated */}
               <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--mist)' }}>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>
                   How activated are you right now?
                 </p>
                 <div className="flex gap-2">
@@ -192,10 +192,10 @@ export default function CommunicationCoach() {
 
               {/* The message */}
               <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--mist)' }}>Paste the message</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Paste the message</p>
                 <textarea value={message} onChange={e => setMessage(e.target.value)}
                   placeholder="Paste or type the message here..."
-                  rows={5} className="w-full bg-transparent outline-none text-sm resize-none" style={{ color: 'var(--depth)' }} />
+                  rows={5} className="w-full bg-transparent outline-none text-sm resize-none" style={{ color: 'var(--text-1)' }} />
               </div>
 
               <button onClick={analyze} disabled={!message.trim() || loading}
@@ -230,7 +230,7 @@ export default function CommunicationCoach() {
               {result.reflection && (
                 <div className="rounded-2xl p-4 text-center"
                   style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
-                  <p className="font-display text-base italic leading-relaxed" style={{ color: 'var(--depth)' }}>
+                  <p className="font-display text-base italic leading-relaxed" style={{ color: 'var(--text-1)' }}>
                     &ldquo;{result.reflection}&rdquo;
                   </p>
                 </div>
@@ -239,11 +239,11 @@ export default function CommunicationCoach() {
               {/* ── What they actually mean ── */}
               {result.what_they_mean && (
                 <div className="rounded-2xl p-4"
-                  style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(139,111,184,0.1)' }}>
+                  style={{ background: 'var(--surface)', border: '1px solid rgba(139,111,184,0.1)' }}>
                   <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>
                     What they actually mean
                   </p>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--depth)' }}>{result.what_they_mean}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{result.what_they_mean}</p>
                   {result.emotional_tone && (
                     <span className="inline-block mt-2 text-xs px-2 py-1 rounded-full capitalize"
                       style={{ background: 'rgba(139,111,184,0.08)', color: 'var(--violet)' }}>
@@ -258,7 +258,7 @@ export default function CommunicationCoach() {
                 <div>
                   <button onClick={() => setShowNotSay(!showNotSay)}
                     className="flex items-center gap-2 text-xs font-medium mb-2"
-                    style={{ color: 'var(--mist)' }}>
+                    style={{ color: 'var(--text-3)' }}>
                     <Shield className="h-3.5 w-3.5" />
                     {showNotSay ? 'Hide' : 'Show'} what not to say
                     {showNotSay ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -269,7 +269,7 @@ export default function CommunicationCoach() {
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#C9A96E' }}>
                         Do not say this right now
                       </p>
-                      <p className="text-sm" style={{ color: 'var(--mid)' }}>{result.what_not_to_say}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-2)' }}>{result.what_not_to_say}</p>
                     </div>
                   )}
                 </div>
@@ -281,7 +281,7 @@ export default function CommunicationCoach() {
               )}
 
               {/* ── 3 reply types ── */}
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>
                 Or choose your tone
               </p>
               <div className="space-y-3">
@@ -295,7 +295,7 @@ export default function CommunicationCoach() {
                 <div>
                   <button onClick={() => setShowWound(!showWound)}
                     className="flex items-center gap-2 text-xs font-medium"
-                    style={{ color: 'var(--mist)' }}>
+                    style={{ color: 'var(--text-3)' }}>
                     {showWound ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                     {showWound ? 'Hide' : 'See'} wound reply (awareness only — do not send this)
                   </button>
@@ -305,7 +305,7 @@ export default function CommunicationCoach() {
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#E05E5E' }}>
                         Wound reply — do not send
                       </p>
-                      <p className="text-sm italic" style={{ color: 'var(--mid)' }}>{result.wound_reply}</p>
+                      <p className="text-sm italic" style={{ color: 'var(--text-2)' }}>{result.wound_reply}</p>
                     </div>
                   )}
                 </div>

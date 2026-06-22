@@ -235,8 +235,8 @@ export default function RelationshipsPage() {
 
             {/* Header */}
             <div className="mb-2">
-              <p className="text-base font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--mist)' }}>Your Circle</p>
-              <h1 className="font-display text-3xl font-bold" style={{ color: 'var(--depth)' }}>Relationships</h1>
+              <p className="text-base font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-3)' }}>Your Circle</p>
+              <h1 className="font-display text-3xl font-bold" style={{ color: 'var(--text-1)' }}>Relationships</h1>
               {needsAttention > 0 && (
                 <p className="text-sm mt-1" style={{ color: '#C9A96E' }}>
                   {needsAttention} connection{needsAttention > 1 ? 's' : ''} need your attention
@@ -268,18 +268,18 @@ export default function RelationshipsPage() {
 
             {/* Add person */}
             <button className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-medium"
-              style={{ background: 'rgba(255,255,255,0.7)', border: '1.5px dashed rgba(139,111,184,0.3)', color: 'var(--violet)' }}>
+              style={{ background: 'var(--surface)', border: '1.5px dashed rgba(139,111,184,0.3)', color: 'var(--violet)' }}>
               <Plus className="h-4 w-4" />
               Add someone
             </button>
 
             {/* AI Coach */}
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(139,111,184,0.12)' }}>
+            <div className="rounded-2xl p-4" style={{ background: 'var(--surface-strong)', border: '1px solid rgba(139,111,184,0.12)' }}>
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="h-4 w-4" style={{ color: 'var(--violet)' }} />
-                <p className="text-sm font-bold" style={{ color: 'var(--depth)' }}>Relationship Coach</p>
+                <p className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>Relationship Coach</p>
               </div>
-              <p className="text-sm mb-3" style={{ color: 'var(--mid)' }}>
+              <p className="text-sm mb-3" style={{ color: 'var(--text-2)' }}>
                 Describe a situation and get thoughtful guidance.
               </p>
               <div className="flex flex-wrap gap-2 mb-3">
@@ -298,9 +298,9 @@ export default function RelationshipsPage() {
                 rows={3}
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none mb-3"
                 style={{
-                  background: 'rgba(255,255,255,0.6)',
+                  background: 'var(--surface-subtle)',
                   border: '1.5px solid rgba(139,111,184,0.15)',
-                  color: 'var(--depth)',
+                  color: 'var(--text-1)',
                 }}
               />
               <button
@@ -312,7 +312,7 @@ export default function RelationshipsPage() {
               </button>
               {aiReply && (
                 <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.12)' }}>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--depth)' }}>{aiReply}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{aiReply}</p>
                 </div>
               )}
             </div>
@@ -343,7 +343,7 @@ export default function RelationshipsPage() {
               <button className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105"
                 style={{
                   background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.15)',
+                  border: '1px solid var(--surface-border)',
                   color: 'rgba(255,255,255,0.8)',
                 }}>
                 <Plus className="h-4 w-4" />
@@ -401,7 +401,7 @@ export default function RelationshipsPage() {
                   className="flex-1 px-4 py-3 rounded-xl text-sm outline-none resize-none"
                   style={{
                     background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    border: '1px solid var(--surface-border)',
                     color: 'rgba(255,255,255,0.85)',
                   }}
                 />

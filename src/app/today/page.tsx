@@ -88,10 +88,10 @@ export default function TodayScreen() {
           {/* Header */}
           <div className="flex items-center gap-2 mb-1">
             <Sun className="h-4 w-4" style={{ color: 'var(--golden)' }} />
-            <p className="text-sm" style={{ color: 'var(--mist)' }}>{today}</p>
+            <p className="text-sm" style={{ color: 'var(--text-3)' }}>{today}</p>
           </div>
-          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--depth)' }}>Today</h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--mid)' }}>
+          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>Today</h1>
+          <p className="text-sm mb-6" style={{ color: 'var(--text-2)' }}>
             {tasks.length} open items · {urgent.length > 0 ? `${urgent.length} need attention` : 'nothing critical'}
           </p>
 
@@ -112,9 +112,9 @@ export default function TodayScreen() {
                 <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--violet)' }}>Daily Brief</p>
                 {brief.top_3 && brief.top_3.length > 0 && (
                   <div className="mb-3">
-                    <p className="text-xs font-medium mb-2" style={{ color: 'var(--mist)' }}>Top 3 today</p>
+                    <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-3)' }}>Top 3 today</p>
                     {brief.top_3.map((item, i) => (
-                      <p key={i} className="text-sm py-1" style={{ color: 'var(--depth)' }}>
+                      <p key={i} className="text-sm py-1" style={{ color: 'var(--text-1)' }}>
                         <span className="text-xs mr-2" style={{ color: 'var(--violet)' }}>0{i + 1}</span>{item}
                       </p>
                     ))}
@@ -122,12 +122,12 @@ export default function TodayScreen() {
                 )}
                 {brief.first_step && (
                   <div className="py-3 border-t" style={{ borderColor: 'rgba(139,111,184,0.1)' }}>
-                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--mist)' }}>Start here →</p>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>{brief.first_step}</p>
+                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-3)' }}>Start here →</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{brief.first_step}</p>
                   </div>
                 )}
                 {brief.ai_message && (
-                  <p className="text-xs italic mt-3" style={{ color: 'var(--mist)' }}>{brief.ai_message}</p>
+                  <p className="text-xs italic mt-3" style={{ color: 'var(--text-3)' }}>{brief.ai_message}</p>
                 )}
               </GlassCard>
             </div>
@@ -136,7 +136,7 @@ export default function TodayScreen() {
           {/* Top 3 priorities */}
           <div className="mb-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Top priorities</p>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>Top priorities</p>
               <Link href="/tasks">
                 <span className="text-xs font-medium flex items-center gap-1" style={{ color: 'var(--violet)' }}>
                   All tasks <ArrowRight className="h-3 w-3" />
@@ -164,13 +164,13 @@ export default function TodayScreen() {
                     {done.has(task.id) && <Check className="h-3.5 w-3.5 text-white" />}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--depth)', textDecoration: done.has(task.id) ? 'line-through' : 'none' }}>
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--text-1)', textDecoration: done.has(task.id) ? 'line-through' : 'none' }}>
                       {task.title}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      {task.client_name && <p className="text-xs" style={{ color: 'var(--mist)' }}>{task.client_name}</p>}
+                      {task.client_name && <p className="text-xs" style={{ color: 'var(--text-3)' }}>{task.client_name}</p>}
                       {task.estimated_minutes && (
-                        <p className="text-xs flex items-center gap-1" style={{ color: 'var(--mist)' }}>
+                        <p className="text-xs flex items-center gap-1" style={{ color: 'var(--text-3)' }}>
                           <Clock className="h-3 w-3" />{task.estimated_minutes}m
                         </p>
                       )}
@@ -193,8 +193,8 @@ export default function TodayScreen() {
               <div className="space-y-2">
                 {urgent.slice(0, 3).map(task => (
                   <div key={task.id} className="glass-card p-4" style={{ borderLeft: '3px solid #E05E5E' }}>
-                    <p className="text-sm font-medium" style={{ color: 'var(--depth)' }}>{task.title}</p>
-                    {task.client_name && <p className="text-xs mt-0.5" style={{ color: 'var(--mist)' }}>{task.client_name}</p>}
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-1)' }}>{task.title}</p>
+                    {task.client_name && <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{task.client_name}</p>}
                   </div>
                 ))}
               </div>
@@ -214,8 +214,8 @@ export default function TodayScreen() {
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2" style={{ background: bg }}>
                     <Icon className="h-4 w-4" style={{ color }} />
                   </div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>{label}</p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--mist)' }}>{sub}</p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{label}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{sub}</p>
                 </div>
               </Link>
             ))}
@@ -224,16 +224,16 @@ export default function TodayScreen() {
           {/* Can wait */}
           {canWait.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--mist)' }}>Can wait</p>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Can wait</p>
               <div className="glass-card p-4 space-y-2">
                 {canWait.slice(0, 4).map(task => (
-                  <p key={task.id} className="text-sm" style={{ color: 'var(--mist)' }}>· {task.title}</p>
+                  <p key={task.id} className="text-sm" style={{ color: 'var(--text-3)' }}>· {task.title}</p>
                 ))}
               </div>
             </div>
           )}
 
-          <p className="text-center text-xs italic pb-2" style={{ color: 'var(--faint)' }}>
+          <p className="text-center text-xs italic pb-2" style={{ color: 'var(--text-4)' }}>
             &ldquo;Your ideas are safe. You do not have to carry them all today.&rdquo;
           </p>
 

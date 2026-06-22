@@ -137,14 +137,14 @@ function StatCard({ icon, label, value, sub, color }: {
   return (
     <div className="flex-1 min-w-0 rounded-2xl p-3 flex flex-col items-center gap-2"
       style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>{label}</p>
       <div className="w-10 h-10 rounded-full flex items-center justify-center"
         style={{ background: `${color}18`, border: `2px solid ${color}40` }}>
         {icon}
       </div>
       <div className="text-center">
-        <p className="text-xs font-semibold" style={{ color: 'var(--depth)' }}>{value}</p>
-        {sub && <p className="text-xs" style={{ color: 'var(--mist)' }}>{sub}</p>}
+        <p className="text-xs font-semibold" style={{ color: 'var(--text-1)' }}>{value}</p>
+        {sub && <p className="text-xs" style={{ color: 'var(--text-3)' }}>{sub}</p>}
       </div>
     </div>
   )
@@ -163,7 +163,7 @@ function DCard({ children, className = '', style = {} }: {
 
 // ─── Dark card label ─────────────────────────────────────────
 function DLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-3)' }}>{children}</p>
+  return <p className="font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-3)', fontSize: '0.72rem', letterSpacing: '0.12em' }}>{children}</p>
 }
 
 export default function SanctuaryPage() {
@@ -206,8 +206,8 @@ export default function SanctuaryPage() {
             {/* Header */}
             <div className="flex items-start justify-between mb-1">
               <div className="flex-1">
-                <p className="text-xs font-medium mb-1" style={{ color: 'var(--mist)' }}>{today}</p>
-                <h1 className="font-display text-[2rem] font-bold leading-tight" style={{ color: 'var(--depth)' }}>
+                <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-3)' }}>{today}</p>
+                <h1 className="font-display text-[2rem] font-bold leading-tight" style={{ color: 'var(--text-1)' }}>
                   {greeting}, Zoe ✨
                 </h1>
                 <p className="text-sm mt-1 font-display italic" style={{ color: 'var(--violet)' }}>
@@ -236,8 +236,8 @@ export default function SanctuaryPage() {
               style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
               <span className="text-4xl flex-shrink-0">🔮</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--mist)' }}>Daily Affirmation</p>
-                <p className="text-sm font-semibold leading-relaxed" style={{ color: 'var(--depth)' }}>{affirmation}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-3)' }}>Daily Affirmation</p>
+                <p className="text-sm font-semibold leading-relaxed" style={{ color: 'var(--text-1)' }}>{affirmation}</p>
               </div>
             </div>
 
@@ -246,11 +246,11 @@ export default function SanctuaryPage() {
               <div className="rounded-2xl p-4"
                 style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Next Meeting</p>
-                  <Calendar className="h-3.5 w-3.5" style={{ color: 'var(--mist)' }} />
+                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>Next Meeting</p>
+                  <Calendar className="h-3.5 w-3.5" style={{ color: 'var(--text-3)' }} />
                 </div>
-                <p className="text-lg font-bold mb-0.5" style={{ color: 'var(--depth)' }}>11:00 AM</p>
-                <p className="text-xs leading-snug mb-3" style={{ color: 'var(--mid)' }}>DRYP Weekly Strategy</p>
+                <p className="text-lg font-bold mb-0.5" style={{ color: 'var(--text-1)' }}>11:00 AM</p>
+                <p className="text-xs leading-snug mb-3" style={{ color: 'var(--text-2)' }}>DRYP Weekly Strategy</p>
                 <Link href="/today">
                   <div className="px-3 py-1.5 rounded-xl text-center text-xs font-semibold"
                     style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--violet)' }}>Prep</div>
@@ -259,11 +259,11 @@ export default function SanctuaryPage() {
               <div className="rounded-2xl p-4"
                 style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Priority</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>Priority</p>
                   <Star className="h-3.5 w-3.5" style={{ color: '#C9A96E' }} />
                 </div>
-                <p className="text-sm font-bold leading-snug mb-1" style={{ color: 'var(--depth)' }}>Review client website plan</p>
-                <p className="text-xs" style={{ color: 'var(--mist)' }}>This unlocks everything.</p>
+                <p className="text-sm font-bold leading-snug mb-1" style={{ color: 'var(--text-1)' }}>Review client website plan</p>
+                <p className="text-xs" style={{ color: 'var(--text-3)' }}>This unlocks everything.</p>
               </div>
             </div>
 
@@ -272,22 +272,22 @@ export default function SanctuaryPage() {
               <div className="rounded-2xl p-3"
                 style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
                 <div className="text-base mb-2">🪷</div>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Spirit</p>
-                <p className="text-sm leading-snug mb-2" style={{ color: 'var(--mid)' }}>{spiritMsg}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-3)' }}>Spirit</p>
+                <p className="text-sm leading-snug mb-2" style={{ color: 'var(--text-2)' }}>{spiritMsg}</p>
                 <Link href="/spirit"><p className="text-sm font-semibold" style={{ color: 'var(--violet)' }}>Read →</p></Link>
               </div>
               <div className="rounded-2xl p-3 flex flex-col items-center text-center"
                 style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
                 <div className="text-base mb-2">🔮</div>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Crystal</p>
-                <p className="text-sm font-bold mb-1" style={{ color: 'var(--depth)' }}>{crystal.name}</p>
-                <p className="text-xs" style={{ color: 'var(--mid)' }}>{crystal.tags}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-3)' }}>Crystal</p>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-1)' }}>{crystal.name}</p>
+                <p className="text-xs" style={{ color: 'var(--text-2)' }}>{crystal.tags}</p>
               </div>
               <div className="rounded-2xl p-3"
                 style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
                 <div className="text-base mb-2">🧭</div>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--mist)' }}>Career</p>
-                <p className="text-sm leading-snug mb-2" style={{ color: 'var(--mid)' }}>Align work with recognition.</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-3)' }}>Career</p>
+                <p className="text-sm leading-snug mb-2" style={{ color: 'var(--text-2)' }}>Align work with recognition.</p>
                 <Link href="/career"><p className="text-sm font-semibold" style={{ color: 'var(--violet)' }}>Open →</p></Link>
               </div>
             </div>
@@ -301,8 +301,8 @@ export default function SanctuaryPage() {
                     <Sun className="h-5 w-5" style={{ color: '#C9A96E' }} />
                   </div>
                   <div>
-                    <p className="text-xs font-bold" style={{ color: 'var(--depth)' }}>I Woke Up Late</p>
-                    <p className="text-xs" style={{ color: 'var(--mist)' }}>Reset without guilt</p>
+                    <p className="text-xs font-bold" style={{ color: 'var(--text-1)' }}>I Woke Up Late</p>
+                    <p className="text-xs" style={{ color: 'var(--text-3)' }}>Reset without guilt</p>
                   </div>
                   <ChevronRight className="h-4 w-4 ml-auto" style={{ color: 'var(--faint)' }} />
                 </div>
@@ -314,8 +314,8 @@ export default function SanctuaryPage() {
                     <Zap className="h-5 w-5" style={{ color: 'var(--violet)' }} />
                   </div>
                   <div>
-                    <p className="text-xs font-bold" style={{ color: 'var(--depth)' }}>I&apos;m Rushing</p>
-                    <p className="text-xs" style={{ color: 'var(--mist)' }}>Sacred minimum</p>
+                    <p className="text-xs font-bold" style={{ color: 'var(--text-1)' }}>I&apos;m Rushing</p>
+                    <p className="text-xs" style={{ color: 'var(--text-3)' }}>Sacred minimum</p>
                   </div>
                   <ChevronRight className="h-4 w-4 ml-auto" style={{ color: 'var(--faint)' }} />
                 </div>
@@ -330,7 +330,7 @@ export default function SanctuaryPage() {
                   <span className="text-lg">🌙</span>
                   <div>
                     <p className="text-xs font-bold" style={{ color: 'var(--violet)' }}>Tonight&apos;s Protection</p>
-                    <p className="text-sm" style={{ color: 'var(--mist)' }}>Start wind-down by 9:30 PM</p>
+                    <p className="text-sm" style={{ color: 'var(--text-3)' }}>Start wind-down by 9:30 PM</p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4" style={{ color: 'var(--violet)' }} />
@@ -341,290 +341,363 @@ export default function SanctuaryPage() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════
-          DESKTOP — dark CarPlay / Apple glass UI
+          DESKTOP — CarPlay × Apple Home Screen
       ══════════════════════════════════════════════════════════ */}
       <div className="hidden lg:block min-h-screen bg-app">
 
-        {/* Ambient orbs */}
-        <div className="fixed top-0 right-0 w-[600px] h-[600px] pointer-events-none"
-          style={{ background: 'radial-gradient(circle at 80% 20%, rgba(139,111,184,0.15) 0%, transparent 60%)', filter: 'blur(40px)' }} />
-        <div className="fixed bottom-0 left-0 w-[400px] h-[400px] pointer-events-none"
-          style={{ background: 'radial-gradient(circle at 20% 80%, rgba(90,120,180,0.1) 0%, transparent 60%)', filter: 'blur(40px)' }} />
+        {/* Ambient orbs — fixed, behind everything */}
+        <div className="fixed top-0 right-0 w-[700px] h-[700px] pointer-events-none z-0"
+          style={{ background: 'radial-gradient(circle at 75% 15%, rgba(139,111,184,0.12) 0%, transparent 65%)', filter: 'blur(60px)' }} />
+        <div className="fixed bottom-0 left-0 w-[500px] h-[500px] pointer-events-none z-0"
+          style={{ background: 'radial-gradient(circle at 25% 85%, rgba(90,120,180,0.08) 0%, transparent 65%)', filter: 'blur(60px)' }} />
 
         <AppLayout noPad>
-          <div className="pt-20 pb-[110px] px-8">
+          <div className="pt-16 pb-[110px] max-w-[1400px] mx-auto px-8">
 
-            {/* ── HERO BANNER ── */}
-            <div className="relative rounded-3xl overflow-hidden mb-5"
+            {/* ── HERO CARD — always dark, emotional center ── */}
+            <div className="relative rounded-[28px] overflow-hidden mb-6 transition-all duration-500"
               style={{
-                background: 'linear-gradient(135deg, #1A1535 0%, #241D4A 50%, #1A1535 100%)',
-                border: '1px solid rgba(139,111,184,0.2)',
-                minHeight: 160,
+                background: 'linear-gradient(135deg, #16133A 0%, #1F1848 40%, #16133A 100%)',
+                border: '1px solid rgba(139,111,184,0.22)',
+                minHeight: 188,
               }}>
-              {/* Moon */}
-              <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none">
-                <MoonSphere size={148} glow={true} />
+              {/* Moon sphere — right side */}
+              <div className="absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none">
+                <MoonSphere size={160} glow={true} />
               </div>
-
-              {/* Stars */}
-              {[
-                { top: '15%', right: '38%', size: 3 },
-                { top: '70%', right: '52%', size: 2 },
-                { top: '25%', right: '60%', size: 2 },
-                { top: '55%', right: '65%', size: 3 },
-                { top: '40%', right: '42%', size: 2 },
-              ].map((s, i) => (
-                <div key={i} className="absolute rounded-full" style={{
-                  top: s.top, right: s.right,
-                  width: s.size, height: s.size,
-                  background: 'rgba(255,255,255,0.8)',
-                }} />
+              {/* Floating stars */}
+              {[[12,40,3],[68,55,2],[22,62,2],[48,68,3],[35,44,1.5],[58,30,2]].map(([t,r,s],i) => (
+                <div key={i} className="absolute rounded-full"
+                  style={{ top:`${t}%`, right:`${r}%`, width:s, height:s, background:'rgba(255,255,255,0.75)' }} />
               ))}
+              {/* Soft glow under moon */}
+              <div className="absolute right-6 top-1/2 -translate-y-1/2 w-48 h-48 pointer-events-none"
+                style={{ background: 'radial-gradient(circle, rgba(139,111,184,0.18) 0%, transparent 70%)', filter: 'blur(24px)' }} />
 
-              <div className="relative z-10 px-10 py-10">
-                <p className="text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>{today}</p>
-                <h1 className="font-display text-5xl font-bold mb-2" style={{ color: 'white' }}>
-                  ✦ {greeting}, Zoe ✦
+              <div className="relative z-10 px-10 py-9 pr-64">
+                <p className="text-sm font-medium mb-2.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{today}</p>
+                <h1 className="font-display text-4xl font-bold mb-2 leading-tight" style={{ color: 'white' }}>
+                  {greeting}, Zoe ✦
                 </h1>
-                <p className="text-lg mb-6" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                  You are not behind. You are returning.
+                <p className="text-base mb-6 max-w-lg leading-relaxed" style={{ color: 'rgba(255,255,255,0.62)' }}>
+                  {affirmation}
                 </p>
                 <Link href="/morning">
-                  <button className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105"
+                  <button className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all hover:scale-105 active:scale-95"
                     style={{
-                      background: 'rgba(255,255,255,0.12)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      color: 'white',
+                      background: 'rgba(255,255,255,0.14)',
+                      border: '1px solid rgba(255,255,255,0.22)',
+                      color: 'rgba(255,255,255,0.95)',
                       backdropFilter: 'blur(12px)',
                     }}>
-                    Let&apos;s begin ✦
+                    <Sparkles className="h-4 w-4" />
+                    Begin Morning Check-In
                   </button>
                 </Link>
               </div>
             </div>
 
-            {/* ── ROW 1: 4 main cards ── */}
-            <div className="grid grid-cols-4 gap-4 mb-4">
+            {/* ── APP TILE GRID — bento layout ── */}
+            <div className="grid grid-cols-12 gap-4 mb-4">
 
-              {/* Today's Priorities */}
-              <DCard>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Today&apos;s Priorities</span>
-                  </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                    style={{ background: 'rgba(139,111,184,0.2)', color: '#C4A9E8' }}>
-                    {tasks.length}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {tasks.map(task => (
-                    <button key={task.id} onClick={() => toggleTask(task.id)}
-                      className="w-full flex items-start gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
-                      style={{ background: 'var(--surface-subtle)', border: '1px solid var(--surface-border)' }}>
-                      {task.done
-                        ? <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: '#8B6FB8' }} />
-                        : <Circle className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: 'var(--text-3)' }} />
-                      }
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium" style={{ color: task.done ? 'var(--text-3)' : 'var(--text-1)', textDecoration: task.done ? 'line-through' : 'none' }}>
-                          {task.title}
-                        </p>
-                        <p className="text-xs" style={{ color: 'var(--text-3)' }}>{task.sub}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <button className="flex items-center gap-2 mt-3 text-xs"
-                  style={{ color: 'var(--text-3)' }}>
-                  <Plus className="h-3.5 w-3.5" /> Add a priority
-                </button>
-              </DCard>
-
-              {/* Messages */}
-              <DCard>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Messages</span>
-                  </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                    style={{ background: 'rgba(139,111,184,0.2)', color: '#C4A9E8' }}>4</span>
-                </div>
-                <div className="space-y-3">
-                  {[
-                    { name: 'Mom',        msg: 'Proud of you. Thinking of you.',  time: '8:30 AM',   dot: true  },
-                    { name: 'Jasmine Lee',msg: "Can't wait to see the deck!",      time: '7:45 AM',   dot: true  },
-                    { name: 'Marcus',     msg: 'Coffee this week?',                time: 'Yesterday', dot: false },
-                    { name: 'LUNA',       msg: 'Your evening reflection is ready.',time: 'Yesterday', dot: false },
-                  ].map(m => (
-                    <div key={m.name} className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                        style={{ background: m.name === 'LUNA' ? 'linear-gradient(135deg,#8B6FB8,#6A4F9B)' : 'rgba(139,111,184,0.2)', color: 'white' }}>
-                        {m.name[0]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{m.name}</p>
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-xs" style={{ color: 'var(--text-3)' }}>{m.time}</p>
-                            {m.dot && <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#8B6FB8' }} />}
-                          </div>
-                        </div>
-                        <p className="text-sm truncate" style={{ color: 'var(--text-2)' }}>{m.msg}</p>
-                      </div>
+              {/* Morning Wake — large (col 4) */}
+              <Link href="/morning" className="col-span-4 group">
+                <div className="relative rounded-[24px] p-6 h-full min-h-[200px] flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer overflow-hidden"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+                  <div className="absolute top-0 right-0 w-40 h-40 pointer-events-none opacity-30"
+                    style={{ background: 'radial-gradient(circle at 100% 0%, rgba(201,169,110,0.4) 0%, transparent 60%)' }} />
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
+                      style={{ background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.2)' }}>
+                      <span className="text-2xl">☀️</span>
                     </div>
-                  ))}
-                </div>
-                <Link href="/messages">
-                  <button className="w-full mt-3 text-xs text-center py-2 rounded-xl transition-all"
-                    style={{ color: 'rgba(139,111,184,0.9)', background: 'rgba(139,111,184,0.08)' }}>
-                    View all messages
-                  </button>
-                </Link>
-              </DCard>
-
-              {/* Next Event */}
-              <DCard>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Next Event</span>
+                    <p className="text-xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>Morning Wake</p>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-3)' }}>How did your soul sleep?</p>
                   </div>
-                  <MoreHorizontal className="h-4 w-4" style={{ color: 'var(--text-3)' }} />
-                </div>
-                {/* Event card */}
-                <div className="rounded-2xl p-4 mb-3"
-                  style={{ background: 'rgba(139,111,184,0.12)', border: '1px solid rgba(139,111,184,0.2)' }}>
-                  <p className="text-sm font-bold mb-1" style={{ color: '#A98FD8' }}>11:00 AM</p>
-                  <p className="text-xl font-bold mb-3" style={{ color: 'var(--text-1)' }}>DRYP Weekly Sync</p>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <Clock className="h-3.5 w-3.5" style={{ color: 'var(--text-3)' }} />
-                    <span className="text-xs" style={{ color: 'var(--text-2)' }}>45 min</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-3.5 w-3.5" style={{ color: 'var(--text-3)' }} />
-                    <span className="text-xs" style={{ color: 'var(--text-2)' }}>Google Meet</span>
+                  <div className="flex items-center justify-between mt-4">
+                    <span className="text-sm font-semibold" style={{ color: '#C9A96E' }}>Start ritual</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" style={{ color: '#C9A96E' }} />
                   </div>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-3)' }}>Up next</p>
-                <div className="flex items-center gap-3">
-                  <p className="text-sm font-medium" style={{ color: 'var(--text-2)' }}>1:00 PM</p>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--text-2)' }}>Client Call</p>
-                  <span className="text-xs ml-auto" style={{ color: 'var(--text-3)' }}>📹 Zoom</span>
-                </div>
-              </DCard>
+              </Link>
 
-              {/* Spirit Guidance */}
-              <DCard style={{
-                background: 'linear-gradient(135deg, rgba(30,20,60,0.9) 0%, rgba(50,30,80,0.9) 100%)',
-                position: 'relative',
-                overflow: 'hidden',
-              }}>
-                {/* Lotus glow */}
-                <div className="absolute top-4 right-4 w-24 h-24 pointer-events-none"
-                  style={{ background: 'radial-gradient(circle, rgba(180,140,240,0.3) 0%, transparent 70%)', filter: 'blur(8px)' }} />
-                <div className="absolute top-6 right-6 text-5xl opacity-60">🪷</div>
-
-                <div className="flex items-center gap-2 mb-auto">
-                  <Sparkles className="h-4 w-4" style={{ color: '#C4A9E8' }} strokeWidth={2} />
-                  <span className="text-sm font-semibold text-white">Spirit Guidance</span>
+              {/* Work Brief — large (col 4) */}
+              <Link href="/work" className="col-span-4 group">
+                <div className="relative rounded-[24px] p-6 h-full min-h-[200px] flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer overflow-hidden"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+                  <div className="absolute top-0 right-0 w-40 h-40 pointer-events-none opacity-20"
+                    style={{ background: 'radial-gradient(circle at 100% 0%, rgba(139,111,184,0.6) 0%, transparent 60%)' }} />
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
+                      style={{ background: 'rgba(139,111,184,0.12)', border: '1px solid rgba(139,111,184,0.2)' }}>
+                      <BriefcaseIcon className="h-6 w-6" style={{ color: 'var(--violet)' }} strokeWidth={1.6} />
+                    </div>
+                    <p className="text-xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>Work Brief</p>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-3)' }}>
+                      {tasks.filter(t => !t.done).length} tasks · 1 meeting · Q2 Launch on track
+                    </p>
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-semibold" style={{ color: 'var(--text-3)' }}>Progress</span>
+                      <span className="text-xs font-bold" style={{ color: 'var(--violet)' }}>72%</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full" style={{ background: 'var(--surface-subtle)' }}>
+                      <div className="h-1.5 rounded-full" style={{ width: '72%', background: 'var(--violet)' }} />
+                    </div>
+                  </div>
                 </div>
+              </Link>
 
-                <div className="mt-16">
-                  <p className="text-lg font-display font-semibold leading-snug mb-4 text-white">{spiritMsg}</p>
-                  <Link href="/spirit">
-                    <button className="text-xs px-4 py-2 rounded-full"
-                      style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                      Tap for guidance
-                    </button>
-                  </Link>
+              {/* Messages — large (col 4) */}
+              <Link href="/messages" className="col-span-4 group">
+                <div className="relative rounded-[24px] p-6 h-full min-h-[200px] flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer overflow-hidden"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+                  <div className="absolute top-0 right-0 w-40 h-40 pointer-events-none opacity-20"
+                    style={{ background: 'radial-gradient(circle at 100% 0%, rgba(168,196,218,0.5) 0%, transparent 60%)' }} />
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 relative"
+                      style={{ background: 'rgba(168,196,218,0.12)', border: '1px solid rgba(168,196,218,0.2)' }}>
+                      <MessageCircle className="h-6 w-6" style={{ color: 'var(--lunar)' }} strokeWidth={1.6} />
+                      <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-white font-bold"
+                        style={{ background: 'var(--violet)', fontSize: 10 }}>4</div>
+                    </div>
+                    <p className="text-xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>Messages</p>
+                    <p className="text-sm" style={{ color: 'var(--text-3)' }}>Communication Coach ready</p>
+                  </div>
+                  <div className="space-y-2 mt-2">
+                    {[
+                      { name: 'Mom', msg: 'Proud of you. Thinking of you.' },
+                      { name: 'Jasmine', msg: "Can't wait to see the deck!" },
+                    ].map(m => (
+                      <div key={m.name} className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold"
+                          style={{ background: 'rgba(139,111,184,0.3)', fontSize: 10 }}>{m.name[0]}</div>
+                        <p className="text-xs truncate flex-1" style={{ color: 'var(--text-2)' }}>
+                          <span className="font-semibold">{m.name}</span> — {m.msg}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </DCard>
+              </Link>
             </div>
 
-            {/* ── ROW 2: Work Brief + Moon + Energy + Sleep ── */}
-            <div className="grid grid-cols-4 gap-4">
+            {/* ── ROW 2: 4 medium tiles + LUNA Now ── */}
+            <div className="grid grid-cols-12 gap-4 mb-4">
 
-              {/* Work Brief */}
-              <DCard>
-                <div className="flex items-center gap-2 mb-4">
-                  <BriefcaseIcon className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                  <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Work Brief</span>
+              {/* Calendar (col 3) */}
+              <Link href="/calendar" className="col-span-3 group">
+                <div className="rounded-[24px] p-5 h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                    style={{ background: 'rgba(232,192,194,0.15)', border: '1px solid rgba(232,192,194,0.2)' }}>
+                    <Calendar className="h-5 w-5" style={{ color: 'var(--blush)' }} strokeWidth={1.7} />
+                  </div>
+                  <p className="font-bold text-base mb-1" style={{ color: 'var(--text-1)' }}>Calendar</p>
+                  <p className="text-sm font-semibold mb-2" style={{ color: 'var(--blush)' }}>11:00 AM</p>
+                  <p className="text-sm" style={{ color: 'var(--text-2)' }}>DRYP Weekly Sync</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-3)' }}>45 min · Google Meet</p>
                 </div>
-                <DLabel>Top Focus</DLabel>
-                <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>Q2 Launch</p>
-                <div className="flex items-center gap-1.5 mb-3">
-                  <div className="w-2 h-2 rounded-full" style={{ background: '#5A9E5A' }} />
-                  <span className="text-xs" style={{ color: '#5A9E5A' }}>On track</span>
-                </div>
-                <p className="text-sm mb-4" style={{ color: 'var(--text-3)' }}>2 tasks due today</p>
-                <div className="flex items-center justify-between">
-                  <Link href="/work">
-                    <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
-                      style={{ background: 'rgba(139,111,184,0.15)', color: '#C4A9E8', border: '1px solid rgba(139,111,184,0.2)' }}>
-                      Review <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </Link>
-                  <Ring pct={72} size={56} stroke={5} color="#8B6FB8" label="72%" />
-                </div>
-              </DCard>
+              </Link>
 
-              {/* Energy / Moon */}
-              <DCard style={{ position: 'relative', overflow: 'hidden' }}>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <MoonSphere size={90} glow={true} />
+              {/* Spirit (col 3) */}
+              <Link href="/spirit" className="col-span-3 group">
+                <div className="relative rounded-[24px] p-5 h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(30,20,60,0.95) 0%, rgba(45,28,75,0.95) 100%)',
+                    border: '1px solid rgba(180,140,240,0.2)',
+                  }}>
+                  <div className="absolute right-3 top-3 text-4xl opacity-40">🪷</div>
+                  <div className="absolute top-2 right-2 w-20 h-20 pointer-events-none"
+                    style={{ background: 'radial-gradient(circle, rgba(180,140,240,0.25) 0%, transparent 70%)', filter: 'blur(8px)' }} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                    style={{ background: 'rgba(180,140,240,0.15)', border: '1px solid rgba(180,140,240,0.2)' }}>
+                    <Sparkles className="h-5 w-5" style={{ color: '#C4A9E8' }} strokeWidth={1.7} />
+                  </div>
+                  <p className="font-bold text-base mb-1 text-white">Spirit</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                    Moon guidance + crystal for today
+                  </p>
+                  <p className="text-xs mt-3 font-semibold" style={{ color: 'rgba(196,169,232,0.8)' }}>
+                    {moon.emoji} {moon.name}
+                  </p>
                 </div>
-                <div className="absolute top-3 right-3 text-sm font-bold" style={{ color: 'var(--text-2)' }}>72%</div>
+              </Link>
 
-                <div className="flex items-center gap-2 mb-3">
-                  <Moon className="h-4 w-4" style={{ color: '#8B6FB8' }} strokeWidth={2} />
-                  <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Energy / Moon</span>
+              {/* Atelier (col 3) */}
+              <Link href="/atelier" className="col-span-3 group">
+                <div className="relative rounded-[24px] p-5 h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+                  <div className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-20"
+                    style={{ background: 'radial-gradient(circle at 100% 0%, rgba(232,192,194,0.6) 0%, transparent 60%)' }} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                    style={{ background: 'rgba(232,192,194,0.12)', border: '1px solid rgba(232,192,194,0.2)' }}>
+                    <span className="text-xl">✂️</span>
+                  </div>
+                  <p className="font-bold text-base mb-1" style={{ color: 'var(--text-1)' }}>Atelier</p>
+                  <p className="text-sm" style={{ color: 'var(--text-3)' }}>Today&apos;s style energy</p>
+                  <div className="mt-3 px-2 py-1.5 rounded-xl inline-block"
+                    style={{ background: 'rgba(139,111,184,0.1)', border: '1px solid rgba(139,111,184,0.15)' }}>
+                    <p className="text-xs font-semibold" style={{ color: 'var(--violet)' }}>✨ LUNA Street Fairy</p>
+                  </div>
                 </div>
-                <p className="text-xs mb-1" style={{ color: 'var(--text-3)' }}>{moon.name}</p>
-                <p className="text-xl font-bold mb-2" style={{ color: 'var(--text-1)' }}>{moon.keyword}</p>
-                <p className="text-xs leading-relaxed pr-24" style={{ color: 'var(--text-2)' }}>
-                  {affirmation.split('.')[0]}.
-                </p>
-              </DCard>
+              </Link>
 
-              {/* Energy stat */}
-              <DCard>
-                <DLabel>Energy</DLabel>
-                <p className="text-5xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>78%</p>
-                <p className="text-sm mb-4" style={{ color: 'var(--text-3)' }}>Steady</p>
-                <Sparkline values={[60, 65, 70, 62, 75, 78, 74, 80]} color="#8B6FB8" />
-              </DCard>
+              {/* Night Protection (col 3) */}
+              <Link href="/night" className="col-span-3 group">
+                <div className="relative rounded-[24px] p-5 h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                    style={{ background: 'rgba(139,111,184,0.12)', border: '1px solid rgba(139,111,184,0.15)' }}>
+                    <Moon className="h-5 w-5" style={{ color: 'var(--violet)' }} strokeWidth={1.7} />
+                  </div>
+                  <p className="font-bold text-base mb-1" style={{ color: 'var(--text-1)' }}>Night Protection</p>
+                  <p className="text-sm" style={{ color: 'var(--text-3)' }}>Wind down by 9:30 PM</p>
+                  <div className="mt-3 flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full" style={{ background: '#B8C9B4' }} />
+                    <p className="text-xs" style={{ color: '#B8C9B4' }}>Evening ritual ready</p>
+                  </div>
+                </div>
+              </Link>
+            </div>
 
-              {/* Sleep / Movement / Mindfulness */}
-              <DCard>
-                <DLabel>Wellness</DLabel>
-                <div className="space-y-4">
-                  {[
-                    { icon: Moon, label: 'Sleep',        value: '7h 32m', color: '#8B6FB8' },
-                    { icon: Zap,  label: 'Movement',     value: '45m',    color: '#C9A96E' },
-                    { icon: Heart,label: 'Mindfulness',  value: '12m',    color: '#B8C9B4' },
-                  ].map(({ icon: Icon, label, value, color }) => (
-                    <div key={label} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                          style={{ background: `${color}20` }}>
-                          <Icon className="h-3.5 w-3.5" style={{ color }} strokeWidth={1.8} />
-                        </div>
-                        <span className="text-sm" style={{ color: 'var(--text-2)' }}>{label}</span>
-                      </div>
-                      <span className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{value}</span>
+            {/* ── ROW 3: Priorities + LUNA Now + Wellness ── */}
+            <div className="grid grid-cols-12 gap-4">
+
+              {/* Today's Priorities (col 4) */}
+              <div className="col-span-4">
+                <div className="rounded-[24px] p-6 h-full"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5" style={{ color: 'var(--violet)' }} strokeWidth={2} />
+                      <span className="font-bold text-base" style={{ color: 'var(--text-1)' }}>Today&apos;s Priorities</span>
                     </div>
-                  ))}
-                </div>
-                <Link href="/profile">
-                  <button className="w-full mt-4 text-xs py-2 rounded-xl transition-all"
-                    style={{ color: 'rgba(139,111,184,0.8)', background: 'rgba(139,111,184,0.08)' }}>
-                    View full breakdown
+                    <span className="text-xs px-2 py-0.5 rounded-full font-bold"
+                      style={{ background: 'rgba(139,111,184,0.15)', color: 'var(--violet)' }}>
+                      {tasks.length}
+                    </span>
+                  </div>
+                  <div className="space-y-2.5">
+                    {tasks.map(task => (
+                      <button key={task.id} onClick={() => toggleTask(task.id)}
+                        className="w-full flex items-start gap-3 px-4 py-3 rounded-2xl text-left transition-all hover:scale-[1.01]"
+                        style={{ background: 'var(--surface-subtle)', border: '1px solid var(--surface-border)' }}>
+                        {task.done
+                          ? <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: 'var(--violet)' }} />
+                          : <Circle className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: 'var(--text-3)' }} />
+                        }
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold" style={{ color: task.done ? 'var(--text-3)' : 'var(--text-1)', textDecoration: task.done ? 'line-through' : 'none' }}>
+                            {task.title}
+                          </p>
+                          <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{task.sub}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <button className="flex items-center gap-2 mt-4 text-sm"
+                    style={{ color: 'var(--text-3)' }}>
+                    <Plus className="h-4 w-4" /> Add a priority
                   </button>
-                </Link>
-              </DCard>
+                </div>
+              </div>
+
+              {/* LUNA Now — dynamic guidance card (col 4) */}
+              <div className="col-span-4">
+                <div className="relative rounded-[24px] p-6 h-full overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(160deg, rgba(26,21,53,0.97) 0%, rgba(36,28,72,0.97) 100%)',
+                    border: '1px solid rgba(139,111,184,0.25)',
+                  }}>
+                  <div className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                    style={{ background: 'radial-gradient(ellipse at 80% 20%, rgba(139,111,184,0.15) 0%, transparent 60%)' }} />
+
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-5">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                        style={{ background: 'rgba(139,111,184,0.2)', border: '1px solid rgba(139,111,184,0.3)' }}>
+                        <Sparkles className="h-4 w-4" style={{ color: '#C4A9E8' }} strokeWidth={1.8} />
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-sm">LUNA Now</p>
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Your best next move</p>
+                      </div>
+                    </div>
+
+                    <p className="font-display text-xl font-bold text-white leading-snug mb-3">
+                      Start with water, mood check, and one priority.
+                    </p>
+                    <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                      {spiritMsg}
+                    </p>
+
+                    <div className="space-y-2">
+                      {[
+                        { emoji: '💧', text: 'Drink water first' },
+                        { emoji: '🧠', text: 'Check your energy level' },
+                        { emoji: '✦', text: 'Pick one thing that matters most' },
+                      ].map(step => (
+                        <div key={step.text} className="flex items-center gap-3 rounded-xl px-3 py-2"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                          <span>{step.emoji}</span>
+                          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>{step.text}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Link href="/morning">
+                      <button className="mt-5 w-full py-3 rounded-2xl font-semibold text-sm transition-all hover:scale-[1.02]"
+                        style={{ background: 'rgba(139,111,184,0.25)', border: '1px solid rgba(139,111,184,0.3)', color: 'rgba(255,255,255,0.9)' }}>
+                        Begin Check-In ✦
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Wellness (col 4) */}
+              <div className="col-span-4">
+                <div className="rounded-[24px] p-6 h-full"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+                  <p className="font-bold text-base mb-4" style={{ color: 'var(--text-1)' }}>Wellness Today</p>
+                  <div className="space-y-4 mb-5">
+                    {[
+                      { icon: Moon,  label: 'Sleep',       value: '7h 32m', color: '#8B6FB8', pct: 74 },
+                      { icon: Zap,   label: 'Movement',    value: '45 min', color: '#C9A96E', pct: 60 },
+                      { icon: Heart, label: 'Mindfulness', value: '12 min', color: '#B8C9B4', pct: 40 },
+                    ].map(({ icon: Icon, label, value, color, pct }) => (
+                      <div key={label}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                              style={{ background: `${color}18`, border: `1px solid ${color}28` }}>
+                              <Icon className="h-4 w-4" style={{ color }} strokeWidth={1.8} />
+                            </div>
+                            <span className="text-sm font-medium" style={{ color: 'var(--text-2)' }}>{label}</span>
+                          </div>
+                          <span className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>{value}</span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full" style={{ background: 'var(--surface-subtle)' }}>
+                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2 pt-3"
+                    style={{ borderTop: '1px solid var(--surface-border)' }}>
+                    <div className="flex-1">
+                      <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-3)' }}>ENERGY TREND</p>
+                      <Sparkline values={[60,65,70,62,75,78,74,80]} color="var(--violet)" />
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold" style={{ color: 'var(--text-1)' }}>78%</p>
+                      <p className="text-xs font-semibold" style={{ color: '#B8C9B4' }}>Steady ↑</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>

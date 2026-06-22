@@ -64,8 +64,8 @@ export default function CalendarPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--depth)' }}>Calendar</h1>
-            <p className="text-sm mt-0.5" style={{ color: 'var(--mist)' }}>{format(today, 'EEEE, MMMM d')}</p>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-1)' }}>Calendar</h1>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--text-3)' }}>{format(today, 'EEEE, MMMM d')}</p>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/today">
@@ -90,9 +90,9 @@ export default function CalendarPage() {
               <Calendar className="h-6 w-6" style={{ color: 'var(--violet)' }} />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--mist)' }}>Next meeting</p>
-              <p className="text-base font-bold" style={{ color: 'var(--depth)' }}>{nextEvent.title}</p>
-              <p className="text-sm" style={{ color: 'var(--mid)' }}>{nextEvent.time} · {nextEvent.duration}</p>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-3)' }}>Next meeting</p>
+              <p className="text-base font-bold" style={{ color: 'var(--text-1)' }}>{nextEvent.title}</p>
+              <p className="text-sm" style={{ color: 'var(--text-2)' }}>{nextEvent.time} · {nextEvent.duration}</p>
             </div>
             <div className="flex gap-2">
               {nextEvent.join_url && (
@@ -116,7 +116,7 @@ export default function CalendarPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
           <button onClick={() => setSelected(addDays(selected, -7))}
             className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--mist)' }}>
+            style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--text-3)' }}>
             <ChevronLeft className="h-4 w-4" />
           </button>
           {weekDays.map(day => {
@@ -140,7 +140,7 @@ export default function CalendarPage() {
           })}
           <button onClick={() => setSelected(addDays(selected, 7))}
             className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--mist)' }}>
+            style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--text-3)' }}>
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
@@ -151,7 +151,7 @@ export default function CalendarPage() {
           {/* Timeline */}
           <div className="space-y-3">
             {events.length === 0 ? (
-              <div className="text-center py-12" style={{ color: 'var(--mist)' }}>
+              <div className="text-center py-12" style={{ color: 'var(--text-3)' }}>
                 <Calendar className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Nothing scheduled. A free day.</p>
               </div>
@@ -168,8 +168,8 @@ export default function CalendarPage() {
                     style={{ background: EVENT_COLORS[event.type] }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="text-sm font-bold truncate" style={{ color: 'var(--depth)' }}>{event.title}</p>
-                      <span className="text-xs flex-shrink-0" style={{ color: 'var(--mist)' }}>{event.time}</span>
+                      <p className="text-sm font-bold truncate" style={{ color: 'var(--text-1)' }}>{event.title}</p>
+                      <span className="text-xs flex-shrink-0" style={{ color: 'var(--text-3)' }}>{event.time}</span>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
                       {event.client && (
@@ -180,14 +180,14 @@ export default function CalendarPage() {
                       )}
                       {event.duration && (
                         <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" style={{ color: 'var(--mist)' }} />
-                          <span className="text-xs" style={{ color: 'var(--mist)' }}>{event.duration}</span>
+                          <Clock className="h-3 w-3" style={{ color: 'var(--text-3)' }} />
+                          <span className="text-xs" style={{ color: 'var(--text-3)' }}>{event.duration}</span>
                         </div>
                       )}
                       {event.location && (
                         <div className="flex items-center gap-1">
-                          {event.join_url ? <Video className="h-3 w-3" style={{ color: 'var(--mist)' }} /> : <MapPin className="h-3 w-3" style={{ color: 'var(--mist)' }} />}
-                          <span className="text-xs" style={{ color: 'var(--mist)' }}>{event.location}</span>
+                          {event.join_url ? <Video className="h-3 w-3" style={{ color: 'var(--text-3)' }} /> : <MapPin className="h-3 w-3" style={{ color: 'var(--text-3)' }} />}
+                          <span className="text-xs" style={{ color: 'var(--text-3)' }}>{event.location}</span>
                         </div>
                       )}
                     </div>
@@ -198,10 +198,10 @@ export default function CalendarPage() {
 
             {/* Connect Google Calendar */}
             <div className="rounded-2xl p-5 text-center mt-4"
-              style={{ background: 'rgba(255,255,255,0.6)', border: '1.5px dashed rgba(139,111,184,0.2)' }}>
+              style={{ background: 'var(--surface-subtle)', border: '1.5px dashed rgba(139,111,184,0.2)' }}>
               <Calendar className="h-8 w-8 mx-auto mb-2 opacity-40" style={{ color: 'var(--violet)' }} />
-              <p className="text-sm font-semibold mb-1" style={{ color: 'var(--depth)' }}>Connect Google Calendar</p>
-              <p className="text-xs mb-3" style={{ color: 'var(--mist)' }}>See real events, meeting prep, and smart scheduling</p>
+              <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-1)' }}>Connect Google Calendar</p>
+              <p className="text-xs mb-3" style={{ color: 'var(--text-3)' }}>See real events, meeting prep, and smart scheduling</p>
               <Link href="/settings">
                 <button className="px-5 py-2 rounded-xl text-xs font-semibold"
                   style={{ background: 'var(--violet)', color: 'white' }}>
@@ -214,28 +214,28 @@ export default function CalendarPage() {
           {/* Detail / prep panel */}
           {selectedEvent ? (
             <div className="mt-4 lg:mt-0 rounded-2xl p-5"
-              style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(139,111,184,0.12)', boxShadow: '0 4px 24px rgba(139,111,184,0.08)' }}>
+              style={{ background: 'var(--surface-strong)', border: '1px solid rgba(139,111,184,0.12)', boxShadow: '0 4px 24px rgba(139,111,184,0.08)' }}>
               <div className="flex items-start gap-3 mb-5">
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
                   style={{ background: EVENT_BG[selectedEvent.type] }}>
                   <Calendar className="h-5 w-5" style={{ color: EVENT_COLORS[selectedEvent.type] }} />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--mist)' }}>{selectedEvent.type}</p>
-                  <h2 className="text-lg font-bold" style={{ color: 'var(--depth)' }}>{selectedEvent.title}</h2>
-                  <p className="text-sm" style={{ color: 'var(--mid)' }}>{selectedEvent.time}{selectedEvent.end_time ? ` – ${selectedEvent.end_time}` : ''} · {selectedEvent.duration}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-3)' }}>{selectedEvent.type}</p>
+                  <h2 className="text-lg font-bold" style={{ color: 'var(--text-1)' }}>{selectedEvent.title}</h2>
+                  <p className="text-sm" style={{ color: 'var(--text-2)' }}>{selectedEvent.time}{selectedEvent.end_time ? ` – ${selectedEvent.end_time}` : ''} · {selectedEvent.duration}</p>
                 </div>
               </div>
 
               {selectedEvent.attendees && (
                 <div className="mb-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--mist)' }}>Attendees</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Attendees</p>
                   <div className="flex gap-2 flex-wrap">
                     {selectedEvent.attendees.map(a => (
                       <div key={a} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
                         style={{ background: 'rgba(139,111,184,0.08)', border: '1px solid rgba(139,111,184,0.12)' }}>
                         <Users className="h-3 w-3" style={{ color: 'var(--violet)' }} />
-                        <span className="text-xs font-medium" style={{ color: 'var(--mid)' }}>{a}</span>
+                        <span className="text-xs font-medium" style={{ color: 'var(--text-2)' }}>{a}</span>
                       </div>
                     ))}
                   </div>
@@ -244,9 +244,9 @@ export default function CalendarPage() {
 
               {selectedEvent.prep_notes && (
                 <div className="mb-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--mist)' }}>Prep notes</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Prep notes</p>
                   <div className="rounded-xl p-3" style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--mid)' }}>{selectedEvent.prep_notes}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-2)' }}>{selectedEvent.prep_notes}</p>
                   </div>
                 </div>
               )}
@@ -272,7 +272,7 @@ export default function CalendarPage() {
             <div className="hidden lg:flex mt-0 rounded-2xl p-8 items-center justify-center flex-col gap-3"
               style={{ background: 'rgba(255,255,255,0.5)', border: '1.5px dashed rgba(139,111,184,0.15)', minHeight: 300 }}>
               <Calendar className="h-10 w-10 opacity-20" style={{ color: 'var(--violet)' }} />
-              <p className="text-sm" style={{ color: 'var(--mist)' }}>Select an event to see details and prep notes</p>
+              <p className="text-sm" style={{ color: 'var(--text-3)' }}>Select an event to see details and prep notes</p>
             </div>
           )}
         </div>

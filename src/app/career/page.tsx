@@ -11,7 +11,7 @@ const CAREER_CONTAINERS = [
   { label: 'Money Moves',        items: ['TikTok Shop', 'Dropshipping', 'Trading', 'Passive income'],                                  color: 'var(--golden)', bg: 'rgba(201,169,110,0.1)'  },
   { label: 'Creative Identity',  items: ['Content creation', 'Sewing + clothing brand', 'Painting', 'Dance', 'Tattoo art'],            color: 'var(--blush)',  bg: 'rgba(232,192,194,0.12)' },
   { label: 'Future Projects',    items: ['Nurturly', 'LINK\'d UP', 'Bikini brand', 'Books', '144-client prep'],                        color: 'var(--herb)',   bg: 'rgba(184,200,180,0.12)' },
-  { label: 'Parked Ideas',       items: ['Wait for the right moment', 'Your ideas are safe here'],                                     color: 'var(--mist)',   bg: 'rgba(158,149,172,0.08)' },
+  { label: 'Parked Ideas',       items: ['Wait for the right moment', 'Your ideas are safe here'],                                     color: 'var(--text-3)',   bg: 'rgba(158,149,172,0.08)' },
 ]
 
 const RECOGNITION_QUESTIONS = [
@@ -80,10 +80,10 @@ export default function CareerCompassScreen() {
             <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--lunar)' }}>Career Compass</p>
           </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--depth)' }}>
+          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>
             Where is your energy best spent today?
           </h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--mid)' }}>
+          <p className="text-sm mb-6" style={{ color: 'var(--text-2)' }}>
             You are not here to do everything. You are here to see what matters.
           </p>
 
@@ -112,8 +112,8 @@ export default function CareerCompassScreen() {
                   {/* Career energy */}
                   <GlassCard>
                     <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--lunar)' }}>Career energy today</p>
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--depth)' }}>{result.career_energy}</p>
-                    {result.chart_theme && <p className="text-xs italic mt-2" style={{ color: 'var(--mist)' }}>{result.chart_theme}</p>}
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{result.career_energy}</p>
+                    {result.chart_theme && <p className="text-xs italic mt-2" style={{ color: 'var(--text-3)' }}>{result.chart_theme}</p>}
                   </GlassCard>
 
                   {/* Highest use work */}
@@ -123,7 +123,7 @@ export default function CareerCompassScreen() {
                       {result.highest_use_work.map((w, i) => (
                         <div key={i} className="flex items-start gap-2 py-1.5" style={{ borderBottom: i < result.highest_use_work!.length - 1 ? '1px solid rgba(139,111,184,0.08)' : 'none' }}>
                           <span className="text-xs font-bold mt-0.5 flex-shrink-0" style={{ color: 'var(--violet)' }}>0{i + 1}</span>
-                          <p className="text-sm" style={{ color: 'var(--depth)' }}>{w}</p>
+                          <p className="text-sm" style={{ color: 'var(--text-1)' }}>{w}</p>
                         </div>
                       ))}
                     </GlassCard>
@@ -132,10 +132,10 @@ export default function CareerCompassScreen() {
                   {/* Recognition check */}
                   <GlassCard>
                     <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--golden)' }}>Recognition check</p>
-                    <p className="text-sm italic" style={{ color: 'var(--depth)' }}>{result.recognition_check}</p>
+                    <p className="text-sm italic" style={{ color: 'var(--text-1)' }}>{result.recognition_check}</p>
                     <div className="mt-3 space-y-1.5">
                       {RECOGNITION_QUESTIONS.slice(0, 3).map((q, i) => (
-                        <p key={i} className="text-xs" style={{ color: 'var(--mist)' }}>· {q}</p>
+                        <p key={i} className="text-xs" style={{ color: 'var(--text-3)' }}>· {q}</p>
                       ))}
                     </div>
                   </GlassCard>
@@ -144,7 +144,7 @@ export default function CareerCompassScreen() {
                   {result.voice_clarity_prompt && (
                     <div className="rounded-2xl p-4" style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Voice clarity</p>
-                      <p className="text-sm font-display italic" style={{ color: 'var(--depth)' }}>{result.voice_clarity_prompt}</p>
+                      <p className="text-sm font-display italic" style={{ color: 'var(--text-1)' }}>{result.voice_clarity_prompt}</p>
                       <Link href="/dictation">
                         <button className="mt-3 flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--violet)' }}>
                           <Mic className="h-3.5 w-3.5" /> Speak it out →
@@ -156,15 +156,15 @@ export default function CareerCompassScreen() {
                   {/* Pattern vs highest self */}
                   {result.current_pattern && (
                     <GlassCard>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--mist)' }}>Current pattern → Highest self</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>Current pattern → Highest self</p>
                       <div className="space-y-2">
                         <div className="rounded-xl p-3" style={{ background: 'rgba(224,94,94,0.06)', border: '1px solid rgba(224,94,94,0.1)' }}>
                           <p className="text-xs font-medium mb-1" style={{ color: '#E05E5E' }}>Pattern</p>
-                          <p className="text-sm" style={{ color: 'var(--depth)' }}>{result.current_pattern}</p>
+                          <p className="text-sm" style={{ color: 'var(--text-1)' }}>{result.current_pattern}</p>
                         </div>
                         <div className="rounded-xl p-3" style={{ background: 'rgba(90,138,90,0.06)', border: '1px solid rgba(90,138,90,0.1)' }}>
                           <p className="text-xs font-medium mb-1" style={{ color: '#5A8A5A' }}>Highest self</p>
-                          <p className="text-sm" style={{ color: 'var(--depth)' }}>{result.highest_self_action}</p>
+                          <p className="text-sm" style={{ color: 'var(--text-1)' }}>{result.highest_self_action}</p>
                         </div>
                       </div>
                     </GlassCard>
@@ -174,21 +174,21 @@ export default function CareerCompassScreen() {
                   {result.career_lesson && (
                     <GlassCard>
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--lunar)' }}>Today&apos;s career lesson</p>
-                      <p className="text-sm" style={{ color: 'var(--mid)' }}>{result.career_lesson}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-2)' }}>{result.career_lesson}</p>
                     </GlassCard>
                   )}
 
                   {/* Message */}
                   {result.career_message && (
                     <div className="text-center py-4">
-                      <p className="font-display text-base italic" style={{ color: 'var(--mid)' }}>
+                      <p className="font-display text-base italic" style={{ color: 'var(--text-2)' }}>
                         &ldquo;{result.career_message}&rdquo;
                       </p>
                     </div>
                   )}
 
                   <button onClick={() => setResult(null)} className="w-full py-3 rounded-2xl text-sm font-medium"
-                    style={{ color: 'var(--mist)', background: 'rgba(139,111,184,0.06)' }}>
+                    style={{ color: 'var(--text-3)', background: 'rgba(139,111,184,0.06)' }}>
                     Regenerate
                   </button>
                 </>
@@ -199,14 +199,14 @@ export default function CareerCompassScreen() {
           {/* Containers tab */}
           {activeTab === 'containers' && (
             <div className="space-y-3 animate-fade-up">
-              <p className="text-sm mb-2" style={{ color: 'var(--mid)' }}>
+              <p className="text-sm mb-2" style={{ color: 'var(--text-2)' }}>
                 Your career is multi-lane. These are your containers — your ideas are safe here.
               </p>
               {CAREER_CONTAINERS.map((c, i) => (
                 <div key={i} className="glass-card p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 rounded-full" style={{ background: c.color }} />
-                    <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>{c.label}</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{c.label}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {c.items.map((item, j) => (
@@ -217,7 +217,7 @@ export default function CareerCompassScreen() {
                   </div>
                 </div>
               ))}
-              <p className="text-xs text-center italic pt-2" style={{ color: 'var(--faint)' }}>
+              <p className="text-xs text-center italic pt-2" style={{ color: 'var(--text-4)' }}>
                 One main priority. Everything else stays safe.
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function CareerCompassScreen() {
           {/* Weekly tab */}
           {activeTab === 'weekly' && (
             <div className="space-y-4 animate-fade-up">
-              <p className="text-sm mb-2" style={{ color: 'var(--mid)' }}>
+              <p className="text-sm mb-2" style={{ color: 'var(--text-2)' }}>
                 Reflect on your week. What did it teach you?
               </p>
               <div className="glass-card p-4">
@@ -236,7 +236,7 @@ export default function CareerCompassScreen() {
                   placeholder="What work gave me energy? Where was I recognized? Where did I force? What did I finish?..."
                   rows={6}
                   className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--depth)' }}
+                  style={{ color: 'var(--text-1)' }}
                 />
               </div>
               <div className="space-y-2">
@@ -248,7 +248,7 @@ export default function CareerCompassScreen() {
                   'What should be parked?',
                   'What did this week teach me?',
                 ].map((q, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm" style={{ color: 'var(--mist)' }}>
+                  <div key={i} className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-3)' }}>
                     <span style={{ color: 'var(--violet)' }}>·</span> {q}
                   </div>
                 ))}

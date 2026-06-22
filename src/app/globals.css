@@ -4,71 +4,76 @@
 :root, [data-theme="light"] {
   color-scheme: light;
 
-  /* semantic text tokens — intentionally high contrast */
-  --text-1: #1A1228;
-  --text-2: #4A4060;
-  --text-3: #837899;
-  --text-4: #B8AECE;
+  /* text — maximum contrast on light backgrounds */
+  --text-1: #100C1E;
+  --text-2: #32284A;
+  --text-3: #5E5474;
+  --text-4: #9188A0;
 
   /* surface / card */
-  --surface:        rgba(255,255,255,0.80);
-  --surface-border: rgba(139,111,184,0.12);
-  --surface-strong: rgba(255,255,255,0.92);
-  --surface-subtle: rgba(255,255,255,0.50);
+  --surface:        rgba(255,255,255,0.88);
+  --surface-border: rgba(139,111,184,0.15);
+  --surface-strong: rgba(255,255,255,0.96);
+  --surface-subtle: rgba(255,255,255,0.55);
 
-  /* app background gradient stops */
+  /* app background */
   --app-bg-from: #EDE8F5;
-  --app-bg-mid:  #F5F0FC;
-  --app-bg-to:   #FDF8F3;
+  --app-bg-mid:  #F3EEFB;
+  --app-bg-to:   #FBF7F0;
 
   /* nav / header / dock */
-  --nav-bg:        rgba(253,248,243,0.96);
-  --nav-border:    rgba(139,111,184,0.10);
-  --header-bg:     rgba(253,248,243,0.88);
-  --header-border: rgba(139,111,184,0.10);
-  --dock-bg:       rgba(253,248,243,0.95);
-  --dock-border:   rgba(139,111,184,0.12);
+  --nav-bg:        rgba(255,252,248,0.97);
+  --nav-border:    rgba(139,111,184,0.14);
+  --header-bg:     rgba(255,252,248,0.92);
+  --header-border: rgba(139,111,184,0.12);
+  --dock-bg:       rgba(255,252,248,0.96);
+  --dock-border:   rgba(139,111,184,0.14);
 
-  /* tab/dock states */
-  --tab-active-bg:     rgba(139,111,184,0.85);
+  /* tab states */
+  --tab-active-bg:     rgba(139,111,184,0.90);
   --tab-active-text:   #ffffff;
-  --tab-inactive-text: #9E95AC;
+  --tab-inactive-text: #5E5474;
 }
 
 /* ─── Dark mode ─────────────────────────────────────────────── */
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* override existing depth/mid/mist so all var(--depth) etc. auto-adapt */
-  --depth: rgba(255,255,255,0.90);
-  --mid:   rgba(255,255,255,0.60);
-  --mist:  rgba(255,255,255,0.40);
-  --faint: rgba(255,255,255,0.20);
+  /* override legacy tokens so old var(--depth/mid/mist) calls auto-adapt */
+  --depth: #FFFFFF;
+  --mid:   rgba(255,255,255,0.78);
+  --mist:  rgba(255,255,255,0.58);
+  --faint: rgba(255,255,255,0.36);
 
-  --text-1: rgba(255,255,255,0.90);
-  --text-2: rgba(255,255,255,0.60);
-  --text-3: rgba(255,255,255,0.40);
-  --text-4: rgba(255,255,255,0.20);
+  /* text — bright and fully readable on dark backgrounds */
+  --text-1: #FFFFFF;
+  --text-2: rgba(255,255,255,0.82);
+  --text-3: rgba(255,255,255,0.62);
+  --text-4: rgba(255,255,255,0.38);
 
-  --surface:        rgba(255,255,255,0.05);
-  --surface-border: rgba(255,255,255,0.08);
-  --surface-strong: rgba(255,255,255,0.10);
-  --surface-subtle: rgba(255,255,255,0.03);
+  /* surfaces */
+  --surface:        rgba(255,255,255,0.07);
+  --surface-border: rgba(255,255,255,0.10);
+  --surface-strong: rgba(255,255,255,0.12);
+  --surface-subtle: rgba(255,255,255,0.04);
 
+  /* app background — deep navy */
   --app-bg-from: #1E1A38;
   --app-bg-mid:  #141030;
   --app-bg-to:   #0D0B1E;
 
-  --nav-bg:        rgba(13,11,30,0.92);
-  --nav-border:    rgba(255,255,255,0.06);
-  --header-bg:     rgba(13,11,30,0.88);
-  --header-border: rgba(255,255,255,0.06);
-  --dock-bg:       rgba(14,11,30,0.90);
-  --dock-border:   rgba(255,255,255,0.10);
+  /* nav / header / dock */
+  --nav-bg:        rgba(13,11,30,0.96);
+  --nav-border:    rgba(255,255,255,0.08);
+  --header-bg:     rgba(13,11,30,0.92);
+  --header-border: rgba(255,255,255,0.08);
+  --dock-bg:       rgba(14,11,30,0.94);
+  --dock-border:   rgba(255,255,255,0.12);
 
-  --tab-active-bg:     rgba(139,111,184,0.85);
+  /* tab states */
+  --tab-active-bg:     rgba(139,111,184,0.90);
   --tab-active-text:   #ffffff;
-  --tab-inactive-text: rgba(255,255,255,0.50);
+  --tab-inactive-text: rgba(255,255,255,0.55);
 }
 
 /* ─── App background utility ────────────────────────────────── */
@@ -107,12 +112,23 @@
 /* ─── Base ──────────────────────────────────────────────────── */
 html, body { height: 100%; }
 
+html {
+  /* Slightly larger base so text-xs = ~14px, text-sm = ~16px, text-base = ~18px */
+  font-size: 17.5px;
+}
+
 body {
   background-color: var(--cream);
-  color: var(--depth);
+  color: var(--text-1);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+[data-theme="dark"] body {
+  background-color: var(--app-bg-to);
 }
 
 * { box-sizing: border-box; }
@@ -125,21 +141,23 @@ body {
 
 /* ─── Glass card ────────────────────────────────────────────── */
 .glass-card {
-  background: var(--glass-bg);
+  background: var(--surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--surface-border);
   box-shadow: var(--card-shadow);
   border-radius: 20px;
+  color: var(--text-1);
 }
 
 .glass-card-sm {
-  background: var(--glass-bg);
+  background: var(--surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--surface-border);
   box-shadow: var(--card-shadow);
   border-radius: 16px;
+  color: var(--text-1);
 }
 
 /* ─── Violet glow card ──────────────────────────────────────── */
@@ -245,6 +263,15 @@ body {
 .text-t2 { color: var(--text-2) !important; }
 .text-t3 { color: var(--text-3) !important; }
 
+/* ─── Minimum readable font sizes ───────────────────────────── */
+/* Tailwind's text-xs at 17.5px base = ~13px — bump to 14px min  */
+.text-xs  { font-size: 0.8rem   !important; }  /* ~14px  */
+.text-sm  { font-size: 0.9rem   !important; }  /* ~15.7px */
+.text-base{ font-size: 1rem     !important; }  /* ~17.5px */
+
+/* Nav tab labels always readable */
+nav .text-xs, nav .text-sm { font-size: 0.8rem !important; }
+
 /* ─── Bottom nav safe area ──────────────────────────────────── */
 .pb-nav { padding-bottom: calc(var(--nav-h) + 16px); }
 
@@ -260,10 +287,16 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--surface-border);
   border-radius: 20px;
+  color: var(--text-1);
   transition: background 0.25s ease, border-color 0.25s ease;
 }
 .dark-card:hover {
   background: var(--surface-strong);
+}
+
+/* All text inside cards inherits the theme color */
+.dark-card p, .dark-card span, .dark-card h1, .dark-card h2, .dark-card h3 {
+  color: inherit;
 }
 
 /* ─── Recording dot ─────────────────────────────────────────── */
@@ -298,9 +331,10 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: rgba(255,255,255,0.6);
+  background: var(--surface);
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.5);
+  border: 1px solid var(--surface-border);
+  color: var(--text-1);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -315,10 +349,11 @@ body {
 .mood-chip {
   padding: 8px 16px;
   border-radius: 50px;
-  font-size: 14px;
+  font-size: 0.9rem;
   font-weight: 500;
-  border: 1.5px solid transparent;
-  background: rgba(255,255,255,0.7);
+  border: 1.5px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--text-2);
   transition: all 0.2s ease;
   cursor: pointer;
   white-space: nowrap;
@@ -354,15 +389,15 @@ input[type="range"]::-webkit-slider-thumb {
 .tab-pill {
   padding: 7px 18px;
   border-radius: 50px;
-  font-size: 14px;
+  font-size: 0.9rem;
   font-weight: 500;
-  color: var(--mist);
+  color: var(--text-3);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .tab-pill.active {
-  background: var(--violet-pale);
-  color: var(--violet-deep);
+  background: rgba(139,111,184,0.12);
+  color: var(--violet);
   font-weight: 600;
 }

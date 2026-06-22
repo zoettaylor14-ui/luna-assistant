@@ -58,7 +58,7 @@ const VAULT_CATEGORIES = [
 
 const STATUS_STYLES: Record<string, { label: string; bg: string; color: string }> = {
   active: { label: 'Active',  bg: 'rgba(90,138,90,0.1)',     color: '#5A8A5A' },
-  parked: { label: 'Parked',  bg: 'rgba(158,149,172,0.1)',   color: 'var(--mist)' },
+  parked: { label: 'Parked',  bg: 'rgba(158,149,172,0.1)',   color: 'var(--text-3)' },
   future: { label: 'Future',  bg: 'rgba(201,169,110,0.1)',   color: 'var(--golden)' },
 }
 
@@ -78,17 +78,17 @@ export default function VaultScreen() {
             <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--golden)' }}>The Vault</p>
           </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-2" style={{ color: 'var(--depth)' }}>
+          <h1 className="font-display text-2xl font-semibold mb-2" style={{ color: 'var(--text-1)' }}>
             Your ideas are safe here.
           </h1>
-          <p className="text-sm mb-8" style={{ color: 'var(--mid)' }}>
+          <p className="text-sm mb-8" style={{ color: 'var(--text-2)' }}>
             You do not have to carry them all today. They live here, waiting for the right moment.
           </p>
 
           {/* Weekly selection reminder */}
           <div className="rounded-2xl p-4 mb-6" style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
             <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--violet)' }}>Weekly selection</p>
-            <p className="text-sm" style={{ color: 'var(--mid)' }}>
+            <p className="text-sm" style={{ color: 'var(--text-2)' }}>
               Each week, choose one from each lane: work · creative · money · personal. Everything else rests.
             </p>
           </div>
@@ -103,12 +103,12 @@ export default function VaultScreen() {
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{cat.emoji}</span>
-                    <p className="font-semibold" style={{ color: 'var(--depth)' }}>{cat.label}</p>
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--mist)' }}>
+                    <p className="font-semibold" style={{ color: 'var(--text-1)' }}>{cat.label}</p>
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--text-3)' }}>
                       {cat.items.length}
                     </span>
                   </div>
-                  <span style={{ color: 'var(--mist)', transform: activeCategory === cat.label ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>›</span>
+                  <span style={{ color: 'var(--text-3)', transform: activeCategory === cat.label ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>›</span>
                 </button>
 
                 {activeCategory === cat.label && (
@@ -118,8 +118,8 @@ export default function VaultScreen() {
                       return (
                         <div key={i} className="glass-card-sm p-4 flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium" style={{ color: 'var(--depth)' }}>{item.name}</p>
-                            <p className="text-xs mt-0.5" style={{ color: 'var(--mist)' }}>{item.note}</p>
+                            <p className="text-sm font-medium" style={{ color: 'var(--text-1)' }}>{item.name}</p>
+                            <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{item.note}</p>
                           </div>
                           <span className="text-xs px-2.5 py-1 rounded-full flex-shrink-0 font-medium" style={{ background: s.bg, color: s.color }}>
                             {s.label}
@@ -136,13 +136,13 @@ export default function VaultScreen() {
           {/* Add new */}
           <div className="mt-6">
             <button className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 font-semibold transition-all"
-              style={{ border: '1.5px dashed rgba(139,111,184,0.2)', color: 'var(--mist)' }}>
+              style={{ border: '1.5px dashed rgba(139,111,184,0.2)', color: 'var(--text-3)' }}>
               <Plus className="h-4 w-4" />
               Add to vault
             </button>
           </div>
 
-          <p className="text-xs text-center italic mt-6" style={{ color: 'var(--faint)' }}>
+          <p className="text-xs text-center italic mt-6" style={{ color: 'var(--text-4)' }}>
             &ldquo;Everything has its season. Not now is not never.&rdquo;
           </p>
 

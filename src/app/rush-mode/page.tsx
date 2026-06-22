@@ -42,16 +42,16 @@ export default function RushModeScreen() {
             <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--golden)' }}>Rush Mode</p>
           </div>
 
-          <h1 className="font-display text-3xl font-semibold mb-2" style={{ color: 'var(--depth)' }}>
+          <h1 className="font-display text-3xl font-semibold mb-2" style={{ color: 'var(--text-1)' }}>
             Sacred minimum.
           </h1>
-          <p className="text-base mb-6 leading-relaxed" style={{ color: 'var(--mid)' }}>
+          <p className="text-base mb-6 leading-relaxed" style={{ color: 'var(--text-2)' }}>
             We are not doing the perfect morning. We are doing what matters.
           </p>
 
           {/* Progress bar */}
           <div className="mb-6">
-            <div className="flex justify-between text-xs mb-2" style={{ color: 'var(--mist)' }}>
+            <div className="flex justify-between text-xs mb-2" style={{ color: 'var(--text-3)' }}>
               <span>Progress</span>
               <span>{pct}%</span>
             </div>
@@ -76,7 +76,7 @@ export default function RushModeScreen() {
                 >
                   <span className="text-xl">{step.emoji}</span>
                   <span className="flex-1 font-medium" style={{
-                    color: 'var(--depth)',
+                    color: 'var(--text-1)',
                     textDecoration: done ? 'line-through' : 'none',
                     fontSize: 15,
                   }}>
@@ -107,16 +107,16 @@ export default function RushModeScreen() {
               onChange={e => setPriority(e.target.value)}
               placeholder="What is the one thing that matters most?"
               className="w-full bg-transparent outline-none text-sm"
-              style={{ color: 'var(--depth)' }}
+              style={{ color: 'var(--text-1)' }}
             />
           </div>
 
           {/* Closing message */}
           <div className="text-center py-4">
-            <p className="font-display text-lg font-medium italic mb-2" style={{ color: 'var(--mid)' }}>
+            <p className="font-display text-lg font-medium italic mb-2" style={{ color: 'var(--text-2)' }}>
               &ldquo;You are already doing it.&rdquo;
             </p>
-            <p className="text-sm" style={{ color: 'var(--mist)' }}>
+            <p className="text-sm" style={{ color: 'var(--text-3)' }}>
               Go. You are ready enough.
             </p>
           </div>

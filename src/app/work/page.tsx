@@ -36,7 +36,7 @@ const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
   dryphub: { label: 'DRYPHub', color: 'var(--violet)' },
   email:   { label: 'Email',   color: 'var(--lunar)' },
   calendar:{ label: 'Cal',     color: 'var(--golden)' },
-  manual:  { label: 'Manual',  color: 'var(--mist)' },
+  manual:  { label: 'Manual',  color: 'var(--text-3)' },
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -68,15 +68,15 @@ export default function WorkScreen() {
               </div>
               <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--lunar)' }}>Work</p>
             </div>
-            <button className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--mist)' }}>
+            <button className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-3)' }}>
               <RefreshCw className="h-3.5 w-3.5" /> Sync
             </button>
           </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--depth)' }}>
+          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>
             Work reality.
           </h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--mid)' }}>
+          <p className="text-sm mb-6" style={{ color: 'var(--text-2)' }}>
             {urgent.length} items need attention · {needsReply.length} need a reply
           </p>
 
@@ -95,7 +95,7 @@ export default function WorkScreen() {
               {/* Work brief */}
               <GlassCard soul>
                 <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Today&apos;s work reality</p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--mid)' }}>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-2)' }}>
                   You have {urgent.length} high-priority items, {needsReply.length} emails needing replies, and {MOCK_WORK.length} total work items.
                   Start with the client deliverable that unlocks the most — then move to communication.
                 </p>
@@ -109,8 +109,8 @@ export default function WorkScreen() {
                     <div key={e.id} className="py-2.5" style={{ borderBottom: i < needsReply.length - 1 ? '1px solid rgba(139,111,184,0.07)' : 'none' }}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate" style={{ color: 'var(--depth)' }}>{e.subject}</p>
-                          <p className="text-xs mt-0.5" style={{ color: 'var(--mist)' }}>{e.sender} · {e.received}</p>
+                          <p className="text-sm font-medium truncate" style={{ color: 'var(--text-1)' }}>{e.subject}</p>
+                          <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{e.sender} · {e.received}</p>
                         </div>
                         <div className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5" style={{ background: PRIORITY_COLORS[e.urgency] }} />
                       </div>
@@ -129,8 +129,8 @@ export default function WorkScreen() {
                   <div key={w.id} className="py-2.5 flex items-center gap-2" style={{ borderBottom: i < arr.length - 1 ? '1px solid rgba(139,111,184,0.07)' : 'none' }}>
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PRIORITY_COLORS[w.priority] }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate" style={{ color: 'var(--depth)' }}>{w.title}</p>
-                      {w.client && <p className="text-xs" style={{ color: 'var(--mist)' }}>{w.client} · {w.due}</p>}
+                      <p className="text-sm truncate" style={{ color: 'var(--text-1)' }}>{w.title}</p>
+                      {w.client && <p className="text-xs" style={{ color: 'var(--text-3)' }}>{w.client} · {w.due}</p>}
                     </div>
                   </div>
                 ))}
@@ -141,20 +141,20 @@ export default function WorkScreen() {
                 <Link href="/email">
                   <div className="glass-card p-4 cursor-pointer active:scale-95 transition-transform">
                     <Mail className="h-5 w-5 mb-2" style={{ color: 'var(--lunar)' }} />
-                    <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>Full inbox</p>
-                    <p className="text-xs" style={{ color: 'var(--mist)' }}>AI reply drafts</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Full inbox</p>
+                    <p className="text-xs" style={{ color: 'var(--text-3)' }}>AI reply drafts</p>
                   </div>
                 </Link>
                 <Link href="/career">
                   <div className="glass-card p-4 cursor-pointer active:scale-95 transition-transform">
                     <Sparkles className="h-5 w-5 mb-2" style={{ color: 'var(--golden)' }} />
-                    <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>Career compass</p>
-                    <p className="text-xs" style={{ color: 'var(--mist)' }}>Highest-use work</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Career compass</p>
+                    <p className="text-xs" style={{ color: 'var(--text-3)' }}>Highest-use work</p>
                   </div>
                 </Link>
               </div>
 
-              <p className="text-xs italic text-center" style={{ color: 'var(--faint)' }}>
+              <p className="text-xs italic text-center" style={{ color: 'var(--text-4)' }}>
                 &ldquo;The app should protect Zoe from treating every task like an emergency.&rdquo;
               </p>
             </div>
@@ -178,12 +178,12 @@ export default function WorkScreen() {
                         {isDone && <Check className="h-3.5 w-3.5 text-white" />}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium" style={{ color: 'var(--depth)', textDecoration: isDone ? 'line-through' : 'none' }}>
+                        <p className="text-sm font-medium" style={{ color: 'var(--text-1)', textDecoration: isDone ? 'line-through' : 'none' }}>
                           {w.title}
                         </p>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          {w.client && <span className="text-xs" style={{ color: 'var(--mist)' }}>{w.client}</span>}
-                          {w.due && <span className="text-xs flex items-center gap-0.5" style={{ color: 'var(--mist)' }}><Clock className="h-3 w-3" />{w.due}</span>}
+                          {w.client && <span className="text-xs" style={{ color: 'var(--text-3)' }}>{w.client}</span>}
+                          {w.due && <span className="text-xs flex items-center gap-0.5" style={{ color: 'var(--text-3)' }}><Clock className="h-3 w-3" />{w.due}</span>}
                           <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${src.color}15`, color: src.color }}>{src.label}</span>
                         </div>
                       </div>
@@ -208,9 +208,9 @@ export default function WorkScreen() {
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5" style={{ background: PRIORITY_COLORS[email.urgency] }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium" style={{ color: 'var(--depth)' }}>{email.subject}</p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--mist)' }}>{email.sender} · {email.received}</p>
-                      {email.client && <p className="text-xs mt-0.5" style={{ color: 'var(--mist)' }}>{email.client}</p>}
+                      <p className="text-sm font-medium" style={{ color: 'var(--text-1)' }}>{email.subject}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{email.sender} · {email.received}</p>
+                      {email.client && <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{email.client}</p>}
                       {email.needs_reply && (
                         <Link href="/email">
                           <button className="mt-2 text-xs font-semibold px-3 py-1.5 rounded-xl"

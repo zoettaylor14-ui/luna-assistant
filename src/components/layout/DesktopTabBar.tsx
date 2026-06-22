@@ -3,18 +3,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, MessageCircle, Calendar, CheckSquare,
-  Sparkles, BookOpen, Users, Settings, Mic
+  Sparkles, Settings, Scissors, Moon, Mic
 } from 'lucide-react'
 
 const TABS = [
-  { href: '/',               label: 'Home',          icon: Home,          badge: null           },
-  { href: '/messages',       label: 'Messages',      icon: MessageCircle, badge: 4              },
-  { href: '/calendar',       label: 'Calendar',      icon: Calendar,      badge: null, dateLabel: true },
-  { href: '/tasks',          label: 'Tasks',         icon: CheckSquare,   badge: null           },
-  { href: '/spirit',         label: 'Spirit',        icon: Sparkles,      badge: null           },
-  { href: '/journal',        label: 'Journal',       icon: BookOpen,      badge: null           },
-  { href: '/relationships',  label: 'Relationships', icon: Users,         badge: null           },
-  { href: '/settings',       label: 'Settings',      icon: Settings,      badge: null           },
+  { href: '/',              label: 'Home',     icon: Home,          badge: null            },
+  { href: '/messages',      label: 'Messages', icon: MessageCircle, badge: 4               },
+  { href: '/calendar',      label: 'Calendar', icon: Calendar,      badge: null, dateLabel: true },
+  { href: '/tasks',         label: 'Tasks',    icon: CheckSquare,   badge: null            },
+  { href: '/spirit',        label: 'Spirit',   icon: Sparkles,      badge: null            },
+  { href: '/atelier',       label: 'Atelier',  icon: Scissors,      badge: null            },
+  { href: '/night',         label: 'Night',    icon: Moon,          badge: null            },
+  { href: '/settings',      label: 'Settings', icon: Settings,      badge: null            },
 ]
 
 export function DesktopTabBar() {

@@ -102,14 +102,14 @@ export default function WeeklyResetPage() {
             </div>
             <div>
               <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--violet)' }}>Weekly Reset</p>
-              <p className="text-xs" style={{ color: 'var(--mist)' }}>Sunday sanctuary ritual.</p>
+              <p className="text-xs" style={{ color: 'var(--text-3)' }}>Sunday sanctuary ritual.</p>
             </div>
           </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--depth)' }}>
+          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>
             Close one week. Open the next.
           </h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--mid)' }}>
+          <p className="text-sm mb-6" style={{ color: 'var(--text-2)' }}>
             You do not need to do all of this. Do what you can. Each check is a small act of love for future Zoe.
           </p>
 
@@ -132,7 +132,7 @@ export default function WeeklyResetPage() {
               {/* Progress */}
               <div className="glass-card p-4 mb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>
                     {doneCount}/{totalItems} complete
                   </p>
                   <p className="text-sm font-bold" style={{ color: 'var(--violet)' }}>{pct}%</p>
@@ -152,7 +152,7 @@ export default function WeeklyResetPage() {
               <div className="space-y-4">
                 {RESET_SECTIONS.map(section => (
                   <div key={section.title} className="glass-card p-4">
-                    <p className="text-sm font-bold mb-3" style={{ color: 'var(--depth)' }}>{section.title}</p>
+                    <p className="text-sm font-bold mb-3" style={{ color: 'var(--text-1)' }}>{section.title}</p>
                     <div className="space-y-2">
                       {section.items.map(item => {
                         const key = `${section.title}-${item}`
@@ -194,7 +194,7 @@ export default function WeeklyResetPage() {
                     rows={3}
                     placeholder="Write freely..."
                     className="w-full bg-transparent outline-none text-sm resize-none"
-                    style={{ color: 'var(--depth)' }}
+                    style={{ color: 'var(--text-1)' }}
                   />
                 </div>
               ))}
@@ -214,25 +214,25 @@ export default function WeeklyResetPage() {
                 <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>
                   This week
                 </p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--depth)' }}>{result.week_opening}</p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{result.week_opening}</p>
               </div>
 
               <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--mist)' }}>Pattern</p>
-                <p className="text-sm" style={{ color: 'var(--depth)' }}>{result.pattern_this_week}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Pattern</p>
+                <p className="text-sm" style={{ color: 'var(--text-1)' }}>{result.pattern_this_week}</p>
                 {result.chart_connection && (
-                  <p className="text-xs mt-2 italic" style={{ color: 'var(--mid)' }}>{result.chart_connection}</p>
+                  <p className="text-xs mt-2 italic" style={{ color: 'var(--text-2)' }}>{result.chart_connection}</p>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="glass-card p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#C87B7B' }}>Release</p>
-                  <p className="text-sm" style={{ color: 'var(--mid)' }}>{result.release}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-2)' }}>{result.release}</p>
                 </div>
                 <div className="glass-card p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#5A8A5A' }}>Carry forward</p>
-                  <p className="text-sm" style={{ color: 'var(--mid)' }}>{result.carry_forward}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-2)' }}>{result.carry_forward}</p>
                 </div>
               </div>
 
@@ -241,19 +241,19 @@ export default function WeeklyResetPage() {
                   <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>
                     Intention for next week
                   </p>
-                  <p className="text-base font-semibold" style={{ color: 'var(--depth)' }}>{result.intention_for_week}</p>
+                  <p className="text-base font-semibold" style={{ color: 'var(--text-1)' }}>{result.intention_for_week}</p>
                 </div>
               )}
 
               <div className="rounded-2xl p-5 text-center"
                 style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
-                <p className="font-display text-base italic" style={{ color: 'var(--depth)' }}>
+                <p className="font-display text-base italic" style={{ color: 'var(--text-1)' }}>
                   &ldquo;{result.affirmation}&rdquo;
                 </p>
               </div>
 
               {result.closing && (
-                <p className="text-center text-sm" style={{ color: 'var(--mist)' }}>{result.closing}</p>
+                <p className="text-center text-sm" style={{ color: 'var(--text-3)' }}>{result.closing}</p>
               )}
 
               <button onClick={() => setResult(null)}

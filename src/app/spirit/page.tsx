@@ -251,11 +251,11 @@ export default function SpiritScreen() {
             </div>
             <div>
               <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--violet)' }}>Spirit</p>
-              <p className="text-xs" style={{ color: 'var(--mist)' }}>{today}</p>
+              <p className="text-xs" style={{ color: 'var(--text-3)' }}>{today}</p>
             </div>
           </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-6" style={{ color: 'var(--depth)' }}>
+          <h1 className="font-display text-2xl font-semibold mb-6" style={{ color: 'var(--text-1)' }}>
             Your sacred space.
           </h1>
 
@@ -284,24 +284,24 @@ export default function SpiritScreen() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Moon Phase — emoji and data both from real API */}
                   <div className="flex flex-col gap-1">
-                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Phase</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>Phase</p>
                     <div className="flex items-center gap-2">
                       {/* Use API emoji — not the approximate function */}
                       <span className="text-2xl animate-float">
                         {realMoon ? realMoon.phase.emoji : moon.emoji}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>
                           {realMoon ? realMoon.phase.name : moon.name}
                         </p>
                         {realMoon && (
-                          <p className="text-xs" style={{ color: 'var(--mist)' }}>
+                          <p className="text-xs" style={{ color: 'var(--text-3)' }}>
                             {realMoon.phase.illumination}% illuminated
                           </p>
                         )}
                       </div>
                     </div>
-                    <p className="text-xs" style={{ color: 'var(--mid)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-2)' }}>
                       {realMoon ? realMoon.phase.description : moon.desc}
                     </p>
                     {/* Show exact phase moment if within ~48h */}
@@ -314,19 +314,19 @@ export default function SpiritScreen() {
 
                   {/* Moon Sign — SEPARATE from phase, always from API */}
                   <div className="flex flex-col gap-1">
-                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mist)' }}>Sign</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>Sign</p>
                     {realMoon ? (
                       <div>
                         <div className="flex items-center gap-1.5">
                           <span className="text-xl">{realMoon.sign.emoji}</span>
-                          <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>
+                          <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>
                             {realMoon.sign.name}
                           </p>
                         </div>
                         <p className="text-xs font-mono mt-0.5" style={{ color: 'var(--violet)' }}>
                           {realMoon.sign.formatted}
                         </p>
-                        <p className="text-xs mt-0.5" style={{ color: 'var(--mid)' }}>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-2)' }}>
                           {realMoon.sign.keywords}
                         </p>
                         {realMoon.next_ingress && (
@@ -337,10 +337,10 @@ export default function SpiritScreen() {
                       </div>
                     ) : (
                       <div>
-                        <p className="text-xs italic" style={{ color: 'var(--mist)' }}>
+                        <p className="text-xs italic" style={{ color: 'var(--text-3)' }}>
                           Loading exact sign...
                         </p>
-                        <p className="text-xs mt-1" style={{ color: 'var(--faint)' }}>
+                        <p className="text-xs mt-1" style={{ color: 'var(--text-4)' }}>
                           Verify in TimePassages
                         </p>
                       </div>
@@ -350,11 +350,11 @@ export default function SpiritScreen() {
 
                 {/* Calculated time + accuracy note */}
                 <div className="mt-3 pt-2 border-t flex items-center justify-between" style={{ borderColor: 'rgba(139,111,184,0.08)' }}>
-                  <p className="text-xs" style={{ color: 'var(--faint)' }}>
+                  <p className="text-xs" style={{ color: 'var(--text-4)' }}>
                     Live · astronomy-engine ephemeris
                     {realMoon?.calculated_at && ` · ${new Date(realMoon.calculated_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}`}
                   </p>
-                  <p className="text-xs" style={{ color: 'var(--faint)' }}>Cross-ref TimePassages</p>
+                  <p className="text-xs" style={{ color: 'var(--text-4)' }}>Cross-ref TimePassages</p>
                 </div>
               </GlassCard>
 
@@ -362,13 +362,13 @@ export default function SpiritScreen() {
                 <div className="text-center py-12">
                   <div className="w-12 h-12 rounded-full mx-auto mb-4 animate-breathe"
                     style={{ background: 'radial-gradient(circle, rgba(139,111,184,0.3), transparent)' }} />
-                  <p className="text-sm" style={{ color: 'var(--mist)' }}>Receiving spiritual guidance...</p>
+                  <p className="text-sm" style={{ color: 'var(--text-3)' }}>Receiving spiritual guidance...</p>
                 </div>
               ) : guidance && (
                 <>
                   <GlassCard soul>
                     <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Energy today</p>
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--depth)' }}>{guidance.energy_today}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{guidance.energy_today}</p>
                   </GlassCard>
 
                   <GlassCard>
@@ -376,47 +376,47 @@ export default function SpiritScreen() {
                       <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl animate-float flex-shrink-0"
                         style={{ background: `${crystal.color}22`, border: `1.5px solid ${crystal.color}44` }}>💎</div>
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--mist)' }}>Crystal today</p>
-                        <p className="font-semibold" style={{ color: 'var(--depth)' }}>{guidance.crystal || crystal.name}</p>
-                        <p className="text-xs" style={{ color: 'var(--mid)' }}>{guidance.crystal_why || crystal.desc}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-3)' }}>Crystal today</p>
+                        <p className="font-semibold" style={{ color: 'var(--text-1)' }}>{guidance.crystal || crystal.name}</p>
+                        <p className="text-xs" style={{ color: 'var(--text-2)' }}>{guidance.crystal_why || crystal.desc}</p>
                       </div>
                     </div>
-                    <p className="text-xs px-3 py-2 rounded-xl" style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--mid)' }}>
+                    <p className="text-xs px-3 py-2 rounded-xl" style={{ background: 'rgba(139,111,184,0.06)', color: 'var(--text-2)' }}>
                       {crystal.use}
                     </p>
                   </GlassCard>
 
                   <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
-                    <p className="font-display text-lg italic leading-relaxed" style={{ color: 'var(--depth)' }}>
+                    <p className="font-display text-lg italic leading-relaxed" style={{ color: 'var(--text-1)' }}>
                       &ldquo;{guidance.affirmation}&rdquo;
                     </p>
                   </div>
 
                   <GlassCard>
                     <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Today&apos;s intention</p>
-                    <p className="text-sm" style={{ color: 'var(--depth)' }}>{guidance.intention}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-1)' }}>{guidance.intention}</p>
                   </GlassCard>
 
                   <GlassCard>
                     <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#A87B7B' }}>Shadow question</p>
-                    <p className="font-display text-base italic" style={{ color: 'var(--depth)' }}>{guidance.shadow_question}</p>
+                    <p className="font-display text-base italic" style={{ color: 'var(--text-1)' }}>{guidance.shadow_question}</p>
                   </GlassCard>
 
                   <div className="grid grid-cols-2 gap-3">
                     <GlassCard className="col-span-1 !p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--herb)' }}>Gratitude</p>
-                      <p className="text-sm" style={{ color: 'var(--mid)' }}>{guidance.gratitude_prompt}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-2)' }}>{guidance.gratitude_prompt}</p>
                     </GlassCard>
                     <GlassCard className="col-span-1 !p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--lunar)' }}>Breathe</p>
-                      <p className="text-sm italic" style={{ color: 'var(--mid)' }}>{guidance.meditation_prompt}</p>
+                      <p className="text-sm italic" style={{ color: 'var(--text-2)' }}>{guidance.meditation_prompt}</p>
                     </GlassCard>
                   </div>
 
                   {guidance.human_design_reminder && (
                     <GlassCard>
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Human Design</p>
-                      <p className="text-sm" style={{ color: 'var(--mid)' }}>{guidance.human_design_reminder}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-2)' }}>{guidance.human_design_reminder}</p>
                     </GlassCard>
                   )}
 
@@ -433,7 +433,7 @@ export default function SpiritScreen() {
           {/* ── ORACLE tab ── */}
           {activeTab === 'oracle' && (
             <div className="space-y-4 animate-fade-up">
-              <p className="text-sm" style={{ color: 'var(--mid)' }}>
+              <p className="text-sm" style={{ color: 'var(--text-2)' }}>
                 Today&apos;s oracle is drawn by the date — every day brings its own card and rune.
               </p>
 
@@ -444,15 +444,15 @@ export default function SpiritScreen() {
                 </p>
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 animate-float"
-                    style={{ background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                    style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
                     {todayCard.emoji}
                   </div>
                   <div className="flex-1">
-                    <p className="font-display text-lg font-semibold mb-1" style={{ color: 'var(--depth)' }}>
+                    <p className="font-display text-lg font-semibold mb-1" style={{ color: 'var(--text-1)' }}>
                       {todayCard.name}
                     </p>
-                    <p className="text-xs mb-2" style={{ color: 'var(--mist)' }}>{todayCard.theme}</p>
-                    <p className="text-sm leading-relaxed italic" style={{ color: 'var(--mid)' }}>
+                    <p className="text-xs mb-2" style={{ color: 'var(--text-3)' }}>{todayCard.theme}</p>
+                    <p className="text-sm leading-relaxed italic" style={{ color: 'var(--text-2)' }}>
                       &ldquo;{todayCard.message}&rdquo;
                     </p>
                   </div>
@@ -471,30 +471,30 @@ export default function SpiritScreen() {
                 <div className="space-y-3">
                   <GlassCard>
                     <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>What this means for you</p>
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--depth)' }}>{tarotResult.card_message}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{tarotResult.card_message}</p>
                   </GlassCard>
                   {tarotResult.life_area && (
                     <GlassCard>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--mist)' }}>Life area</p>
-                      <p className="text-sm" style={{ color: 'var(--depth)' }}>{tarotResult.life_area}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Life area</p>
+                      <p className="text-sm" style={{ color: 'var(--text-1)' }}>{tarotResult.life_area}</p>
                     </GlassCard>
                   )}
                   {tarotResult.action && (
                     <GlassCard>
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#5A8A5A' }}>Your action</p>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>{tarotResult.action}</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{tarotResult.action}</p>
                     </GlassCard>
                   )}
                   {tarotResult.affirmation && (
                     <div className="rounded-2xl p-4 text-center"
                       style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
-                      <p className="font-display text-base italic" style={{ color: 'var(--depth)' }}>
+                      <p className="font-display text-base italic" style={{ color: 'var(--text-1)' }}>
                         &ldquo;{tarotResult.affirmation}&rdquo;
                       </p>
                     </div>
                   )}
                   <button onClick={() => setTarotResult(null)}
-                    className="text-xs font-medium" style={{ color: 'var(--mist)' }}>
+                    className="text-xs font-medium" style={{ color: 'var(--text-3)' }}>
                     Clear reading
                   </button>
                 </div>
@@ -510,10 +510,10 @@ export default function SpiritScreen() {
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--mist)' }}>Daily rune</p>
-                    <p className="font-semibold mb-0.5" style={{ color: 'var(--depth)' }}>{todayRune.name}</p>
-                    <p className="text-xs mb-2" style={{ color: 'var(--mist)' }}>{todayRune.meaning}</p>
-                    <p className="text-sm italic" style={{ color: 'var(--mid)' }}>&ldquo;{todayRune.message}&rdquo;</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-3)' }}>Daily rune</p>
+                    <p className="font-semibold mb-0.5" style={{ color: 'var(--text-1)' }}>{todayRune.name}</p>
+                    <p className="text-xs mb-2" style={{ color: 'var(--text-3)' }}>{todayRune.meaning}</p>
+                    <p className="text-sm italic" style={{ color: 'var(--text-2)' }}>&ldquo;{todayRune.message}&rdquo;</p>
                   </div>
                 </div>
               </GlassCard>
@@ -524,7 +524,7 @@ export default function SpiritScreen() {
                 <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--golden)' }}>
                   Journal prompt
                 </p>
-                <p className="font-display text-base italic leading-relaxed" style={{ color: 'var(--depth)' }}>
+                <p className="font-display text-base italic leading-relaxed" style={{ color: 'var(--text-1)' }}>
                   &ldquo;{journalPmt}&rdquo;
                 </p>
                 <button
@@ -542,8 +542,8 @@ export default function SpiritScreen() {
             <div className="space-y-4 animate-fade-up">
               <div className="soul-card p-5 mb-2">
                 <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--violet)' }}>Your Design</p>
-                <p className="font-display text-lg font-semibold" style={{ color: 'var(--depth)' }}>Self-Projected Projector · 4/6</p>
-                <p className="text-sm mt-1" style={{ color: 'var(--mid)' }}>Scorpio Sun · Cancer Moon · Gemini Rising · Virgo Midheaven</p>
+                <p className="font-display text-lg font-semibold" style={{ color: 'var(--text-1)' }}>Self-Projected Projector · 4/6</p>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-2)' }}>Scorpio Sun · Cancer Moon · Gemini Rising · Virgo Midheaven</p>
               </div>
               {HD_REMINDERS.map((note, i) => (
                 <GlassCard key={i}>
@@ -553,8 +553,8 @@ export default function SpiritScreen() {
                       <Star className="h-4 w-4" style={{ color: 'var(--violet)' }} />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold mb-1" style={{ color: 'var(--depth)' }}>{note.title}</p>
-                      <p className="text-sm leading-relaxed" style={{ color: 'var(--mid)' }}>{note.body}</p>
+                      <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-1)' }}>{note.title}</p>
+                      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-2)' }}>{note.body}</p>
                     </div>
                   </div>
                 </GlassCard>
@@ -571,9 +571,9 @@ export default function SpiritScreen() {
                     <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"
                       style={{ background: `${c.color}22`, border: `1.5px solid ${c.color}55` }}>💎</div>
                     <div>
-                      <p className="font-semibold" style={{ color: 'var(--depth)' }}>{c.name}</p>
-                      <p className="text-sm mt-0.5" style={{ color: 'var(--mid)' }}>{c.desc}</p>
-                      <p className="text-xs mt-1 italic" style={{ color: 'var(--mist)' }}>{c.use}</p>
+                      <p className="font-semibold" style={{ color: 'var(--text-1)' }}>{c.name}</p>
+                      <p className="text-sm mt-0.5" style={{ color: 'var(--text-2)' }}>{c.desc}</p>
+                      <p className="text-xs mt-1 italic" style={{ color: 'var(--text-3)' }}>{c.use}</p>
                     </div>
                   </div>
                 </GlassCard>
@@ -589,8 +589,8 @@ export default function SpiritScreen() {
               <div className="flex items-center gap-3">
                 <Moon className="h-5 w-5" style={{ color: 'var(--violet)' }} />
                 <div className="text-left">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--depth)' }}>Dream log</p>
-                  <p className="text-xs" style={{ color: 'var(--mist)' }}>Record last night&apos;s dreams</p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Dream log</p>
+                  <p className="text-xs" style={{ color: 'var(--text-3)' }}>Record last night&apos;s dreams</p>
                 </div>
               </div>
               <span className="text-xs font-medium" style={{ color: 'var(--violet)' }}>Dictate →</span>
