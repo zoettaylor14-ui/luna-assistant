@@ -5,7 +5,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { formatCurrency } from '@/lib/money'
 import {
   DollarSign, AlertTriangle, TrendingUp, TrendingDown,
-  CreditCard, RefreshCw, ArrowRight, Loader2,
+  CreditCard, RefreshCw, ArrowRight, Loader2, Upload,
 } from 'lucide-react'
 
 const BG = 'linear-gradient(180deg, #1A1240 0%, #100C30 35%, #0A0820 65%, #060418 100%)'
@@ -55,10 +55,10 @@ interface SummaryData {
 }
 
 const QUICK_NAV = [
-  { label: 'Accounts',      href: '/money/accounts',          icon: CreditCard },
   { label: 'Transactions',  href: '/money/transactions',      icon: TrendingDown },
   { label: 'Bills',         href: '/money/bills',             icon: AlertTriangle },
   { label: 'Subscriptions', href: '/money/subscriptions',     icon: RefreshCw },
+  { label: 'Import CSV',    href: '/money/import',            icon: Upload },
   { label: 'Insights',      href: '/money/insights',          icon: TrendingUp },
   { label: 'Business',      href: '/money/business-expenses', icon: DollarSign },
   { label: 'Planning',      href: '/money/planning',          icon: TrendingUp },
