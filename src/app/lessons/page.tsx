@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { BookOpen, Sparkles } from 'lucide-react'
+import { SmartInput } from '@/components/ui/SmartInput'
 import { format, startOfWeek } from 'date-fns'
 
 const REFLECTION_PROMPTS = [
@@ -94,18 +95,19 @@ export default function LessonsScreen() {
           {/* Reflection prompts */}
           <div className="space-y-3 mb-6">
             {REFLECTION_PROMPTS.map(prompt => (
-              <div key={prompt.key} className="glass-card p-4">
-                <p className="text-xs font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--violet)' }}>
+              <div key={prompt.key}>
+                <p className="text-xs font-semibold mb-2 flex items-center gap-2 px-1" style={{ color: 'var(--violet)' }}>
                   <span>{prompt.emoji}</span>
                   {prompt.label}
                 </p>
-                <textarea
+                <SmartInput
+                  context={prompt.label}
+                  placeholder="Speak or tap..."
                   value={entries[prompt.key] ?? ''}
-                  onChange={e => update(prompt.key, e.target.value)}
-                  placeholder="..."
+                  onChange={v => update(prompt.key, v)}
+                  patternType="lessons"
                   rows={2}
-                  className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--depth)' }}
+                  autoSuggest={false}
                 />
               </div>
             ))}

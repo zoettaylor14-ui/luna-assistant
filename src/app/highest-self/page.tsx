@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { Zap, Sparkles } from 'lucide-react'
+import { SmartInput } from '@/components/ui/SmartInput'
 
 const STATIC_MIRRORS = [
   {
@@ -112,13 +113,13 @@ export default function HighestSelfScreen() {
                 <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--golden)' }}>
                   What pattern are you in right now?
                 </p>
-                <textarea
+                <SmartInput
+                  context="what pattern am I in — what I keep doing, what I feel stuck in, what my shadow is showing me"
+                  placeholder="I keep doing X... I feel like I always... I am struggling with..."
                   value={input}
-                  onChange={e => setInput(e.target.value)}
-                  placeholder="Describe what you are feeling, doing, or stuck in... 'I keep doing X' or 'I feel like I always...' or 'I am struggling with...'"
+                  onChange={setInput}
+                  patternType="highest_self"
                   rows={4}
-                  className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--depth)' }}
                 />
               </div>
 

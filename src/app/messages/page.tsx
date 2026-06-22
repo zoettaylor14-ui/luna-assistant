@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { MessageSquare, Sparkles, Copy, Check, AlertTriangle, Shield, ChevronDown, ChevronUp } from 'lucide-react'
+import { SmartInput } from '@/components/ui/SmartInput'
 
 const ACTIVATED_LEVELS = [
   { value: 1, label: 'Calm',      emoji: '😌' },
@@ -191,11 +192,16 @@ export default function CommunicationCoach() {
               </div>
 
               {/* The message */}
-              <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Paste the message</p>
-                <textarea value={message} onChange={e => setMessage(e.target.value)}
-                  placeholder="Paste or type the message here..."
-                  rows={5} className="w-full bg-transparent outline-none text-sm resize-none" style={{ color: 'var(--text-1)' }} />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2 px-1" style={{ color: 'var(--text-3)' }}>Paste the message</p>
+                <SmartInput
+                  context="a message I received that I need help responding to wisely — not reactively"
+                  placeholder="Paste or speak the message here..."
+                  value={message}
+                  onChange={setMessage}
+                  patternType="messages"
+                  rows={5}
+                />
               </div>
 
               <button onClick={analyze} disabled={!message.trim() || loading}

@@ -3,6 +3,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { Mic, Square, ChevronDown, Check, Sparkles, Archive } from 'lucide-react'
+import { SmartInput } from '@/components/ui/SmartInput'
 
 type DictationType = 'journal' | 'dream' | 'task' | 'work_note' | 'message_draft' | 'spiritual' | 'career' | 'money_note'
 
@@ -196,14 +197,14 @@ export default function DictationScreen() {
                 <div className="flex-1 h-px" style={{ background: 'rgba(139,111,184,0.1)' }} />
               </div>
 
-              <div className="glass-card p-4 mb-5">
-                <textarea
+              <div className="mb-5">
+                <SmartInput
+                  context={selectedType?.prompt ?? 'what is on your mind right now'}
+                  placeholder={selectedType?.prompt ?? 'Speak or type...'}
                   value={text}
-                  onChange={e => setText(e.target.value)}
-                  placeholder={selectedType.prompt}
+                  onChange={setText}
+                  patternType="dictation"
                   rows={5}
-                  className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--depth)' }}
                 />
               </div>
 

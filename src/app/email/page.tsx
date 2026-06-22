@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { AIThinking } from '@/components/ui/loading'
 import { Sparkles, Copy, CheckCheck, Mail, AlertCircle, ArrowRight } from 'lucide-react'
+import { SmartInput } from '@/components/ui/SmartInput'
 import { cn, URGENCY_COLORS } from '@/lib/utils'
 
 interface EmailAnalysis {
@@ -105,20 +106,29 @@ export default function EmailPage() {
                   value={subject}
                   onChange={e => setSubject(e.target.value)}
                 />
-                <Textarea
-                  label="Email body *"
-                  placeholder="Paste the full email here..."
-                  value={body}
-                  onChange={e => setBody(e.target.value)}
-                  rows={8}
-                />
-                <Textarea
-                  label="Your context (optional)"
-                  placeholder="Any relevant background? e.g. 'This is about the EHM project launch'"
-                  value={context}
-                  onChange={e => setContext(e.target.value)}
-                  rows={2}
-                />
+                <div>
+                  <p className="text-xs font-semibold mb-1.5" style={{ color: 'var(--text-3)' }}>Email body *</p>
+                  <SmartInput
+                    context="email I received that I need help responding to — paste full email"
+                    placeholder="Paste or speak the full email..."
+                    value={body}
+                    onChange={setBody}
+                    patternType="email"
+                    rows={8}
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold mb-1.5" style={{ color: 'var(--text-3)' }}>Your context (optional)</p>
+                  <SmartInput
+                    context="background context for this email — project name, relationship, what I want to communicate"
+                    placeholder="Any relevant background?"
+                    value={context}
+                    onChange={setContext}
+                    patternType="email"
+                    rows={2}
+                    autoSuggest={false}
+                  />
+                </div>
 
                 {error && (
                   <div className="flex items-center gap-2 text-red-500 bg-red-50 rounded-xl px-3 py-2">

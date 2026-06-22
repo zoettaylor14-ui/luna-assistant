@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Sun, Sparkles, Droplets, Apple, RefreshCw } from 'lucide-react'
+import { SmartInput } from '@/components/ui/SmartInput'
 
 const ENERGY_CHIPS = [
   { emoji: '🔥', label: 'Flowing',   value: 'flowing'   },
@@ -148,14 +149,18 @@ export default function MiddayPage() {
               </div>
 
               {/* One question */}
-              <div className="glass-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2 px-1" style={{ color: 'var(--violet)' }}>
                   {MIDDAY_PROMPTS[promptIdx]}
                 </p>
-                <textarea value={note} onChange={e => setNote(e.target.value)}
-                  placeholder="Write what comes up..."
-                  rows={3} className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--depth)' }} />
+                <SmartInput
+                  context={MIDDAY_PROMPTS[promptIdx]}
+                  placeholder="Speak or tap what comes up..."
+                  value={note}
+                  onChange={setNote}
+                  patternType="midday"
+                  rows={3}
+                />
               </div>
 
               <button onClick={reset} disabled={loading}

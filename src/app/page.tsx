@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { GrowthAnalytics } from '@/components/ui/GrowthAnalytics'
 import { format } from 'date-fns'
 import {
   Sparkles, Moon, BriefcaseIcon, Mic, MessageCircle,
@@ -309,6 +310,11 @@ export default function SanctuaryPage() {
                 </div>
                 <ArrowRight className="h-4 w-4" style={{ color: 'var(--violet)' }} />
               </div>
+            </Link>
+
+            {/* Growth compact widget */}
+            <Link href="/growth">
+              <GrowthAnalytics compact />
             </Link>
           </div>
         </AppLayout>

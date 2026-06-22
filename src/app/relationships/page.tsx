@@ -6,6 +6,7 @@ import {
   Phone, Calendar, Sparkles, Clock, AlertCircle
 } from 'lucide-react'
 import Link from 'next/link'
+import { SmartInput } from '@/components/ui/SmartInput'
 
 type RelType = 'all' | 'family' | 'friends' | 'clients' | 'team'
 
@@ -291,17 +292,13 @@ export default function RelationshipsPage() {
                   </button>
                 ))}
               </div>
-              <textarea
+              <SmartInput
+                context="what is on my mind about someone in my life — a relationship dynamic, a conversation, something unresolved"
+                placeholder="What is on your mind about someone?"
                 value={aiInput}
-                onChange={e => setAiInput(e.target.value)}
-                placeholder="What is on your mind about someone in your life?"
+                onChange={setAiInput}
+                patternType="relationships"
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none mb-3"
-                style={{
-                  background: 'var(--surface-subtle)',
-                  border: '1.5px solid rgba(139,111,184,0.15)',
-                  color: 'var(--text-1)',
-                }}
               />
               <button
                 onClick={askAI}
@@ -392,26 +389,16 @@ export default function RelationshipsPage() {
                   </button>
                 ))}
               </div>
-              <div className="flex gap-3">
-                <textarea
+              <div className="space-y-2">
+                <SmartInput
+                  context="what is on my mind about someone in my life — a relationship dynamic, a conversation, something unresolved"
+                  placeholder="What is on your mind about someone?"
                   value={aiInput}
-                  onChange={e => setAiInput(e.target.value)}
-                  placeholder="What is on your mind about someone in your life?"
+                  onChange={setAiInput}
+                  patternType="relationships"
                   rows={2}
-                  className="flex-1 px-4 py-3 rounded-xl text-sm outline-none resize-none"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid var(--surface-border)',
-                    color: 'rgba(255,255,255,0.85)',
-                  }}
+                  onSubmit={askAI}
                 />
-                <button
-                  onClick={askAI}
-                  disabled={aiLoading || !aiInput.trim()}
-                  className="px-6 py-3 rounded-xl text-sm font-semibold text-white self-end transition-all disabled:opacity-50 hover:scale-105"
-                  style={{ background: 'linear-gradient(135deg, #8B6FB8, #6A4F9B)' }}>
-                  {aiLoading ? 'Thinking...' : 'Ask'}
-                </button>
               </div>
               {aiReply && (
                 <div className="mt-4 p-4 rounded-xl" style={{ background: 'rgba(139,111,184,0.08)', border: '1px solid rgba(139,111,184,0.15)' }}>

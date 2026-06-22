@@ -4,6 +4,8 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { BookOpen, Mic, Plus, ChevronRight, Heart, Sparkles, Moon, Star, Search } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { SmartInput } from '@/components/ui/SmartInput'
+import { addPattern } from '@/lib/patterns'
 
 interface JournalEntry {
   id: string
@@ -132,7 +134,11 @@ export default function JournalPage() {
             <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>How are you feeling?</p>
             <div className="flex gap-2 flex-wrap">
               {MOODS.map(m => (
-                <button key={m.label} onClick={() => setSelectedMood(m.label === selectedMood ? '' : m.label)}
+                <button key={m.label} onClick={() => {
+                  const newMood = m.label === selectedMood ? '' : m.label
+                  setSelectedMood(newMood)
+                  if (newMood) addPattern({ type: 'journal', context: 'mood', value: newMood, source: 'suggestion' })
+                }}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
                   style={{
                     background: selectedMood === m.label ? 'rgba(139,111,184,0.15)' : 'rgba(255,255,255,0.7)',
@@ -169,36 +175,29 @@ export default function JournalPage() {
           </div>
         </div>
 
-        {/* Text area */}
-        <textarea
+        {/* Smart write area */}
+        <SmartInput
+          context={
+            writeType === 'dream' ? 'dream — what I saw, felt, people, places, symbols' :
+            writeType === 'shadow' ? 'shadow work — what I am avoiding, the pattern I see, what I am projecting' :
+            writeType === 'gratitude' ? 'gratitude — what I am genuinely grateful for today' :
+            writeType === 'lesson' ? 'lesson — what I learned, what changed my perspective' :
+            selectedPrompt || 'journal — what I am feeling, thinking, processing, noticing'
+          }
+          placeholder="Write or speak freely. Nothing needs to be perfect here..."
           value={content}
-          onChange={e => setContent(e.target.value)}
-          rows={10}
-          placeholder="Write freely. This is your space. Nothing needs to be perfect here..."
-          className="w-full rounded-2xl p-4 text-sm leading-relaxed resize-none outline-none"
-          style={{
-            background: 'var(--surface-strong)',
-            border: '1.5px solid rgba(139,111,184,0.15)',
-            color: 'var(--text-1)',
-            fontFamily: 'var(--font-display)',
-          }}
-          autoFocus
+          onChange={setContent}
+          patternType="journal"
+          rows={8}
+          history={selectedMood ? [selectedMood] : []}
         />
 
-        <div className="flex gap-3 mt-4">
-          <Link href="/dictation" className="flex-1">
-            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold"
-              style={{ background: 'rgba(139,111,184,0.1)', color: 'var(--violet)', border: '1px solid rgba(139,111,184,0.2)' }}>
-              <Mic className="h-4 w-4" /> Dictate instead
-            </button>
-          </Link>
-          <button onClick={saveEntry}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold"
-            style={{ background: 'var(--violet)', color: 'white' }}
-            disabled={!content.trim()}>
-            Save entry
-          </button>
-        </div>
+        <button onClick={saveEntry}
+          className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold"
+          style={{ background: content.trim() ? 'var(--violet)' : 'var(--surface-border)', color: content.trim() ? 'white' : 'var(--text-4)' }}
+          disabled={!content.trim()}>
+          Save entry
+        </button>
       </div>
     </AppLayout>
   )

@@ -4,6 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { Compass, Sparkles, ChevronRight, Mic } from 'lucide-react'
 import Link from 'next/link'
+import { SmartInput } from '@/components/ui/SmartInput'
 
 const CAREER_CONTAINERS = [
   { label: 'Client Work',        items: ['EHM Strategies', 'DRYP Studio', 'Babe Coffee Lounge', 'Flanagan\'s', 'Villa Residential'], color: 'var(--lunar)',  bg: 'rgba(168,196,218,0.12)' },
@@ -229,16 +230,14 @@ export default function CareerCompassScreen() {
               <p className="text-sm mb-2" style={{ color: 'var(--text-2)' }}>
                 Reflect on your week. What did it teach you?
               </p>
-              <div className="glass-card p-4">
-                <textarea
-                  value={weekInput}
-                  onChange={e => setWeekInput(e.target.value)}
-                  placeholder="What work gave me energy? Where was I recognized? Where did I force? What did I finish?..."
-                  rows={6}
-                  className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--text-1)' }}
-                />
-              </div>
+              <SmartInput
+                context="career week reflection — what gave me energy, where I was recognized, where I forced, what I finished"
+                placeholder="Speak your week..."
+                value={weekInput}
+                onChange={setWeekInput}
+                patternType="career"
+                rows={6}
+              />
               <div className="space-y-2">
                 {[
                   'What work gave me energy this week?',

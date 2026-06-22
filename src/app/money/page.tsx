@@ -4,6 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { DollarSign, TrendingUp, TrendingDown, Plus, AlertTriangle, Check } from 'lucide-react'
 import { format } from 'date-fns'
+import { SmartInput } from '@/components/ui/SmartInput'
 
 type MoneyTab = 'daily' | 'trading' | 'goals'
 
@@ -230,13 +231,14 @@ export default function MoneyScreen() {
                     className="w-full bg-transparent outline-none text-sm py-2 rounded-xl px-3"
                     style={{ border: '1px solid rgba(139,111,184,0.15)', color: 'var(--depth)' }}
                   />
-                  <textarea
-                    placeholder="Setup — why are you taking this trade? Write it before entering."
+                  <SmartInput
+                    context="trade setup — why am I taking this trade, what is the thesis, what do I see in the chart"
+                    placeholder="Why are you taking this trade?"
                     value={trade.setup}
-                    onChange={e => setTrade(p => ({ ...p, setup: e.target.value }))}
+                    onChange={v => setTrade(p => ({ ...p, setup: v }))}
+                    patternType="money"
                     rows={3}
-                    className="w-full bg-transparent outline-none text-sm resize-none py-2 px-3 rounded-xl"
-                    style={{ border: '1px solid rgba(139,111,184,0.15)', color: 'var(--depth)' }}
+                    autoSuggest={false}
                   />
                   <input
                     placeholder="Emotion before entering"
@@ -257,13 +259,14 @@ export default function MoneyScreen() {
                       </button>
                     ))}
                   </div>
-                  <textarea
-                    placeholder="Lesson from this trade..."
+                  <SmartInput
+                    context="lesson from this trade — what I learned, what I would do differently"
+                    placeholder="What did this trade teach me?"
                     value={trade.lesson}
-                    onChange={e => setTrade(p => ({ ...p, lesson: e.target.value }))}
+                    onChange={v => setTrade(p => ({ ...p, lesson: v }))}
+                    patternType="money"
                     rows={2}
-                    className="w-full bg-transparent outline-none text-sm resize-none py-2 px-3 rounded-xl"
-                    style={{ border: '1px solid rgba(139,111,184,0.15)', color: 'var(--depth)' }}
+                    autoSuggest={false}
                   />
                   <button className="w-full py-3.5 rounded-2xl font-semibold text-white"
                     style={{ background: 'linear-gradient(135deg, var(--violet), var(--violet-deep))' }}>
