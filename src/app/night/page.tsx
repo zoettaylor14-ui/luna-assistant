@@ -1,7 +1,7 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { Moon, Clock, Home, Sparkles, Sunset, Sun } from 'lucide-react'
+import { Moon, Clock, Home, Sparkles } from 'lucide-react'
 
 const LOCATIONS = [
   { value: 'home',         label: '🏠 Home',         drive: 0  },

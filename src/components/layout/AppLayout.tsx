@@ -29,7 +29,9 @@ export function AppLayout({ children, noPad, className, darkDesktop }: AppLayout
         'pb-nav lg:pb-[100px]',
         className ?? '',
       ].join(' ')}>
-        {children}
+        <div className="animate-page-enter content-enter">
+          {children}
+        </div>
       </main>
 
       {/* Mobile bottom nav */}

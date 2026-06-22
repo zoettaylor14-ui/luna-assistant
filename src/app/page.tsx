@@ -231,6 +231,29 @@ export default function SanctuaryPage() {
               <StatCard icon={<span className="text-base">{moon.emoji}</span>} label="Moon" value={moon.keyword} sub={moon.name.split(' ').slice(-1)[0]} color="#A8C4DA" />
             </div>
 
+            {/* Quick Actions — horizontal scroll */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-4)' }}>Quick Actions</p>
+              <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                {[
+                  { href: '/morning',      emoji: '✨', label: 'Check In',   color: 'rgba(139,111,184,0.18)' },
+                  { href: '/brain-dump',   emoji: '🧠', label: 'Brain Dump', color: 'rgba(201,169,110,0.18)' },
+                  { href: '/dictation',    emoji: '🎙', label: 'Dictate',    color: 'rgba(139,111,184,0.14)' },
+                  { href: '/spirit',       emoji: '🔮', label: 'Spirit',     color: 'rgba(184,159,216,0.16)' },
+                  { href: '/night',        emoji: '🌙', label: 'Night',      color: 'rgba(60,40,100,0.25)'   },
+                  { href: '/rush-mode',    emoji: '⚡', label: 'Rush Mode',  color: 'rgba(200,100,60,0.18)'  },
+                  { href: '/more',         emoji: '···', label: 'All',       color: 'rgba(139,111,184,0.10)' },
+                ].map(a => (
+                  <Link key={a.href} href={a.href} className="flex-shrink-0">
+                    <div className="action-pill" style={{ background: a.color, border: '1px solid rgba(139,111,184,0.15)' }}>
+                      <span className="text-2xl leading-none">{a.emoji}</span>
+                      <span className="text-xs font-semibold whitespace-nowrap" style={{ color: 'var(--text-1)' }}>{a.label}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             {/* Affirmation */}
             <div className="rounded-2xl p-4 flex items-center gap-4"
               style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>

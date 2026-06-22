@@ -3,18 +3,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, MessageCircle, Calendar, CheckSquare,
-  Sparkles, Scissors, Moon, BookHeart
+  Sparkles, Scissors, Moon, BookHeart, Settings
 } from 'lucide-react'
 
 const TABS = [
-  { href: '/',          label: 'Home',     icon: Home,          badge: null, dateLabel: false },
-  { href: '/messages',  label: 'Messages', icon: MessageCircle, badge: 4,    dateLabel: false },
-  { href: '/calendar',  label: 'Calendar', icon: Calendar,      badge: null, dateLabel: true  },
-  { href: '/tasks',     label: 'Tasks',    icon: CheckSquare,   badge: null, dateLabel: false },
-  { href: '/spirit',    label: 'Spirit',   icon: Sparkles,      badge: null, dateLabel: false },
-  { href: '/atelier',   label: 'Atelier',  icon: Scissors,      badge: null, dateLabel: false },
-  { href: '/night',     label: 'Night',    icon: Moon,          badge: null, dateLabel: false },
-  { href: '/memory',    label: 'Memory',   icon: BookHeart,     badge: null, dateLabel: false },
+  { href: '/',         label: 'Home',     icon: Home          },
+  { href: '/messages', label: 'Messages', icon: MessageCircle, badge: 4 },
+  { href: '/calendar', label: 'Calendar', icon: Calendar,      date: true },
+  { href: '/tasks',    label: 'Tasks',    icon: CheckSquare   },
+  { href: '/spirit',   label: 'Spirit',   icon: Sparkles      },
+  { href: '/atelier',  label: 'Atelier',  icon: Scissors      },
+  { href: '/night',    label: 'Night',    icon: Moon          },
+  { href: '/memory',   label: 'Memory',   icon: BookHeart     },
+  { href: '/settings', label: 'Settings', icon: Settings      },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -24,7 +25,7 @@ function isActive(pathname: string, href: string) {
 
 export function BottomNav() {
   const pathname = usePathname()
-  const today = new Date().getDate()
+  const today    = new Date().getDate()
 
   return (
     <nav
@@ -32,53 +33,73 @@ export function BottomNav() {
       style={{
         height: 'var(--nav-h)',
         background: 'var(--nav-bg)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
         borderTop: '1px solid var(--nav-border)',
-      }}
-    >
-      <div className="flex items-center h-full max-w-lg mx-auto px-1">
-        {TABS.map(({ href, label, icon: Icon, badge, dateLabel }) => {
+      }}>
+      <div className="flex items-center h-full max-w-xl mx-auto px-1">
+        {TABS.map(({ href, label, icon: Icon, badge, date }) => {
           const active = isActive(pathname, href)
           return (
-            <Link
-              key={href}
-              href={href}
-              className="flex flex-col items-center gap-0.5 flex-1 py-2"
-            >
-              <div className="relative">
-                {dateLabel ? (
-                  <div className="relative">
-                    <Icon
-                      className="h-5 w-5 transition-all"
-                      style={{ color: active ? 'var(--violet)' : 'var(--tab-inactive-text)', strokeWidth: active ? 2.2 : 1.7 }}
-                    />
-                    <div
-                      className="absolute -bottom-1 -right-2 text-xs font-bold"
-                      style={{ color: active ? 'var(--violet)' : 'var(--tab-inactive-text)' }}
-                    >{today}</div>
-                  </div>
-                ) : (
-                  <>
-                    <Icon
-                      className="h-5 w-5 transition-all"
-                      style={{ color: active ? 'var(--violet)' : 'var(--tab-inactive-text)', strokeWidth: active ? 2.2 : 1.7 }}
-                    />
-                    {badge && (
-                      <div className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                        style={{ background: 'var(--violet)', border: '1.5px solid var(--nav-bg)' }}>
-                        <span className="text-white font-bold" style={{ fontSize: 8 }}>{badge}</span>
-                      </div>
-                    )}
-                  </>
-                )}
+            <Link key={href} href={href}
+              className="flex flex-col items-center justify-center flex-1 py-1 relative"
+              style={{ minHeight: 56 }}>
+
+              {/* Active pill background */}
+              {active && (
+                <div className="absolute inset-x-1 inset-y-1 rounded-2xl"
+                  style={{
+                    background: 'rgba(139,111,184,0.15)',
+                    border: '1px solid rgba(139,111,184,0.20)',
+                    transition: 'opacity 0.2s ease',
+                  }} />
+              )}
+
+              <div className="relative z-10 flex flex-col items-center gap-0.5">
+                {/* Icon */}
+                <div className="relative">
+                  {date ? (
+                    <div className="relative">
+                      <Icon className="h-5 w-5"
+                        style={{
+                          color: active ? 'var(--violet)' : 'var(--tab-inactive-text)',
+                          strokeWidth: active ? 2.2 : 1.6,
+                          transition: 'color 0.2s, stroke-width 0.2s',
+                        }} />
+                      <span className="absolute -bottom-1 -right-2 text-xs font-bold"
+                        style={{ color: active ? 'var(--violet)' : 'var(--tab-inactive-text)', fontSize: 9 }}>
+                        {today}
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <Icon className="h-5 w-5"
+                        style={{
+                          color: active ? 'var(--violet)' : 'var(--tab-inactive-text)',
+                          strokeWidth: active ? 2.2 : 1.6,
+                          transition: 'color 0.2s, stroke-width 0.2s',
+                        }} />
+                      {badge && (
+                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
+                          style={{ background: 'var(--violet)', border: '1.5px solid var(--nav-bg)' }}>
+                          <span className="text-white font-bold" style={{ fontSize: 8 }}>{badge}</span>
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Label */}
+                <span style={{
+                  fontSize: 9,
+                  fontWeight: active ? 700 : 500,
+                  color: active ? 'var(--violet)' : 'var(--tab-inactive-text)',
+                  transition: 'color 0.2s, font-weight 0.2s',
+                  lineHeight: 1,
+                }}>
+                  {label}
+                </span>
               </div>
-              <span
-                className="text-xs font-medium transition-all leading-none"
-                style={{ color: active ? 'var(--violet)' : 'var(--tab-inactive-text)' }}
-              >
-                {label}
-              </span>
             </Link>
           )
         })}
