@@ -1,13 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Sparkles, Star, BookHeart, BriefcaseIcon } from 'lucide-react'
+import { Home, Sparkles, Star, MessageCircle, BriefcaseIcon } from 'lucide-react'
 
 const TABS = [
   { href: '/',          label: 'Home',      icon: Home          },
   { href: '/morning',   label: 'Check-in',  icon: Sparkles      },
+  { href: '/chat',      label: 'LUNA',      icon: MessageCircle },
   { href: '/astrology', label: 'Astrology', icon: Star          },
-  { href: '/memory',    label: 'Memory',    icon: BookHeart     },
   { href: '/work',      label: 'Work',      icon: BriefcaseIcon },
 ]
 

@@ -73,7 +73,10 @@ export default function PlanMyDayPage() {
       if (data.error) throw new Error(data.detail ?? data.error)
       setPlan(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      const raw = err instanceof Error ? err.message : 'Something went wrong.'
+      setError(raw.toLowerCase().includes('credit') || raw.includes('LUNA_AI') || raw.includes('overload')
+        ? 'LUNA is taking a breath — try again in a moment.'
+        : raw)
     } finally {
       setLoading(false)
     }

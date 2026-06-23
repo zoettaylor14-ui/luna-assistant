@@ -129,14 +129,21 @@ export default function DictationScreen() {
         <div className="px-6 pb-nav">
 
           {/* Header */}
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(139,111,184,0.12)' }}>
-              <Mic className="h-5 w-5" style={{ color: 'var(--violet)' }} />
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(139,111,184,0.12)' }}>
+                <Mic className="h-5 w-5" style={{ color: 'var(--violet)' }} />
+              </div>
+              <div>
+                <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--violet)' }}>Dictation</p>
+                <p className="text-xs" style={{ color: 'var(--mist)' }}>Speak. I am listening.</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--violet)' }}>Dictation</p>
-              <p className="text-xs" style={{ color: 'var(--mist)' }}>Speak. I am listening.</p>
-            </div>
+            <a href="/chat" style={{
+              fontSize: 12, fontWeight: 700, color: '#C9A96E', textDecoration: 'none',
+              padding: '6px 12px', borderRadius: 20, background: 'rgba(201,169,110,0.10)',
+              border: '1px solid rgba(201,169,110,0.22)',
+            }}>Talk to LUNA →</a>
           </div>
 
           <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--depth)' }}>

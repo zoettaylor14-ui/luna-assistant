@@ -534,17 +534,47 @@ Return ONLY valid JSON:
   "tags": ["tag1", "tag2", "tag3"]
 }`
 
-// ─── Core AI caller ───────────────────────────────────────────
+// ─── Core AI caller with retry ────────────────────────────────
 export async function callAI(systemPrompt: string, userMessage: string, maxTokens = 2048): Promise<string> {
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: maxTokens,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userMessage }],
-  })
-  const content = message.content[0]
-  if (content.type === 'text') return content.text
-  throw new Error('Unexpected response type from AI')
+  const MAX_RETRIES = 3
+  let lastErr: Error | null = null
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }],
+      })
+      const content = message.content[0]
+      if (content.type === 'text') return content.text
+      throw new Error('Unexpected response type from AI')
+    } catch (err) {
+      lastErr = err instanceof Error ? err : new Error(String(err))
+      const msg  = lastErr.message.toLowerCase()
+      const isOverloaded = msg.includes('529') || msg.includes('overloaded') || msg.includes('overload')
+      const isRateLimit  = msg.includes('429') || msg.includes('rate limit')
+      const isTransient  = isOverloaded || isRateLimit
+      // Credit / billing errors — don't retry, re-throw with clean message
+      if (msg.includes('credit') || msg.includes('billing') || msg.includes('402') || msg.includes('insufficient')) {
+        throw new Error('LUNA_AI_UNAVAILABLE')
+      }
+      if (!isTransient || attempt === MAX_RETRIES - 1) break
+      // Exponential backoff: 1s, 2s
+      await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+    }
+  }
+  throw lastErr ?? new Error('AI request failed')
+}
+
+// Wrapper that returns null instead of throwing — use for non-critical AI calls
+export async function tryCallAI(systemPrompt: string, userMessage: string, maxTokens = 2048): Promise<string | null> {
+  try {
+    return await callAI(systemPrompt, userMessage, maxTokens)
+  } catch {
+    return null
+  }
 }
 
 export function parseAIJson<T>(text: string): T {

@@ -1,4 +1,5 @@
 'use client'
+import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -9,8 +10,8 @@ import {
 const TABS = [
   { href: '/',          label: 'Home',      icon: Home          },
   { href: '/morning',   label: 'Morning',   icon: Sparkles      },
+  { href: '/chat',      label: 'LUNA',      icon: MessageCircle },
   { href: '/work',      label: 'Work',      icon: BriefcaseIcon },
-  { href: '/messages',  label: 'Messages',  icon: MessageCircle, badge: 4 },
   { href: '/astrology', label: 'Astrology', icon: Star          },
   { href: '/atelier',   label: 'Atelier',   icon: Scissors      },
   { href: '/vault',     label: 'Vault',     icon: Archive       },
@@ -49,7 +50,8 @@ export function DesktopTabBar() {
             boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
             pointerEvents: 'all',
           }}>
-          {TABS.map(({ href, label, icon: Icon, badge }) => {
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          {TABS.map(({ href, label, icon: Icon, badge }: any) => {
             const active = isActive(href)
             return (
               <Link key={href} href={href}
