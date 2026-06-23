@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { callAI } from '@/lib/ai'
 import { getCurrentPlanets, getTransitsToNatal, ZOE_NATAL, type PlanetPosition, type TransitAspect } from '@/lib/astrology'
 
 // ─── Transit-based fallback (works with no AI credits) ────────────────────────
@@ -166,24 +166,12 @@ Generate a complete daily reading for Zoe. Return ONLY valid JSON — no markdow
   "affirmation": "One powerful affirmation written in first person, specific to today's energy. Not generic — written as if she is declaring it from her Scorpio Sun depth."
 }`
 
-    // ── Call Claude ─────────────────────────────────────────────────────────
+    // ── Call AI ─────────────────────────────────────────────────────────────
     let guidance: DailyGuidance
     try {
-    const client = new Anthropic()
+    const SYSTEM = 'You are LUNA, Zoe\'s personal astrology guide. Write in a warm, direct, honest voice. Never use textbook astrology jargon in descriptions — if you use a term (like "trine" or "retrograde"), it is only as a label/title, never as the explanation. Speak as if you deeply know this woman. Be specific, be real, be encouraging but honest. Make every word feel personally written for Zoe, not for a generic reader. Return ONLY valid JSON — no markdown fences, no prose outside the JSON.'
 
-    const message = await client.messages.create({
-      model:      'claude-sonnet-4-6',
-      max_tokens:  2000,
-      system:     'You are LUNA, Zoe\'s personal astrology guide. Write in a warm, direct, honest voice. Never use textbook astrology jargon in descriptions — if you use a term (like "trine" or "retrograde"), it is only as a label/title, never as the explanation. Speak as if you deeply know this woman. Be specific, be real, be encouraging but honest. Make every word feel personally written for Zoe, not for a generic reader.',
-      messages: [
-        { role: 'user', content: userPrompt },
-      ],
-    })
-
-    // ── Parse response ──────────────────────────────────────────────────────
-    const rawText = message.content[0]?.type === 'text' ? message.content[0].text : ''
-
-    // Strip any accidental markdown fences
+    const rawText = await callAI(SYSTEM, userPrompt, 2000)
     const jsonText = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
 
     guidance = JSON.parse(jsonText) as DailyGuidance

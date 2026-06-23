@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import Anthropic from '@anthropic-ai/sdk'
+import { callAI } from '@/lib/ai'
 import { getWeekRange } from '@/lib/money'
 
 const ZOE_USER_ID = '98f5b277-bb63-41d5-89ec-0edadc1e2858'
@@ -8,7 +8,6 @@ const ZOE_USER_ID = '98f5b277-bb63-41d5-89ec-0edadc1e2858'
 export async function POST() {
   try {
     const db = createAdminClient()
-    const ai = new Anthropic()
     const { start, end } = getWeekRange()
 
     const [txnsRes, billsRes, subsRes] = await Promise.all([
@@ -77,13 +76,7 @@ Respond in EXACT JSON format, no markdown:
   "affirmation": "powerful money affirmation for this week"
 }`
 
-    const message = await ai.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 800,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const rawText = message.content[0].type === 'text' ? message.content[0].text : '{}'
+    const rawText = await callAI('You are LUNA, Zoe\'s AI financial advisor. Generate sharp, honest, CEO-level money analysis. Return only valid JSON, no markdown.', prompt, 800)
     let parsed: {
       summary?: string
       top_categories?: { category: string; amount: number; insight: string }[]

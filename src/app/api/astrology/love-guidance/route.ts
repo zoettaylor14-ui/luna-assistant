@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { callAI } from '@/lib/ai'
 import { getCurrentPlanets, getTransitsToNatal, type PlanetPosition, type TransitAspect } from '@/lib/astrology'
 
 const cache = new Map<string, { data: LoveGuidance; ts: number }>()
@@ -121,7 +121,6 @@ export async function GET(req: NextRequest) {
     ).join('\n')
 
     try {
-      const client = new Anthropic()
       const dateStr = localDate || new Intl.DateTimeFormat('en-US', {
         timeZone: clientTz, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
       }).format(now)
@@ -162,14 +161,8 @@ Generate a complete love energy reading for today. Return ONLY valid JSON matchi
   "navigate_now": ["5 specific pieces of guidance for how to navigate her love life right now, grounded in today's transits and her chart"]
 }`
 
-      const message = await client.messages.create({
-        model:      'claude-sonnet-4-6',
-        max_tokens:  1500,
-        system:     "You are LUNA, Zoe's personal astrology guide. Write about love with honesty, warmth, and real depth. No toxic positivity. No vague generalities. You know this woman — speak directly to her.",
-        messages:   [{ role: 'user', content: prompt }],
-      })
-
-      const rawText = message.content[0]?.type === 'text' ? message.content[0].text : ''
+      const SYSTEM = "You are LUNA, Zoe's personal astrology guide. Write about love with honesty, warmth, and real depth. No toxic positivity. No vague generalities. You know this woman — speak directly to her. Return ONLY valid JSON — no markdown fences."
+      const rawText = await callAI(SYSTEM, prompt, 1500)
       const jsonText = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
       const guidance = JSON.parse(jsonText) as LoveGuidance
 

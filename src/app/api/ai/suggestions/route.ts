@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { callAI } from '@/lib/ai'
 
 function buildLunaContext(tz?: string, localDate?: string, localTime?: string): string {
   const clientTz = tz || 'America/New_York'
@@ -78,14 +76,7 @@ Think about what a real Scorpio Sun / Cancer Moon woman would actually feel or t
 Raw honesty over positive spin. Variety — include at least one lighter and one heavier option.
 Return only a JSON array of 5 strings.`
 
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 200,
-      system: LUNA_CONTEXT,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const raw = response.content[0].type === 'text' ? response.content[0].text.trim() : '[]'
+    const raw = await callAI(LUNA_CONTEXT, prompt, 200)
     const match = raw.match(/\[[\s\S]*?\]/)
     const suggestions: string[] = match ? JSON.parse(match[0]) : []
 

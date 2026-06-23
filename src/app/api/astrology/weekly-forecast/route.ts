@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { callAI } from '@/lib/ai'
 import { getCurrentPlanets, getTransitsToNatal } from '@/lib/astrology'
 
 const cache = new Map<string, { data: WeeklyForecast; ts: number }>()
@@ -136,7 +136,6 @@ ${tLines}`
     }).join('\n\n')
 
     try {
-      const client = new Anthropic()
       const prompt = `Generate a detailed 7-day horoscope for Zoe for the upcoming week.
 
 ZOE'S NATAL CHART:
@@ -174,14 +173,8 @@ Return ONLY valid JSON matching this exact schema. Every field is REQUIRED. Writ
   ]
 }`
 
-      const message = await client.messages.create({
-        model:      'claude-sonnet-4-6',
-        max_tokens:  4000,
-        system:     "You are LUNA, Zoe's personal astrology guide. Generate detailed, specific, personalized daily readings — not generic horoscope content. Reference her actual chart placements and today's real transits. Be honest, warm, and deeply personal.",
-        messages:   [{ role: 'user', content: prompt }],
-      })
-
-      const rawText = message.content[0]?.type === 'text' ? message.content[0].text : ''
+      const SYSTEM = "You are LUNA, Zoe's personal astrology guide. Generate detailed, specific, personalized daily readings — not generic horoscope content. Reference her actual chart placements and today's real transits. Be honest, warm, and deeply personal. Return ONLY valid JSON — no markdown fences."
+      const rawText = await callAI(SYSTEM, prompt, 4000)
       const jsonText = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
       const forecast = JSON.parse(jsonText) as WeeklyForecast
 

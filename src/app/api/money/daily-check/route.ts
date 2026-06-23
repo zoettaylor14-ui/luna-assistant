@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import Anthropic from '@anthropic-ai/sdk'
+import { callAI } from '@/lib/ai'
 
 const ZOE_USER_ID = '98f5b277-bb63-41d5-89ec-0edadc1e2858'
 
 export async function POST() {
   try {
     const db = createAdminClient()
-    const ai = new Anthropic()
 
     const today = new Date().toISOString().slice(0, 10)
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
@@ -56,13 +55,7 @@ Respond in this EXACT JSON format, no markdown, no extra text:
   "affirmation": "short powerful money affirmation for a Taurus founder energy"
 }`
 
-    const message = await ai.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 600,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const rawText = message.content[0].type === 'text' ? message.content[0].text : '{}'
+    const rawText = await callAI('You are LUNA, Zoe\'s personal AI financial advisor with the energy of a billionaire CFO who also does morning astrology. Return only valid JSON, no markdown.', prompt, 600)
     let parsed: {
       check_questions?: string[]
       todays_assessment?: string

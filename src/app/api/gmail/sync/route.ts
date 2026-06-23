@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGmailTokens, listGmailMessages, type GmailMessage } from '@/lib/gmail'
-import Anthropic from '@anthropic-ai/sdk'
-
-const ai = new Anthropic()
+import { callAI } from '@/lib/ai'
 
 function adminDb() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -66,13 +64,8 @@ async function categorizeEmails(emails: (GmailMessage & { account: string })[]) 
   ).join('\n---\n')
 
   try {
-    const msg = await ai.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1200,
-      messages: [{
-        role: 'user', content: `You are Zoe's AI assistant. Categorize each email below.
-
-Zoe runs Ad-Vantage Media Agency and DRYP Digital. She checks info@drypdigital.com and zoe@drypdigital.com.
+    const SYSTEM = "You are Zoe's AI email assistant. Zoe runs Ad-Vantage Media Agency and DRYP Digital. Categorize emails accurately and extract real action items. Return ONLY valid JSON arrays, no markdown."
+    const userPrompt = `Categorize each email below.
 
 Categories:
 - urgent: needs response TODAY, deadline or time-sensitive
@@ -87,11 +80,9 @@ Emails:
 ${summaries}
 
 Return ONLY valid JSON array: [{"index": 0, "category": "...", "action": "one sentence what Zoe needs to do", "tasks": ["task1"]}]
-"tasks" is empty array if none. "action" is empty string if none.`,
-      }],
-    })
+"tasks" is empty array if none. "action" is empty string if none.`
 
-    const text = msg.content[0].type === 'text' ? msg.content[0].text : '[]'
+    const text = await callAI(SYSTEM, userPrompt, 1200)
     const match = text.match(/\[[\s\S]*\]/)
     const parsed: { index: number; category: string; action?: string; tasks?: string[] }[] = match
       ? JSON.parse(match[0]) : []
