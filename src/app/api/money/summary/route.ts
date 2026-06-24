@@ -11,8 +11,6 @@ export async function GET() {
     const { start: weekStart, end: weekEnd } = getWeekRange()
 
     const [
-      itemsResult,
-      accountsResult,
       monthExpensesResult,
       weekExpensesResult,
       incomeResult,
@@ -22,9 +20,8 @@ export async function GET() {
       subsResult,
       needsReviewResult,
       alertsResult,
+      txnCountResult,
     ] = await Promise.allSettled([
-      db.from('plaid_items').select('id, institution_name, last_synced_at, status').eq('user_id', ZOE_USER_ID).eq('status', 'active'),
-      db.from('plaid_accounts').select('*').eq('user_id', ZOE_USER_ID).eq('hidden', false),
       db.from('money_transactions')
         .select('amount')
         .eq('user_id', ZOE_USER_ID)
@@ -66,12 +63,13 @@ export async function GET() {
       db.from('money_subscriptions').select('*').eq('user_id', ZOE_USER_ID).eq('status', 'active'),
       db.from('money_transactions').select('id', { count: 'exact', head: true }).eq('user_id', ZOE_USER_ID).eq('needs_review', true),
       db.from('money_alerts').select('*').eq('user_id', ZOE_USER_ID).eq('status', 'pending').order('created_at', { ascending: false }).limit(5),
+      db.from('money_transactions').select('id', { count: 'exact', head: true }).eq('user_id', ZOE_USER_ID),
     ])
 
-    // Accounts + balances
-    const accounts = accountsResult.status === 'fulfilled' ? (accountsResult.value.data ?? []) : []
-    const totalAvailable = accounts.reduce((s: number, a: { available_balance: number | null }) => s + (a.available_balance ?? 0), 0)
-    const totalCurrent = accounts.reduce((s: number, a: { current_balance: number | null }) => s + (a.current_balance ?? 0), 0)
+    // No Plaid accounts — balances derived from transactions
+    const accounts: never[] = []
+    const totalAvailable = 0
+    const totalCurrent = 0
 
     // Spending
     const monthExpenses = monthExpensesResult.status === 'fulfilled' ? (monthExpensesResult.value.data ?? []) : []
@@ -100,12 +98,7 @@ export async function GET() {
     const subs = subsResult.status === 'fulfilled' ? (subsResult.value.data ?? []) : []
     const subsTotal = subs.reduce((s: number, sub: { amount_estimate: number | null }) => s + (sub.amount_estimate ?? 0), 0)
 
-    // Items
-    const items = itemsResult.status === 'fulfilled' ? (itemsResult.value.data ?? []) : []
-    const lastSynced = items.length > 0
-      ? items.reduce((latest: string | null, i: { last_synced_at: string | null }) =>
-          !latest || (i.last_synced_at && i.last_synced_at > latest) ? i.last_synced_at : latest, null)
-      : null
+    const txnCount = txnCountResult.status === 'fulfilled' ? (txnCountResult.value.count ?? 0) : 0
 
     return NextResponse.json({
       total_available_balance: totalAvailable,
@@ -124,8 +117,8 @@ export async function GET() {
       accounts,
       needs_review_count: needsReviewResult.status === 'fulfilled' ? (needsReviewResult.value.count ?? 0) : 0,
       alerts: alertsResult.status === 'fulfilled' ? (alertsResult.value.data ?? []) : [],
-      plaid_connected: items.length > 0,
-      last_synced_at: lastSynced,
+      has_transactions: txnCount > 0,
+      last_synced_at: null,
     })
   } catch (error) {
     console.error('[Money] summary error:', error)

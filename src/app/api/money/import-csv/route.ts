@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       const isTransfer = (t.category ?? '').toLowerCase() === 'transfer'
       return {
         user_id: ZOE_USER_ID,
-        plaid_transaction_id: `csv_${source ?? 'import'}_${Date.now()}_${idx}`,
+        plaid_transaction_id: `csv_${source ?? 'import'}_${idx}`,
         name: t.description,
         merchant_name: t.description,
         amount: t.amount,

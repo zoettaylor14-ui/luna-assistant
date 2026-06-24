@@ -1,8 +1,8 @@
 // ─── Money helpers for LUNA banking integration ───────────────────────────────
 
-export interface PlaidTransaction {
+export interface Transaction {
   transaction_id: string
-  account_id: string
+  account_id?: string
   amount: number
   date: string
   authorized_date?: string | null
@@ -48,7 +48,7 @@ const INCOME_CATEGORIES = [
   'INCOME_RETIREMENT_PENSION', 'INCOME_DIVIDENDS',
 ]
 
-export function classifyTransaction(txn: PlaidTransaction): string {
+export function classifyTransaction(txn: Transaction): string {
   const name = (txn.merchant_name ?? txn.name ?? '').toLowerCase()
   const cat = txn.personal_finance_category?.primary?.toUpperCase() ?? ''
   const catDetail = txn.personal_finance_category?.detailed?.toUpperCase() ?? ''
@@ -59,7 +59,6 @@ export function classifyTransaction(txn: PlaidTransaction): string {
   if (isSubscription(txn)) return 'subscription'
   if (isBusinessExpense(txn)) return 'business'
 
-  // Map Plaid categories to friendly expense types
   if (cat.includes('FOOD') || cat.includes('DINING')) return 'food'
   if (cat.includes('TRANSPORT') || cat.includes('TRAVEL')) return 'transport'
   if (cat.includes('HEALTHCARE') || cat.includes('MEDICAL')) return 'healthcare'
@@ -70,13 +69,12 @@ export function classifyTransaction(txn: PlaidTransaction): string {
   if (cat.includes('GENERAL_SERVICES')) return 'services'
   if (cat.includes('HOME')) return 'home'
 
-  // name is used in classification — keep it referenced
   void name
 
   return 'other'
 }
 
-export function isBusinessExpense(txn: PlaidTransaction): boolean {
+export function isBusinessExpense(txn: Transaction): boolean {
   const name = (txn.merchant_name ?? txn.name ?? '').toLowerCase()
   const cat = txn.personal_finance_category?.primary?.toUpperCase() ?? ''
   if (BUSINESS_MERCHANTS.some(m => name.includes(m))) return true
@@ -84,7 +82,7 @@ export function isBusinessExpense(txn: PlaidTransaction): boolean {
   return false
 }
 
-export function isSubscription(txn: PlaidTransaction): boolean {
+export function isSubscription(txn: Transaction): boolean {
   const name = (txn.merchant_name ?? txn.name ?? '').toLowerCase()
   const cat = txn.personal_finance_category?.primary?.toUpperCase() ?? ''
   const catDetail = txn.personal_finance_category?.detailed?.toUpperCase() ?? ''
@@ -94,7 +92,7 @@ export function isSubscription(txn: PlaidTransaction): boolean {
   return false
 }
 
-export function isBill(txn: PlaidTransaction): boolean {
+export function isBill(txn: Transaction): boolean {
   const name = (txn.merchant_name ?? txn.name ?? '').toLowerCase()
   const cat = txn.personal_finance_category?.primary?.toUpperCase() ?? ''
   if (BILL_PATTERNS.some(m => name.includes(m))) return true
@@ -102,8 +100,8 @@ export function isBill(txn: PlaidTransaction): boolean {
   return false
 }
 
-export function isIncome(txn: PlaidTransaction): boolean {
-  if (txn.amount < 0) return true // In Plaid, negative amount = money in
+export function isIncome(txn: Transaction): boolean {
+  if (txn.amount < 0) return true
   const cat = txn.personal_finance_category?.primary?.toUpperCase() ?? ''
   return INCOME_CATEGORIES.some(c => cat.includes(c))
 }

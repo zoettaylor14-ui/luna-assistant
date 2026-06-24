@@ -52,7 +52,6 @@ export default function AccountsPage() {
 
   const handleSync = async () => {
     setSyncing(true)
-    await fetch('/api/plaid/accounts/sync', { method: 'POST' })
     await loadAccounts()
     setSyncing(false)
   }

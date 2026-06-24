@@ -87,7 +87,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="6. Financial Data">
-          Financial data imported into LUNA (via CSV or Plaid) is stored in your private database for personal budgeting and insight purposes only. LUNA does not execute financial transactions, provide regulated financial advice, or share your financial data with any third party beyond what is necessary to operate the Service.
+          Financial data imported into LUNA (via CSV) is stored in your private database for personal budgeting and insight purposes only. LUNA does not execute financial transactions, provide regulated financial advice, or share your financial data with any third party beyond what is necessary to operate the Service.
         </Section>
 
         <Section title="7. Intellectual Property">

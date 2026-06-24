@@ -5,7 +5,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { formatCurrency } from '@/lib/money'
 import {
   DollarSign, AlertTriangle, TrendingUp, TrendingDown,
-  CreditCard, RefreshCw, ArrowRight, Loader2, Upload,
+  CreditCard, RefreshCw, ArrowRight, Upload,
 } from 'lucide-react'
 
 const BG = 'linear-gradient(180deg, #1A1240 0%, #100C30 35%, #0A0820 65%, #060418 100%)'
@@ -28,7 +28,7 @@ const LABEL: React.CSSProperties = {
 }
 
 interface Transaction {
-  id: string; plaid_transaction_id?: string
+  id: string
   merchant_name?: string | null; name?: string | null
   amount: number; transaction_date: string
   expense_type?: string | null; is_income?: boolean
@@ -41,17 +41,14 @@ interface BillDue {
 interface ActiveSub { id: string; merchant_name?: string | null; amount_estimate?: number | null }
 interface MoneyAlert { id: string; title?: string | null; body?: string | null; severity?: string | null }
 interface SummaryData {
-  total_available_balance: number; total_current_balance: number
   spending_this_month: number; spending_this_week: number; income_this_month: number
   top_categories: { category: string; amount: number; count: number }[]
   recent_transactions: Transaction[]
   bills_due_soon: BillDue[]
   active_subscriptions: { count: number; total: number; items: ActiveSub[] }
-  accounts: { id: string; name: string; type: string; available_balance?: number }[]
   needs_review_count: number
   alerts: MoneyAlert[]
-  plaid_connected: boolean
-  last_synced_at: string | null
+  has_transactions: boolean
 }
 
 const QUICK_NAV = [
@@ -65,18 +62,6 @@ const QUICK_NAV = [
   { label: 'Review',        href: '/money/review',            icon: AlertTriangle },
 ]
 
-declare global {
-  interface Window {
-    Plaid?: { create: (config: PlaidConfig) => { open: () => void } }
-  }
-}
-interface PlaidConfig {
-  token: string
-  onSuccess: (public_token: string, metadata: { institution: { name: string; institution_id: string } }) => void
-  onExit: () => void
-  onEvent?: (eventName: string) => void
-}
-
 function Skeleton({ h = 80, w = '100%' }: { h?: number; w?: string | number }) {
   return (
     <div style={{
@@ -86,30 +71,10 @@ function Skeleton({ h = 80, w = '100%' }: { h?: number; w?: string | number }) {
   )
 }
 
-// ─── Plaid Link loader ─────────────────────────────────────────────────────────
-async function loadPlaidScript(): Promise<void> {
-  if (window.Plaid) return
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector('script[src*="plaid.com/link"]')
-    if (existing) {
-      existing.addEventListener('load', () => resolve())
-      return
-    }
-    const s = document.createElement('script')
-    s.src = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js'
-    s.onload  = () => resolve()
-    s.onerror = () => reject(new Error('Could not load Plaid Link'))
-    document.head.appendChild(s)
-  })
-}
-
 export default function MoneyCommandCenter() {
-  const [summary, setSummary]               = useState<SummaryData | null>(null)
-  const [loading, setLoading]               = useState(true)
-  const [syncing, setSyncing]               = useState(false)
-  const [connecting, setConnecting]         = useState(false)
-  const [dismissed, setDismissed]           = useState<Set<string>>(new Set())
-  const [connectError, setConnectError]     = useState<string | null>(null)
+  const [summary, setSummary]     = useState<SummaryData | null>(null)
+  const [loading, setLoading]     = useState(true)
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
 
   const loadSummary = useCallback(async () => {
     try {
@@ -124,85 +89,14 @@ export default function MoneyCommandCenter() {
 
   useEffect(() => { void loadSummary() }, [loadSummary])
 
-  // ─── Connect bank — full async flow with no state race ─────────────────────
-  async function handleConnectBank() {
-    setConnectError(null)
-    setConnecting(true)
-    try {
-      // 1. Get link token from server
-      const tokenRes = await fetch('/api/plaid/create-link-token', { method: 'POST' })
-      const tokenData = await tokenRes.json() as { link_token?: string; error?: string }
-      if (!tokenRes.ok || !tokenData.link_token) {
-        throw new Error(tokenData.error ?? 'Could not create Plaid link token')
-      }
+  const alerts   = (summary?.alerts ?? []).filter(a => !dismissed.has(a.id))
+  const recentTxns = (summary?.recent_transactions ?? []).slice(0, 8)
+  const topCats  = summary?.top_categories ?? []
+  const maxCat   = topCats.length > 0 ? Math.max(...topCats.map(c => c.amount)) : 1
+  const billsDue = summary?.bills_due_soon ?? []
 
-      // 2. Load Plaid Link JS (waits until actually ready)
-      await loadPlaidScript()
-
-      if (!window.Plaid) throw new Error('Plaid Link did not load')
-
-      // 3. Open Plaid Link
-      setConnecting(false)
-      const handler = window.Plaid.create({
-        token: tokenData.link_token,
-        onSuccess: async (public_token, metadata) => {
-          setConnecting(true)
-          try {
-            const exchRes = await fetch('/api/plaid/exchange-public-token', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                public_token,
-                institution_id: metadata.institution.institution_id,
-                institution_name: metadata.institution.name,
-              }),
-            })
-            if (!exchRes.ok) {
-              const { error } = await exchRes.json() as { error?: string }
-              throw new Error(error ?? 'Token exchange failed')
-            }
-            // Refresh data
-            setLoading(true)
-            await loadSummary()
-          } catch (e) {
-            setConnectError(e instanceof Error ? e.message : 'Connection failed')
-          } finally {
-            setConnecting(false)
-          }
-        },
-        onExit: () => { setConnecting(false) },
-      })
-      handler.open()
-    } catch (err) {
-      setConnecting(false)
-      setConnectError(err instanceof Error ? err.message : 'Could not open Plaid Link')
-      console.error('[Plaid] connect error:', err)
-    }
-  }
-
-  async function handleSync() {
-    setSyncing(true)
-    try {
-      await Promise.all([
-        fetch('/api/plaid/accounts/sync', { method: 'POST' }),
-        fetch('/api/plaid/transactions/sync', { method: 'POST' }),
-      ])
-      setLoading(true)
-      await loadSummary()
-    } finally {
-      setSyncing(false)
-    }
-  }
-
-  const isConnected = summary?.plaid_connected === true
-  const alerts      = (summary?.alerts ?? []).filter(a => !dismissed.has(a.id))
-  const recentTxns  = (summary?.recent_transactions ?? []).slice(0, 8)
-  const topCats     = summary?.top_categories ?? []
-  const maxCat      = topCats.length > 0 ? Math.max(...topCats.map(c => c.amount)) : 1
-  const billsDue    = summary?.bills_due_soon ?? []
-
-  // ─── NOT CONNECTED ─────────────────────────────────────────────────────────
-  if (!loading && !isConnected) {
+  // ─── NO DATA YET ───────────────────────────────────────────────────────────
+  if (!loading && !summary?.has_transactions) {
     return (
       <div style={{ background: BG, minHeight: '100vh' }}>
         <AppLayout noPad>
@@ -211,7 +105,6 @@ export default function MoneyCommandCenter() {
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             textAlign: 'center', gap: 24, maxWidth: 400, margin: '0 auto',
           }}>
-            {/* Gold icon */}
             <div style={{
               width: 88, height: 88, borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(201,169,110,0.22) 0%, rgba(201,169,110,0.06) 70%)',
@@ -232,53 +125,33 @@ export default function MoneyCommandCenter() {
             </div>
 
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75 }}>
-              Connect both banks through Plaid and LUNA will track every dollar —
+              Import your bank statements and LUNA will track every dollar —
               expenses, bills, subscriptions, money leaks, and your path to wealth.
             </p>
 
-            {/* Connect button */}
-            <button
-              onClick={() => void handleConnectBank()}
-              disabled={connecting}
-              style={{
-                width: '100%', height: 52, borderRadius: 16, border: 'none', cursor: connecting ? 'wait' : 'pointer',
-                background: connecting ? 'rgba(201,169,110,0.4)' : 'linear-gradient(135deg, #C9A96E 0%, #B8903A 100%)',
-                color: '#1A1240', fontSize: 16, fontWeight: 800, letterSpacing: '0.02em',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                transition: 'opacity 0.2s',
-              }}>
-              {connecting
-                ? <><Loader2 style={{ width: 18, height: 18, animation: 'spin 1s linear infinite' }} /> Connecting…</>
-                : 'Connect Bank'}
-            </button>
+            <Link href="/money/import" style={{
+              width: '100%', height: 52, borderRadius: 16, border: 'none',
+              background: 'linear-gradient(135deg, #C9A96E 0%, #B8903A 100%)',
+              color: '#1A1240', fontSize: 16, fontWeight: 800, letterSpacing: '0.02em',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              textDecoration: 'none',
+            }}>
+              <Upload style={{ width: 18, height: 18 }} /> Import Bank CSV
+            </Link>
 
-            {connectError && (
-              <p style={{ fontSize: 13, color: RED, background: 'rgba(201,107,90,0.1)', border: '1px solid rgba(201,107,90,0.3)', borderRadius: 10, padding: '10px 14px', width: '100%' }}>
-                {connectError}
-              </p>
-            )}
-
-            {/* April preview */}
             <div style={{
               ...CARD,
               border: '1px solid rgba(201,169,110,0.22)',
               background: 'rgba(201,169,110,0.06)',
               padding: '16px 20px', width: '100%', textAlign: 'left',
             }}>
-              <p style={{ ...LABEL, color: GOLDEN, marginBottom: 8 }}>April Snapshot</p>
+              <p style={{ ...LABEL, color: GOLDEN, marginBottom: 8 }}>How to import</p>
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7 }}>
-                19 known subscriptions from April —{' '}
-                <span style={{ color: GOLDEN, fontWeight: 700 }}>$437/mo estimated</span>
+                Log into your bank → Download transactions as CSV → Drag into LUNA.
+                Works with Chase, BofA, Wells Fargo, Capital One, Discover, and more.
               </p>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.42)', marginTop: 6, lineHeight: 1.6 }}>
-                ChatGPT + Claude · Spotify · AT&T · Spectrum · Crunch · CapCut · iCloud and more
-              </p>
-              <Link href="/money/subscriptions" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 10, fontSize: 12, color: GOLDEN, textDecoration: 'none', fontWeight: 600 }}>
-                View all subscriptions <ArrowRight style={{ width: 12, height: 12 }} />
-              </Link>
             </div>
 
-            {/* Quick nav even without connection */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, width: '100%' }}>
               {QUICK_NAV.map(({ label, href, icon: Icon }) => (
                 <Link key={href} href={href} style={{ textDecoration: 'none' }}>
@@ -289,11 +162,6 @@ export default function MoneyCommandCenter() {
                 </Link>
               ))}
             </div>
-
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', lineHeight: 1.6 }}>
-              LUNA never stores your bank login. Plaid handles the secure connection.
-              Your credentials are encrypted by Plaid — LUNA only reads balances and transactions.
-            </p>
           </div>
         </AppLayout>
         <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
@@ -322,7 +190,7 @@ export default function MoneyCommandCenter() {
     )
   }
 
-  // ─── CONNECTED DASHBOARD ───────────────────────────────────────────────────
+  // ─── DASHBOARD ─────────────────────────────────────────────────────────────
   return (
     <div style={{ background: BG, minHeight: '100vh' }}>
       <AppLayout noPad>
@@ -335,45 +203,23 @@ export default function MoneyCommandCenter() {
               <h1 style={{ fontSize: 24, fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>
                 Your Money
               </h1>
-              {summary?.last_synced_at && (
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                  Last synced {new Date(summary.last_synced_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              )}
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                onClick={() => void handleConnectBank()}
-                disabled={connecting}
-                style={{
-                  height: 36, padding: '0 14px', borderRadius: 10, border: '1px solid rgba(201,169,110,0.4)',
-                  background: 'transparent', color: GOLDEN, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 5,
-                }}>
-                <DollarSign style={{ width: 12, height: 12 }} />
-                {connecting ? 'Connecting…' : '+ Bank'}
-              </button>
-              <button
-                onClick={() => void handleSync()}
-                disabled={syncing}
-                style={{
-                  height: 36, padding: '0 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)',
-                  background: 'transparent', color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 5,
-                }}>
-                <RefreshCw style={{ width: 12, height: 12, animation: syncing ? 'spin 1s linear infinite' : 'none' }} />
-                {syncing ? 'Syncing…' : 'Sync'}
-              </button>
-            </div>
+            <Link href="/money/import" style={{
+              height: 36, padding: '0 14px', borderRadius: 10, border: '1px solid rgba(201,169,110,0.4)',
+              background: 'transparent', color: GOLDEN, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none',
+            }}>
+              <Upload style={{ width: 12, height: 12 }} /> Import CSV
+            </Link>
           </div>
 
           {/* Stat cards */}
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', marginBottom: 16, paddingBottom: 4 }}>
             {[
-              { label: 'Available Cash', value: formatCurrency(summary?.total_available_balance ?? 0), color: GREEN },
               { label: 'Spent This Month', value: formatCurrency(summary?.spending_this_month ?? 0), color: GOLDEN },
-              { label: 'Income This Month', value: formatCurrency(summary?.income_this_month ?? 0), color: GREEN },
-              { label: 'Bills Due', value: String(billsDue.length), color: billsDue.length > 0 ? AMBER : 'rgba(255,255,255,0.5)' },
+              { label: 'Spent This Week',  value: formatCurrency(summary?.spending_this_week ?? 0),  color: GOLDEN },
+              { label: 'Income This Month',value: formatCurrency(summary?.income_this_month ?? 0),   color: GREEN  },
+              { label: 'Bills Due',        value: String(billsDue.length), color: billsDue.length > 0 ? AMBER : 'rgba(255,255,255,0.5)' },
               { label: 'Subscriptions/mo', value: formatCurrency(summary?.active_subscriptions?.total ?? 0), color: GOLDEN },
             ].map(stat => (
               <div key={stat.label} style={{ ...CARD, minWidth: 155, flexShrink: 0, padding: 16 }}>
@@ -414,7 +260,7 @@ export default function MoneyCommandCenter() {
             </div>
             {recentTxns.length === 0 ? (
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textAlign: 'center', padding: '20px 0' }}>
-                No transactions yet. Sync your banks to begin.
+                No transactions yet. <Link href="/money/import" style={{ color: GOLDEN }}>Import a CSV</Link> to begin.
               </p>
             ) : recentTxns.map(txn => {
               const label = txn.merchant_name ?? txn.name ?? 'Unknown'
