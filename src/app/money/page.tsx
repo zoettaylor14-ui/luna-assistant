@@ -129,28 +129,25 @@ export default function MoneyCommandCenter() {
               expenses, bills, subscriptions, money leaks, and your path to wealth.
             </p>
 
-            <Link href="/money/import" style={{
+            <Link href="/money/connect" style={{
               width: '100%', height: 52, borderRadius: 16, border: 'none',
               background: 'linear-gradient(135deg, #C9A96E 0%, #B8903A 100%)',
               color: '#1A1240', fontSize: 16, fontWeight: 800, letterSpacing: '0.02em',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               textDecoration: 'none',
             }}>
-              <Upload style={{ width: 18, height: 18 }} /> Import Bank CSV
+              <CreditCard style={{ width: 18, height: 18 }} /> Connect Bank Account
             </Link>
 
-            <div style={{
-              ...CARD,
-              border: '1px solid rgba(201,169,110,0.22)',
-              background: 'rgba(201,169,110,0.06)',
-              padding: '16px 20px', width: '100%', textAlign: 'left',
+            <Link href="/money/import" style={{
+              width: '100%', height: 44, borderRadius: 14, border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              textDecoration: 'none',
             }}>
-              <p style={{ ...LABEL, color: GOLDEN, marginBottom: 8 }}>How to import</p>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7 }}>
-                Log into your bank → Download transactions as CSV → Drag into LUNA.
-                Works with Chase, BofA, Wells Fargo, Capital One, Discover, and more.
-              </p>
-            </div>
+              <Upload style={{ width: 15, height: 15 }} /> Or import CSV instead
+            </Link>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, width: '100%' }}>
               {QUICK_NAV.map(({ label, href, icon: Icon }) => (
