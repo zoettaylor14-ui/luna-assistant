@@ -1,0 +1,181 @@
+import { createClient } from '@supabase/supabase-js'
+
+const CLIENT_ID     = process.env.GOOGLE_CLIENT_ID!
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!
+
+function adminDb() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+}
+
+async function refreshAccessToken(refresh_token: string): Promise<{ access_token: string; expires_in: number }> {
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id:     CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+      refresh_token,
+      grant_type:    'refresh_token',
+    }),
+  })
+  if (!res.ok) throw new Error(`Token refresh failed: ${await res.text()}`)
+  return res.json()
+}
+
+async function getValidTokens(): Promise<{ access_token: string; email: string }[]> {
+  const db = adminDb()
+  const { data } = await db
+    .from('gmail_tokens')
+    .select('id, email, access_token, refresh_token, token_expiry')
+    .order('connected_at', { ascending: true })
+
+  if (!data?.length) return []
+
+  const results: { access_token: string; email: string }[] = []
+
+  await Promise.all(data.map(async (row: {
+    id: string; email: string; access_token: string; refresh_token: string; token_expiry: string
+  }) => {
+    try {
+      const expiry       = row.token_expiry ? new Date(row.token_expiry).getTime() : 0
+      const needsRefresh = Date.now() > expiry - 60_000
+      let access_token   = row.access_token
+
+      if (needsRefresh && row.refresh_token) {
+        const refreshed = await refreshAccessToken(row.refresh_token)
+        access_token    = refreshed.access_token
+        const newExpiry = new Date(Date.now() + refreshed.expires_in * 1000).toISOString()
+        await db.from('gmail_tokens').update({ access_token, token_expiry: newExpiry }).eq('id', row.id)
+      }
+
+      results.push({ access_token, email: row.email })
+    } catch { /* skip expired/bad token */ }
+  }))
+
+  return results
+}
+
+async function calFetch(access_token: string, path: string) {
+  const res = await fetch(`https://www.googleapis.com/calendar/v3${path}`, {
+    headers: { Authorization: `Bearer ${access_token}` },
+  })
+  if (!res.ok) throw new Error(`Calendar API ${res.status}: ${await res.text()}`)
+  return res.json()
+}
+
+export interface CalendarEvent {
+  id: string
+  title: string
+  start: string
+  end: string
+  startTime: string
+  endTime: string
+  allDay: boolean
+  location?: string
+  description?: string
+  htmlLink?: string
+  colorId?: string
+  calendar: string
+  calendarId: string
+  account: string
+  isToday: boolean
+  isTomorrow: boolean
+  isPast: boolean
+  status?: string
+  organizer?: string
+  attendeeCount?: number
+}
+
+function formatTime(dateStr: string, allDay: boolean): string {
+  if (allDay) return 'All day'
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  }).format(new Date(dateStr))
+}
+
+export async function getUpcomingEvents(daysAhead = 14): Promise<CalendarEvent[]> {
+  const tokens = await getValidTokens()
+  if (!tokens.length) return []
+
+  const now      = new Date()
+  const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1)
+  const maxTime  = new Date(now); maxTime.setDate(maxTime.getDate() + daysAhead)
+
+  const todayStr    = now.toDateString()
+  const tomorrowStr = tomorrow.toDateString()
+
+  const allEvents: CalendarEvent[] = []
+
+  await Promise.all(tokens.map(async (tok) => {
+    try {
+      const calList  = await calFetch(tok.access_token, '/users/me/calendarList?maxResults=20')
+      const calendars: { id: string; summary: string }[] = calList.items ?? []
+
+      await Promise.all(calendars.slice(0, 8).map(async (cal) => {
+        try {
+          const params = new URLSearchParams({
+            timeMin:      now.toISOString(),
+            timeMax:      maxTime.toISOString(),
+            maxResults:   '50',
+            singleEvents: 'true',
+            orderBy:      'startTime',
+          })
+          const data  = await calFetch(tok.access_token, `/calendars/${encodeURIComponent(cal.id)}/events?${params}`)
+          const items = (data.items ?? []) as Array<{
+            id: string; summary?: string; status?: string
+            start?: { dateTime?: string; date?: string }
+            end?:   { dateTime?: string; date?: string }
+            location?: string; description?: string; htmlLink?: string; colorId?: string
+            organizer?: { email?: string }; attendees?: unknown[]
+          }>
+
+          for (const ev of items) {
+            if (ev.status === 'cancelled') continue
+            const startStr = ev.start?.dateTime ?? ev.start?.date ?? ''
+            const endStr   = ev.end?.dateTime   ?? ev.end?.date   ?? ''
+            const allDay   = !ev.start?.dateTime
+            const startD   = new Date(startStr)
+            const startDS  = startD.toDateString()
+
+            allEvents.push({
+              id:            ev.id,
+              title:         ev.summary ?? '(No title)',
+              start:         startStr,
+              end:           endStr,
+              startTime:     formatTime(startStr, allDay),
+              endTime:       formatTime(endStr, allDay),
+              allDay,
+              location:      ev.location,
+              description:   ev.description,
+              htmlLink:      ev.htmlLink,
+              colorId:       ev.colorId,
+              calendar:      cal.summary,
+              calendarId:    cal.id,
+              account:       tok.email,
+              isToday:       startDS === todayStr,
+              isTomorrow:    startDS === tomorrowStr,
+              isPast:        startD < now && !allDay,
+              status:        ev.status,
+              organizer:     ev.organizer?.email,
+              attendeeCount: ev.attendees?.length ?? 0,
+            })
+          }
+        } catch { /* skip calendar on error */ }
+      }))
+    } catch { /* skip account on error */ }
+  }))
+
+  const seen = new Set<string>()
+  return allEvents
+    .filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true })
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+}
+
+export async function getTodayEvents(): Promise<CalendarEvent[]> {
+  const all = await getUpcomingEvents(2)
+  return all.filter(e => e.isToday)
+}
+
+export async function getWeekEvents(): Promise<CalendarEvent[]> {
+  return getUpcomingEvents(7)
+}

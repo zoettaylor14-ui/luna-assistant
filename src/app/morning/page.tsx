@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Sun, ArrowRight, Sparkles, ChevronLeft, Moon } from 'lucide-react'
 import { format } from 'date-fns'
+import { SmartInput } from '@/components/ui/SmartInput'
+import { addPattern } from '@/lib/patterns'
+import { useLocation } from '@/hooks/useLocation'
 
 type CheckInType = 'morning' | 'midday' | 'night'
 
@@ -64,6 +67,7 @@ interface CheckInData {
 type Step = 'wake' | 'sleep' | 'energy' | 'mood' | 'dream' | 'feeling' | 'support' | 'goal' | 'result'
 
 export default function MorningCheckIn() {
+  const location = useLocation()
   const [checkInType, setCheckInType] = useState<CheckInType>('morning')
   const [step, setStep] = useState<Step>('wake')
   const [data, setData] = useState<CheckInData>({
@@ -93,7 +97,7 @@ export default function MorningCheckIn() {
       const res = await fetch('/api/ai/daily-brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ checkIn: data, type: checkInType }),
+        body: JSON.stringify({ checkIn: data, type: checkInType, tz: location.tz, localTime: location.localTime }),
       })
       aiResult = await res.json()
       setResult(aiResult)
@@ -123,7 +127,9 @@ export default function MorningCheckIn() {
     }
   }
 
-  const today = format(new Date(), 'EEEE, MMMM d')
+  const today = location.localDate
+    ? location.localDate.split(',').slice(0,2).join(',')
+    : format(new Date(), 'EEEE, MMMM d')
 
   function SliderInput({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
     return (
@@ -134,7 +140,11 @@ export default function MorningCheckIn() {
         </div>
         <input
           type="range" min={1} max={10} value={value}
-          onChange={e => onChange(Number(e.target.value))}
+          onChange={e => {
+            const n = Number(e.target.value)
+            onChange(n)
+            addPattern({ type: 'morning', context: label.toLowerCase(), value: String(n), source: 'typed' })
+          }}
         />
         <div className="flex justify-between mt-1">
           <span className="text-xs" style={{ color: 'var(--mist)' }}>Low</span>
@@ -263,14 +273,14 @@ export default function MorningCheckIn() {
               </div>
               {data.hadDream && (
                 <div className="glass-card p-5 mb-5">
-                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--violet)' }}>Tell me what you remember</p>
-                  <textarea
-                    value={data.dreamText}
-                    onChange={e => update('dreamText', e.target.value)}
+                  <p className="text-xs font-semibold mb-3" style={{ color: 'var(--violet)' }}>Tell me what you remember</p>
+                  <SmartInput
+                    context="dream — people, feelings, places, symbols from last night's dream"
                     placeholder="People, feelings, places, symbols — anything..."
-                    rows={4}
-                    className="w-full bg-transparent outline-none text-sm resize-none"
-                    style={{ color: 'var(--depth)' }}
+                    value={data.dreamText}
+                    onChange={v => update('dreamText', v)}
+                    patternType="morning"
+                    rows={3}
                   />
                 </div>
               )}
@@ -296,25 +306,27 @@ export default function MorningCheckIn() {
               <p className="text-sm mb-6" style={{ color: 'var(--mid)' }}>
                 Say it out loud if you can. Speak it into the room first.
               </p>
-              <div className="glass-card p-5 mb-5">
-                <textarea
-                  value={data.feeling}
-                  onChange={e => update('feeling', e.target.value)}
+              <div className="glass-card p-5 mb-4">
+                <p className="text-xs font-semibold mb-3" style={{ color: 'var(--violet)' }}>What are you feeling?</p>
+                <SmartInput
+                  context="how are you feeling right now — emotions, physical sensations, overall state"
                   placeholder="I feel... I am noticing... Something in me is..."
-                  rows={4}
-                  className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--depth)' }}
+                  value={data.feeling}
+                  onChange={v => update('feeling', v)}
+                  patternType="morning"
+                  rows={3}
                 />
               </div>
               <div className="glass-card p-5 mb-5">
-                <p className="text-xs font-semibold mb-2" style={{ color: 'var(--violet)' }}>What is sitting on your mind?</p>
-                <textarea
-                  value={data.onMind}
-                  onChange={e => update('onMind', e.target.value)}
+                <p className="text-xs font-semibold mb-3" style={{ color: 'var(--violet)' }}>What is sitting on your mind?</p>
+                <SmartInput
+                  context="what is on your mind — work, people, thoughts, worries, excitement"
                   placeholder="Work, people, thoughts, worries, excitement..."
+                  value={data.onMind}
+                  onChange={v => update('onMind', v)}
+                  patternType="morning"
+                  history={data.feeling ? [data.feeling] : []}
                   rows={3}
-                  className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--depth)' }}
                 />
               </div>
               <div className="flex gap-3">
@@ -343,7 +355,10 @@ export default function MorningCheckIn() {
                 {SUPPORT_NEEDS.map(s => (
                   <button
                     key={s.value}
-                    onClick={() => update('supportNeed', s.value)}
+                    onClick={() => {
+                      update('supportNeed', s.value)
+                      addPattern({ type: 'morning', context: 'support need', value: s.label, source: 'suggestion' })
+                    }}
                     className="p-4 rounded-2xl text-left transition-all"
                     style={{
                       background: data.supportNeed === s.value ? 'var(--violet-pale)' : 'var(--glass-bg)',
@@ -379,13 +394,14 @@ export default function MorningCheckIn() {
                 One thing. Not a list. What would feel like a win by bedtime?
               </p>
               <div className="glass-card p-5 mb-8">
-                <textarea
-                  value={data.prideGoal}
-                  onChange={e => update('prideGoal', e.target.value)}
+                <SmartInput
+                  context="what would make tonight-you proud — one thing that would feel like a win by bedtime"
                   placeholder="Tonight I will feel good because I..."
+                  value={data.prideGoal}
+                  onChange={v => update('prideGoal', v)}
+                  patternType="morning"
+                  history={[data.feeling, data.onMind].filter(Boolean)}
                   rows={3}
-                  className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--depth)' }}
                 />
               </div>
               <div className="flex gap-3">

@@ -1,36 +1,22 @@
 'use client'
 import { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { AIThinking } from '@/components/ui/loading'
-import { createClient } from '@/lib/supabase/client'
-import { Sparkles, Brain, Zap, DollarSign, Clock, AlertCircle, CheckCircle } from 'lucide-react'
-import { cn, URGENCY_COLORS, CATEGORY_COLORS } from '@/lib/utils'
+import { Brain, Sparkles, Zap, Clock, DollarSign, CheckCircle, AlertCircle } from 'lucide-react'
+import { SmartInput } from '@/components/ui/SmartInput'
+import { addPattern } from '@/lib/patterns'
 
 interface BrainDumpTask {
-  title: string
-  category: string
-  project: string
-  urgency_level: string
-  estimated_minutes: number
-  money_impact: number
-  is_quick_win: boolean
-  priority_score: number
+  title: string; category: string; project: string; urgency_level: string
+  estimated_minutes: number; money_impact: number; is_quick_win: boolean; priority_score: number
 }
-
 interface BrainDumpResult {
-  tasks: BrainDumpTask[]
-  grouped: Record<string, BrainDumpTask[]>
-  today_order: BrainDumpTask[]
-  quick_wins: BrainDumpTask[]
-  can_wait: BrainDumpTask[]
-  ai_message: string
+  tasks: BrainDumpTask[]; grouped: Record<string, BrainDumpTask[]>; today_order: BrainDumpTask[]
+  quick_wins: BrainDumpTask[]; can_wait: BrainDumpTask[]; ai_message: string
 }
 
-const EXAMPLE_DUMP = "Fix EHM emails, check DRYP studio update, make Linked Up flyer, respond to Mick about Flanagan's, finish USF assignment due Friday, book dentist appointment, post TikTok for Ad-Vantage, follow up on Villa Residential invoice, review Babe Coffee content calendar"
+const URGENCY_COLORS: Record<string, string> = {
+  critical: '#C96B5A', high: '#C9A96E', medium: '#8B6FB8', low: '#5A8A7A'
+}
 
 export default function BrainDumpPage() {
   const [text, setText] = useState('')
@@ -39,17 +25,14 @@ export default function BrainDumpPage() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState<string | null>(null)
   const [saved, setSaved] = useState<Set<string>>(new Set())
-  const supabase = createClient()
 
   async function handleDump() {
     if (!text.trim()) return
-    setLoading(true)
-    setError('')
-    setResult(null)
+    setLoading(true); setError(''); setResult(null)
+    addPattern({ type: 'brain_dump', context: 'brain dump', value: text, source: 'typed' })
     try {
       const res = await fetch('/api/ai/brain-dump', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       })
       const data = await res.json()
@@ -57,288 +40,199 @@ export default function BrainDumpPage() {
       setResult(data)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   async function saveTask(task: BrainDumpTask) {
-    const key = task.title
-    setSaving(key)
+    setSaving(task.title)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
       await fetch('/api/tasks/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: task.title,
-          category: task.category || 'Personal',
-          project: task.project || '',
-          urgency_level: task.urgency_level || 'medium',
-          estimated_minutes: task.estimated_minutes || 30,
-          money_impact: task.money_impact || 0,
-          priority_score: task.priority_score || 50,
-          status: 'todo',
-          source: 'brain_dump',
-        }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: task.title, category: task.category || 'Personal', project: task.project || '', urgency_level: task.urgency_level || 'medium', estimated_minutes: task.estimated_minutes || 30, money_impact: task.money_impact || 0, priority_score: task.priority_score || 50, status: 'todo', source: 'brain_dump' }),
       })
-      setSaved(prev => new Set(prev).add(key))
-    } finally {
-      setSaving(null)
-    }
-  }
-
-  async function saveAllTasks() {
-    if (!result) return
-    for (const task of result.today_order.slice(0, 10)) {
-      if (!saved.has(task.title)) {
-        await saveTask(task)
-      }
-    }
+      setSaved(prev => new Set(prev).add(task.title))
+    } finally { setSaving(null) }
   }
 
   return (
-    <AppLayout>
-      <div className="space-y-5">
-        <div>
-          <h1 className="text-2xl font-bold">Brain Dump</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Type everything on your mind. AI turns it into organized tasks.</p>
+    <div className="min-h-screen bg-app">
+      <AppLayout>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5 pt-2">
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+            style={{ background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.2)' }}>
+            <Brain className="h-5 w-5" style={{ color: '#C9A96E' }} />
+          </div>
+          <div>
+            <h1 className="font-display text-xl font-bold" style={{ color: 'var(--text-1)' }}>Brain Dump</h1>
+            <p className="text-xs" style={{ color: 'var(--text-4)' }}>Speak everything out. LUNA organizes it.</p>
+          </div>
         </div>
 
-        {/* Input */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Brain className="h-4 w-4 text-amber-500" />
-              <CardTitle>What's on your mind?</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Textarea
-              placeholder="Dump everything here. Doesn't need to be organized. Just type it all out..."
+        {/* Smart input */}
+        {!result && (
+          <div className="rounded-[22px] p-5 mb-4"
+            style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+            <p className="text-sm font-semibold mb-4" style={{ color: 'var(--text-1)' }}>
+              What is everything that is on your mind right now?
+            </p>
+            <SmartInput
+              context="brain dump — everything on my mind, tasks, worries, to-dos, people, ideas"
+              placeholder="Speak or type — dump it all out..."
               value={text}
-              onChange={e => setText(e.target.value)}
-              rows={6}
+              onChange={setText}
+              patternType="brain_dump"
+              rows={5}
             />
-            {!text && (
-              <button
-                onClick={() => setText(EXAMPLE_DUMP)}
-                className="text-xs text-violet-500 hover:underline"
-              >
-                Try an example →
-              </button>
-            )}
             {error && (
-              <div className="flex items-center gap-2 text-red-500 bg-red-50 rounded-xl px-3 py-2">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                <p className="text-sm">{error}</p>
+              <div className="flex items-center gap-2 mt-3 rounded-[14px] px-3 py-2"
+                style={{ background: 'rgba(201,107,90,0.1)', border: '1px solid rgba(201,107,90,0.2)' }}>
+                <AlertCircle className="h-4 w-4 flex-shrink-0" style={{ color: '#C96B5A' }} />
+                <p className="text-sm" style={{ color: '#C96B5A' }}>{error}</p>
               </div>
             )}
-            <div className="flex gap-2">
-              <Button
-                onClick={handleDump}
-                disabled={!text.trim() || loading}
-                loading={loading}
-                className="gap-2"
-              >
-                <Sparkles className="h-4 w-4" />
-                Sort it out
-              </Button>
-              {result && (
-                <Button variant="outline" onClick={() => { setText(''); setResult(null); setSaved(new Set()) }}>
-                  Start over
-                </Button>
-              )}
+            <button onClick={handleDump} disabled={!text.trim() || loading}
+              className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-[16px] font-semibold transition-all"
+              style={{
+                background: !text.trim() ? 'var(--surface-border)' : 'var(--violet)',
+                color: !text.trim() ? 'var(--text-4)' : 'white',
+              }}>
+              <Sparkles className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Organizing...' : 'Sort it out'}
+            </button>
+          </div>
+        )}
+
+        {/* Loading state */}
+        {loading && (
+          <div className="rounded-[20px] p-6 text-center"
+            style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
+            <div className="flex gap-1.5 justify-center mb-3">
+              {[0,1,2].map(i => (
+                <div key={i} className="w-2 h-2 rounded-full" style={{ background: 'var(--violet)', animation: `bounce 1s ease-in-out ${i * 0.2}s infinite` }} />
+              ))}
             </div>
-          </CardContent>
-        </Card>
+            <p className="text-sm" style={{ color: 'var(--text-3)' }}>Organizing your thoughts into tasks...</p>
+          </div>
+        )}
 
-        {loading && <AIThinking message="Organizing your thoughts into tasks..." />}
-
-        {result && (
-          <div className="space-y-5">
+        {/* Result */}
+        {result && !loading && (
+          <div className="space-y-4">
             {/* AI message */}
-            <div className="bg-violet-50 border border-violet-100 rounded-2xl p-4">
+            <div className="rounded-[20px] p-4"
+              style={{ background: 'rgba(139,111,184,0.1)', border: '1px solid rgba(139,111,184,0.2)' }}>
               <div className="flex items-start gap-3">
-                <Sparkles className="h-5 w-5 text-violet-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-violet-800">{result.ai_message}</p>
+                <Sparkles className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--violet)' }} />
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{result.ai_message}</p>
               </div>
             </div>
 
+            {/* Summary bar */}
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-600">{result.tasks?.length || 0} tasks found</p>
-              <Button size="sm" onClick={saveAllTasks} variant="outline" className="gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Save all to tasks
-              </Button>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>{result.tasks?.length ?? 0} things pulled out</p>
+              <button onClick={() => { setText(''); setResult(null); setSaved(new Set()) }}
+                className="text-xs px-3 py-1.5 rounded-full"
+                style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)', color: 'var(--text-3)' }}>
+                New dump
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Today's order */}
-              <Card>
-                <CardHeader>
+            {/* Do today */}
+            {result.today_order?.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-2.5">
                   <div className="flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-amber-500" />
-                    <CardTitle>Do today</CardTitle>
+                    <Zap className="h-4 w-4" style={{ color: '#C9A96E' }} />
+                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-4)' }}>Do Today</p>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-2 p-3">
-                  {result.today_order?.map((task, i) => (
-                    <TaskItem
-                      key={task.title}
-                      task={task}
-                      rank={i + 1}
-                      onSave={saveTask}
-                      saving={saving === task.title}
-                      saved={saved.has(task.title)}
-                    />
+                  <button onClick={async () => { for (const t of result.today_order.slice(0,8)) { if (!saved.has(t.title)) await saveTask(t) } }}
+                    className="text-xs px-2.5 py-1 rounded-full font-semibold"
+                    style={{ background: 'rgba(90,140,120,0.15)', color: '#5A8A7A', border: '1px solid rgba(90,140,120,0.25)' }}>
+                    Save all
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {result.today_order.map((task, i) => (
+                    <TaskCard key={task.title} task={task} rank={i + 1} onSave={saveTask} saving={saving === task.title} saved={saved.has(task.title)} />
                   ))}
-                </CardContent>
-              </Card>
-
-              {/* Quick wins */}
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-green-500" />
-                      <CardTitle>Quick wins</CardTitle>
-                      <Badge className="bg-green-50 text-green-600 ml-1">under 15 mins</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2 p-3">
-                    {result.quick_wins?.length === 0 ? (
-                      <p className="text-sm text-slate-400 px-2">No quick wins found</p>
-                    ) : result.quick_wins?.map(task => (
-                      <TaskItem
-                        key={task.title}
-                        task={task}
-                        onSave={saveTask}
-                        saving={saving === task.title}
-                        saved={saved.has(task.title)}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-slate-400">Can wait</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 p-3">
-                    {result.can_wait?.length === 0 ? (
-                      <p className="text-sm text-slate-400 px-2">Everything needs attention</p>
-                    ) : result.can_wait?.map(task => (
-                      <TaskItem
-                        key={task.title}
-                        task={task}
-                        onSave={saveTask}
-                        saving={saving === task.title}
-                        saved={saved.has(task.title)}
-                        muted
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Grouped by project */}
-            {Object.keys(result.grouped || {}).length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Grouped by project</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {Object.entries(result.grouped).map(([project, tasks]) => (
-                    <div key={project}>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">{project}</p>
-                      <div className="space-y-1.5 pl-2">
-                        {tasks.map(task => (
-                          <div key={task.title} className="flex items-center gap-2">
-                            <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', URGENCY_COLORS[task.urgency_level]?.includes('red') ? 'bg-red-400' : 'bg-gray-400')} />
-                            <p className="text-sm text-slate-700">{task.title}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+            {/* Quick wins */}
+            {result.quick_wins?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2.5">
+                  <CheckCircle className="h-4 w-4" style={{ color: '#5A8A7A' }} />
+                  <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-4)' }}>Quick Wins · Under 15 min</p>
+                </div>
+                <div className="space-y-2">
+                  {result.quick_wins.map(task => (
+                    <TaskCard key={task.title} task={task} onSave={saveTask} saving={saving === task.title} saved={saved.has(task.title)} />
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            )}
+
+            {/* Can wait */}
+            {result.can_wait?.length > 0 && (
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider mb-2.5" style={{ color: 'var(--text-4)' }}>Can Wait</p>
+                <div className="space-y-2 opacity-60">
+                  {result.can_wait.map(task => (
+                    <TaskCard key={task.title} task={task} onSave={saveTask} saving={saving === task.title} saved={saved.has(task.title)} muted />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         )}
-      </div>
-    </AppLayout>
+      </AppLayout>
+    </div>
   )
 }
 
-function TaskItem({
-  task,
-  rank,
-  onSave,
-  saving,
-  saved,
-  muted = false
-}: {
-  task: BrainDumpTask
-  rank?: number
-  onSave: (task: BrainDumpTask) => void
-  saving: boolean
-  saved: boolean
-  muted?: boolean
+function TaskCard({ task, rank, onSave, saving, saved, muted = false }: {
+  task: BrainDumpTask; rank?: number; onSave: (t: BrainDumpTask) => void; saving: boolean; saved: boolean; muted?: boolean
 }) {
+  const urgColor = URGENCY_COLORS[task.urgency_level] ?? 'var(--text-4)'
   return (
-    <div className={cn(
-      'flex items-start gap-3 p-3 rounded-xl border transition-all',
-      muted ? 'border-slate-50 bg-slate-50' : 'border-slate-100 bg-white hover:border-slate-200'
-    )}>
+    <div className="rounded-[18px] p-3.5 flex items-start gap-3"
+      style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)', opacity: muted ? 0.65 : 1 }}>
       {rank && (
-        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-violet-100 text-violet-600 text-xs font-bold flex items-center justify-center mt-0.5">
-          {rank}
-        </span>
+        <span className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold mt-0.5"
+          style={{ background: 'rgba(139,111,184,0.15)', color: 'var(--violet)' }}>{rank}</span>
       )}
       <div className="flex-1 min-w-0">
-        <p className={cn('text-sm font-medium', muted ? 'text-slate-400' : 'text-slate-800')}>{task.title}</p>
-        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+        <p className="text-sm font-medium" style={{ color: 'var(--text-1)' }}>{task.title}</p>
+        <div className="flex flex-wrap items-center gap-2 mt-1.5">
           {task.urgency_level && (
-            <Badge className={cn('text-xs', URGENCY_COLORS[task.urgency_level])}>
+            <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+              style={{ background: urgColor + '18', color: urgColor }}>
               {task.urgency_level}
-            </Badge>
+            </span>
           )}
           {task.category && (
-            <Badge className={cn('text-xs', CATEGORY_COLORS[task.category] || 'rounded-full')}>
-              {task.category}
-            </Badge>
+            <span className="text-xs" style={{ color: 'var(--text-4)' }}>{task.category}</span>
           )}
-          {task.estimated_minutes && (
-            <span className="text-xs text-slate-400 flex items-center gap-0.5">
+          {task.estimated_minutes > 0 && (
+            <span className="text-xs flex items-center gap-0.5" style={{ color: 'var(--text-4)' }}>
               <Clock className="h-3 w-3" />
-              {task.estimated_minutes < 60 ? `${task.estimated_minutes}m` : `${Math.round(task.estimated_minutes / 60)}h`}
+              {task.estimated_minutes < 60 ? `${task.estimated_minutes}m` : `${Math.round(task.estimated_minutes/60)}h`}
             </span>
           )}
-          {task.money_impact > 0 && (
-            <span className="text-xs text-emerald-600 flex items-center gap-0.5 font-medium">
-              <DollarSign className="h-3 w-3" />
-            </span>
-          )}
-          {task.is_quick_win && (
-            <Badge className="bg-green-50 text-green-600 text-xs">quick win</Badge>
-          )}
+          {task.money_impact > 0 && <DollarSign className="h-3 w-3" style={{ color: '#5A8A7A' }} />}
         </div>
       </div>
-      <button
-        onClick={() => onSave(task)}
-        disabled={saving || saved}
-        className={cn(
-          'flex-shrink-0 text-xs px-2 py-1 rounded-lg font-medium transition-all',
-          saved
-            ? 'bg-green-50 text-green-600 cursor-default'
-            : 'bg-slate-100 text-slate-500 hover:bg-violet-50 hover:text-violet-600 disabled:opacity-50'
-        )}
-      >
-        {saving ? '...' : saved ? '✓ Saved' : '+ Add'}
+      <button onClick={() => onSave(task)} disabled={saving || saved}
+        className="flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-semibold transition-all"
+        style={{
+          background: saved ? 'rgba(90,140,120,0.15)' : 'rgba(139,111,184,0.12)',
+          color: saved ? '#5A8A7A' : 'var(--violet)',
+          border: `1px solid ${saved ? 'rgba(90,140,120,0.25)' : 'rgba(139,111,184,0.2)'}`,
+        }}>
+        {saving ? '...' : saved ? '✓' : '+ Save'}
       </button>
     </div>
   )

@@ -1,27 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
-import { Compass, Sparkles, ChevronRight, Mic } from 'lucide-react'
+import { Compass, Sparkles, Mic, ExternalLink, RefreshCw, Loader2, AlertCircle, TrendingUp, Users, Clock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import type { DryphubAccount, DryphubTask } from '@/lib/dryp-crm'
 
-const CAREER_CONTAINERS = [
-  { label: 'Client Work',        items: ['EHM Strategies', 'DRYP Studio', 'Babe Coffee Lounge', 'Flanagan\'s', 'Villa Residential'], color: 'var(--lunar)',  bg: 'rgba(168,196,218,0.12)' },
-  { label: 'DRYP Growth',        items: ['DRYP Digital', 'DRYPHub CRM', 'Newsletter Studio', 'Social media'],                         color: 'var(--violet)', bg: 'rgba(139,111,184,0.1)'  },
-  { label: 'Money Moves',        items: ['TikTok Shop', 'Dropshipping', 'Trading', 'Passive income'],                                  color: 'var(--golden)', bg: 'rgba(201,169,110,0.1)'  },
-  { label: 'Creative Identity',  items: ['Content creation', 'Sewing + clothing brand', 'Painting', 'Dance', 'Tattoo art'],            color: 'var(--blush)',  bg: 'rgba(232,192,194,0.12)' },
-  { label: 'Future Projects',    items: ['Nurturly', 'LINK\'d UP', 'Bikini brand', 'Books', '144-client prep'],                        color: 'var(--herb)',   bg: 'rgba(184,200,180,0.12)' },
-  { label: 'Parked Ideas',       items: ['Wait for the right moment', 'Your ideas are safe here'],                                     color: 'var(--text-3)',   bg: 'rgba(158,149,172,0.08)' },
-]
-
-const RECOGNITION_QUESTIONS = [
-  'Am I being asked for this, or am I pushing my way in?',
-  'Is this opening naturally, or am I forcing the door?',
-  'Are people recognizing me for this specific work?',
-  'Am I working from invitation or from fear of being unseen?',
-  'Where is the energy coming toward me right now?',
-]
-
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface CareerResult {
   career_energy?: string
   highest_use_work?: string[]
@@ -34,235 +19,543 @@ interface CareerResult {
   chart_theme?: string
 }
 
-export default function CareerCompassScreen() {
-  const [loading, setLoading]   = useState(false)
-  const [result, setResult]     = useState<CareerResult | null>(null)
-  const [activeTab, setActiveTab] = useState<'today' | 'containers' | 'weekly'>('today')
-  const [weekInput, setWeekInput] = useState('')
-  const [weekResult, setWeekResult] = useState<string | null>(null)
+interface WeekResult {
+  week_theme?: string
+  energy_summary?: string
+  what_to_keep?: string[]
+  what_to_release?: string[]
+  next_week_intention?: string
+  affirmation?: string
+}
 
-  async function generate() {
-    setLoading(true)
+// ─── Design ───────────────────────────────────────────────────────────────────
+const GLASS: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 18,
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+}
+
+const HEALTH_STYLES: Record<string, { color: string; label: string }> = {
+  excellent: { color: '#5A8A5A', label: 'Excellent' },
+  good:      { color: '#8BAD78', label: 'Good'      },
+  new:       { color: '#8B6FB8', label: 'New'       },
+  at_risk:   { color: '#E08B4A', label: 'At risk'   },
+  churning:  { color: '#E05E5E', label: 'Churning'  },
+}
+
+const STAGE_LABELS: Record<string, string> = {
+  onboarding:    'Onboarding',
+  working_on_it: 'Active',
+  proposal:      'Proposal',
+  closed:        'Closed',
+  prospect:      'Prospect',
+}
+
+const RECOGNITION_QUESTIONS = [
+  'Am I being asked for this, or am I pushing my way in?',
+  'Is this opening naturally, or am I forcing the door?',
+  'Are people recognizing me for this specific work?',
+  'Am I working from invitation or from fear of being unseen?',
+]
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function dueDaysLabel(dateStr?: string) {
+  if (!dateStr) return null
+  const d    = new Date(dateStr); d.setHours(0,0,0,0)
+  const now  = new Date();        now.setHours(0,0,0,0)
+  const diff = Math.round((d.getTime() - now.getTime()) / 86_400_000)
+  if (diff < 0)   return { text: 'Overdue', color: '#E05E5E' }
+  if (diff === 0) return { text: 'Due today', color: '#E08B4A' }
+  if (diff === 1) return { text: 'Tomorrow',  color: '#C9A96E' }
+  if (diff <= 7)  return { text: `${diff}d`,  color: 'rgba(255,255,255,0.4)' }
+  return null
+}
+
+const PO: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
+const sortP = (a: DryphubTask, b: DryphubTask) => (PO[a.priority ?? 'low'] ?? 3) - (PO[b.priority ?? 'low'] ?? 3)
+
+// ─── Subcomponents ────────────────────────────────────────────────────────────
+function ClientCard({ account, tasks }: { account: DryphubAccount; tasks: DryphubTask[] }) {
+  const h     = HEALTH_STYLES[account.health_status] ?? HEALTH_STYLES.new
+  const stage = STAGE_LABELS[account.client_pipeline_stage ?? ''] ?? account.client_pipeline_stage ?? ''
+  const top   = tasks.sort(sortP).slice(0, 3)
+
+  return (
+    <div style={{ ...GLASS, padding: '14px 16px', borderLeft: `3px solid ${h.color}22` }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div>
+          <p style={{ fontSize: 14, fontWeight: 700, color: 'white' }}>{account.business_name.trim()}</p>
+          <div style={{ display: 'flex', gap: 8, marginTop: 3, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: h.color, background: `${h.color}18`, padding: '2px 8px', borderRadius: 8 }}>{h.label}</span>
+            {stage && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{stage}</span>}
+            {account.monthly_retainer && account.monthly_retainer > 0 && (
+              <span style={{ fontSize: 10, color: '#C9A96E', fontWeight: 700 }}>${account.monthly_retainer.toLocaleString()}/mo</span>
+            )}
+          </div>
+        </div>
+        {tasks.length > 0 && (
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(139,111,184,0.8)', background: 'rgba(139,111,184,0.1)', padding: '4px 8px', borderRadius: 8 }}>
+            {tasks.length} task{tasks.length !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
+      {top.length > 0 && (
+        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {top.map(t => {
+            const due = dueDaysLabel(t.due_date)
+            return (
+              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 5, height: 5, borderRadius: '50%', flexShrink: 0, background: t.priority === 'high' || t.priority === 'critical' ? '#E08B4A' : 'rgba(255,255,255,0.2)' }} />
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</p>
+                {due && <span style={{ fontSize: 10, color: due.color, fontWeight: 700, flexShrink: 0 }}>{due.text}</span>}
+              </div>
+            )
+          })}
+          {tasks.length > 3 && (
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>+{tasks.length - 3} more</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+type Tab = 'today' | 'clients' | 'lanes' | 'week'
+
+export default function CareerCompassScreen() {
+  const [tab,        setTab]        = useState<Tab>('today')
+  const [accounts,   setAccounts]   = useState<DryphubAccount[]>([])
+  const [tasks,      setTasks]      = useState<DryphubTask[]>([])
+  const [crmLoading, setCrmLoading] = useState(true)
+  const [crmError,   setCrmError]   = useState(false)
+
+  // Today AI
+  const [compassLoading, setCompassLoading] = useState(false)
+  const [compassResult,  setCompassResult]  = useState<CareerResult | null>(null)
+
+  // Week AI
+  const [weekAnswers, setWeekAnswers] = useState<Record<string,string>>({})
+  const [weekLoading, setWeekLoading] = useState(false)
+  const [weekResult,  setWeekResult]  = useState<WeekResult | null>(null)
+
+  const loadCrm = useCallback(() => {
+    setCrmLoading(true); setCrmError(false)
+    Promise.all([
+      fetch('/api/dryp/accounts').then(r => r.json()),
+      fetch('/api/dryp/tasks').then(r => r.json()),
+    ]).then(([a, t]) => {
+      if (a.accounts) setAccounts(a.accounts)
+      if (t.tasks)    setTasks(t.tasks)
+    }).catch(() => setCrmError(true))
+    .finally(() => setCrmLoading(false))
+  }, [])
+
+  useEffect(() => { loadCrm() }, [loadCrm])
+
+  async function generateCompass() {
+    setCompassLoading(true)
     try {
       const res = await fetch('/api/ai/career-compass', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ tasks, accounts }),
       })
-      setResult(await res.json())
+      setCompassResult(await res.json())
     } catch {
-      setResult({
-        career_energy: 'Today is a day for Projector wisdom, not Projector grinding. Look at what is being invited and put your full attention there.',
-        highest_use_work: ['Complete the client deliverable that is already in motion', 'Reply to the one email that unblocks progress', 'Do one DRYP thing that moves a system forward'],
-        recognition_check: 'Check: Is this work I was invited to do, or am I trying to prove something?',
-        voice_clarity_prompt: 'Talk through what you think you need to do today. What did you hear yourself say? That is the truth.',
-        career_lesson: "Today's lesson connects to your Virgo Midheaven: turn scattered energy into one clean next step.",
-        current_pattern: 'Trying to do all career lanes at once',
-        highest_self_action: 'Choose the one container that creates the most relief or money today. Everything else stays safe.',
-        career_message: 'Your work becomes powerful when you stop chasing and start choosing.',
-        chart_theme: 'Virgo Midheaven — serve with precision, not scattered effort.',
-      })
+      setCompassResult({ career_energy: 'Today is a Projector day — work from invitation, not urgency.', highest_use_work: ['One deliverable that unblocks a client', 'One DRYP system action', 'One communication that moves a deal forward'], recognition_check: 'Is this invited or am I pushing?' })
     } finally {
-      setLoading(false)
+      setCompassLoading(false)
     }
   }
 
+  async function submitWeek() {
+    setWeekLoading(true)
+    try {
+      const res = await fetch('/api/ai/weekly-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reflections: weekAnswers, checklist_pct: 0 }),
+      })
+      setWeekResult(await res.json())
+    } catch {
+      setWeekResult({ week_theme: 'Reflection received', energy_summary: 'Your week held real work and real growth.' })
+    } finally {
+      setWeekLoading(false)
+    }
+  }
+
+  // Derived
+  const tasksByClient = tasks.reduce<Record<string, DryphubTask[]>>((acc, t) => {
+    if (!t.account_id) return acc
+    acc[t.account_id] = acc[t.account_id] ?? []; acc[t.account_id].push(t); return acc
+  }, {})
+  const retainerAccounts = accounts.filter(a => a.monthly_retainer && a.monthly_retainer > 0)
+  const totalMRR = retainerAccounts.reduce((s, a) => s + (a.monthly_retainer ?? 0), 0)
+  const atRiskAccounts = accounts.filter(a => a.health_status === 'at_risk' || a.health_status === 'churning')
+
+  const WEEK_QUESTIONS = [
+    { key: 'energy',      q: 'What work gave me energy this week?' },
+    { key: 'recognized',  q: 'Where was I recognized or invited?' },
+    { key: 'forced',      q: 'Where did I force something?' },
+    { key: 'system',      q: 'What should become a system?' },
+    { key: 'park',        q: 'What should be parked?' },
+    { key: 'learned',     q: 'What did this week teach me?' },
+  ]
+
   return (
-    <div className="bg-sanctuary min-h-screen">
-      <AppLayout noPad className="pt-16">
-        <div className="px-6 pb-nav">
+    <div className="min-h-screen bg-app overflow-x-hidden">
+      <div className="fixed top-0 right-0 pointer-events-none z-0" style={{ width: 300, height: 300, background: 'radial-gradient(circle at 75% 12%, rgba(168,196,218,0.08) 0%, transparent 65%)', filter: 'blur(60px)' }} />
+      <AppLayout>
 
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(168,196,218,0.15)' }}>
-              <Compass className="h-5 w-5" style={{ color: 'var(--lunar)' }} />
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingTop: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(168,196,218,0.12)', border: '1px solid rgba(168,196,218,0.2)' }}>
+              <Compass className="h-5 w-5" style={{ color: 'var(--lunar)' }} strokeWidth={1.6} />
             </div>
-            <p className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--lunar)' }}>Career Compass</p>
+            <div>
+              <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--text-1)' }}>Career Compass</h1>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                {crmLoading ? 'Syncing CRM…' : crmError ? 'CRM unavailable' : `${accounts.length} clients · ${tasks.length} open tasks`}
+              </p>
+            </div>
           </div>
+          <button onClick={loadCrm} disabled={crmLoading} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+            {crmLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+          </button>
+        </div>
 
-          <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>
-            Where is your energy best spent today?
-          </h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--text-2)' }}>
-            You are not here to do everything. You are here to see what matters.
-          </p>
-
-          {/* Tabs */}
-          <div className="flex gap-2 mb-6">
-            {(['today', 'containers', 'weekly'] as const).map(t => (
-              <button key={t} onClick={() => setActiveTab(t)}
-                className={`tab-pill ${activeTab === t ? 'active' : ''}`}>
-                {t === 'today' ? '🧭 Today' : t === 'containers' ? '📦 Lanes' : '📅 Week'}
-              </button>
-            ))}
-          </div>
-
-          {/* Today tab */}
-          {activeTab === 'today' && (
-            <div className="space-y-4 animate-fade-up">
-              {!result ? (
-                <button onClick={generate} disabled={loading}
-                  className="w-full py-4 rounded-2xl font-semibold text-white transition-all active:scale-95 disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg, var(--lunar), #7BA8C8)' }}>
-                  <Sparkles className="inline h-4 w-4 mr-2" />
-                  {loading ? 'Reading your career energy...' : 'Generate Career Compass'}
-                </button>
-              ) : (
-                <>
-                  {/* Career energy */}
-                  <GlassCard>
-                    <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--lunar)' }}>Career energy today</p>
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>{result.career_energy}</p>
-                    {result.chart_theme && <p className="text-xs italic mt-2" style={{ color: 'var(--text-3)' }}>{result.chart_theme}</p>}
-                  </GlassCard>
-
-                  {/* Highest use work */}
-                  {result.highest_use_work && result.highest_use_work.length > 0 && (
-                    <GlassCard soul>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--violet)' }}>Highest-use work today</p>
-                      {result.highest_use_work.map((w, i) => (
-                        <div key={i} className="flex items-start gap-2 py-1.5" style={{ borderBottom: i < result.highest_use_work!.length - 1 ? '1px solid rgba(139,111,184,0.08)' : 'none' }}>
-                          <span className="text-xs font-bold mt-0.5 flex-shrink-0" style={{ color: 'var(--violet)' }}>0{i + 1}</span>
-                          <p className="text-sm" style={{ color: 'var(--text-1)' }}>{w}</p>
-                        </div>
-                      ))}
-                    </GlassCard>
-                  )}
-
-                  {/* Recognition check */}
-                  <GlassCard>
-                    <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--golden)' }}>Recognition check</p>
-                    <p className="text-sm italic" style={{ color: 'var(--text-1)' }}>{result.recognition_check}</p>
-                    <div className="mt-3 space-y-1.5">
-                      {RECOGNITION_QUESTIONS.slice(0, 3).map((q, i) => (
-                        <p key={i} className="text-xs" style={{ color: 'var(--text-3)' }}>· {q}</p>
-                      ))}
-                    </div>
-                  </GlassCard>
-
-                  {/* Voice clarity */}
-                  {result.voice_clarity_prompt && (
-                    <div className="rounded-2xl p-4" style={{ background: 'rgba(139,111,184,0.06)', border: '1px solid rgba(139,111,184,0.1)' }}>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Voice clarity</p>
-                      <p className="text-sm font-display italic" style={{ color: 'var(--text-1)' }}>{result.voice_clarity_prompt}</p>
-                      <Link href="/dictation">
-                        <button className="mt-3 flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--violet)' }}>
-                          <Mic className="h-3.5 w-3.5" /> Speak it out →
-                        </button>
-                      </Link>
-                    </div>
-                  )}
-
-                  {/* Pattern vs highest self */}
-                  {result.current_pattern && (
-                    <GlassCard>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>Current pattern → Highest self</p>
-                      <div className="space-y-2">
-                        <div className="rounded-xl p-3" style={{ background: 'rgba(224,94,94,0.06)', border: '1px solid rgba(224,94,94,0.1)' }}>
-                          <p className="text-xs font-medium mb-1" style={{ color: '#E05E5E' }}>Pattern</p>
-                          <p className="text-sm" style={{ color: 'var(--text-1)' }}>{result.current_pattern}</p>
-                        </div>
-                        <div className="rounded-xl p-3" style={{ background: 'rgba(90,138,90,0.06)', border: '1px solid rgba(90,138,90,0.1)' }}>
-                          <p className="text-xs font-medium mb-1" style={{ color: '#5A8A5A' }}>Highest self</p>
-                          <p className="text-sm" style={{ color: 'var(--text-1)' }}>{result.highest_self_action}</p>
-                        </div>
-                      </div>
-                    </GlassCard>
-                  )}
-
-                  {/* Career lesson */}
-                  {result.career_lesson && (
-                    <GlassCard>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--lunar)' }}>Today&apos;s career lesson</p>
-                      <p className="text-sm" style={{ color: 'var(--text-2)' }}>{result.career_lesson}</p>
-                    </GlassCard>
-                  )}
-
-                  {/* Message */}
-                  {result.career_message && (
-                    <div className="text-center py-4">
-                      <p className="font-display text-base italic" style={{ color: 'var(--text-2)' }}>
-                        &ldquo;{result.career_message}&rdquo;
-                      </p>
-                    </div>
-                  )}
-
-                  <button onClick={() => setResult(null)} className="w-full py-3 rounded-2xl text-sm font-medium"
-                    style={{ color: 'var(--text-3)', background: 'rgba(139,111,184,0.06)' }}>
-                    Regenerate
-                  </button>
-                </>
-              )}
+        {/* CRM stat pills */}
+        {!crmLoading && !crmError && accounts.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 12, background: 'rgba(139,111,184,0.1)', border: '1px solid rgba(139,111,184,0.18)' }}>
+              <Users className="h-3 w-3" style={{ color: '#8B6FB8' }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#8B6FB8' }}>{accounts.length} clients</span>
             </div>
-          )}
-
-          {/* Containers tab */}
-          {activeTab === 'containers' && (
-            <div className="space-y-3 animate-fade-up">
-              <p className="text-sm mb-2" style={{ color: 'var(--text-2)' }}>
-                Your career is multi-lane. These are your containers — your ideas are safe here.
-              </p>
-              {CAREER_CONTAINERS.map((c, i) => (
-                <div key={i} className="glass-card p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full" style={{ background: c.color }} />
-                    <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{c.label}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {c.items.map((item, j) => (
-                      <span key={j} className="text-xs px-2.5 py-1 rounded-full" style={{ background: c.bg, color: c.color }}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <p className="text-xs text-center italic pt-2" style={{ color: 'var(--text-4)' }}>
-                One main priority. Everything else stays safe.
-              </p>
-            </div>
-          )}
-
-          {/* Weekly tab */}
-          {activeTab === 'weekly' && (
-            <div className="space-y-4 animate-fade-up">
-              <p className="text-sm mb-2" style={{ color: 'var(--text-2)' }}>
-                Reflect on your week. What did it teach you?
-              </p>
-              <div className="glass-card p-4">
-                <textarea
-                  value={weekInput}
-                  onChange={e => setWeekInput(e.target.value)}
-                  placeholder="What work gave me energy? Where was I recognized? Where did I force? What did I finish?..."
-                  rows={6}
-                  className="w-full bg-transparent outline-none text-sm resize-none"
-                  style={{ color: 'var(--text-1)' }}
-                />
+            {totalMRR > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 12, background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.18)' }}>
+                <TrendingUp className="h-3 w-3" style={{ color: '#C9A96E' }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#C9A96E' }}>${totalMRR.toLocaleString()}/mo retainer</span>
               </div>
-              <div className="space-y-2">
-                {[
-                  'What work gave me energy this week?',
-                  'Where was I recognized?',
-                  'Where did I force something?',
-                  'What should become a system?',
-                  'What should be parked?',
-                  'What did this week teach me?',
-                ].map((q, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-3)' }}>
-                    <span style={{ color: 'var(--violet)' }}>·</span> {q}
+            )}
+            {tasks.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 12, background: 'rgba(168,196,218,0.09)', border: '1px solid rgba(168,196,218,0.16)' }}>
+                <Clock className="h-3 w-3" style={{ color: 'var(--lunar)' }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--lunar)' }}>{tasks.length} open tasks</span>
+              </div>
+            )}
+            {atRiskAccounts.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 12, background: 'rgba(224,94,94,0.09)', border: '1px solid rgba(224,94,94,0.18)' }}>
+                <AlertCircle className="h-3 w-3" style={{ color: '#E05E5E' }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#E05E5E' }}>{atRiskAccounts.length} at risk</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 7, marginBottom: 20, flexWrap: 'wrap' }}>
+          {([
+            { key: 'today',   label: '🧭 Today'   },
+            { key: 'clients', label: '👥 Clients'  },
+            { key: 'lanes',   label: '📦 Lanes'    },
+            { key: 'week',    label: '📅 Week'     },
+          ] as { key: Tab; label: string }[]).map(({ key, label }) => (
+            <button key={key} onClick={() => setTab(key)} style={{
+              padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              background: tab === key ? 'rgba(168,196,218,0.14)' : 'transparent',
+              border: tab === key ? '1px solid rgba(168,196,218,0.28)' : '1px solid rgba(255,255,255,0.07)',
+              color: tab === key ? 'var(--lunar)' : 'rgba(255,255,255,0.4)',
+            }}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* ── TODAY TAB ────────────────────────────────────── */}
+        {tab === 'today' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {!compassResult ? (
+              <>
+                {/* Context preview */}
+                {!crmLoading && tasks.length > 0 && (
+                  <div style={{ ...GLASS, padding: '12px 16px', background: 'rgba(255,255,255,0.03)' }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Live context for your compass</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      {tasks.filter(t => t.priority === 'high' || t.priority === 'critical').slice(0, 4).map(t => (
+                        <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#E08B4A', flexShrink: 0 }} />
+                          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{t.title}{t.account_name ? ` — ${t.account_name}` : ''}</span>
+                        </div>
+                      ))}
+                      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 2 }}>{accounts.length} clients · ${totalMRR.toLocaleString()}/mo MRR</p>
+                    </div>
+                  </div>
+                )}
+                <button onClick={generateCompass} disabled={compassLoading} style={{
+                  width: '100%', padding: '16px', borderRadius: 18, fontWeight: 700, fontSize: 14, color: 'white', cursor: 'pointer',
+                  background: 'linear-gradient(135deg, rgba(168,196,218,0.3), rgba(139,111,184,0.3))',
+                  border: '1px solid rgba(168,196,218,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}>
+                  {compassLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Reading your career energy…</> : <><Sparkles className="h-4 w-4" /> Generate Career Compass</>}
+                </button>
+              </>
+            ) : (
+              <>
+                <GlassCard>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--lunar)', marginBottom: 8 }}>Career energy today</p>
+                  <p style={{ fontSize: 14, color: 'white', lineHeight: 1.6 }}>{compassResult.career_energy}</p>
+                  {compassResult.chart_theme && <p style={{ fontSize: 11, fontStyle: 'italic', color: 'rgba(255,255,255,0.35)', marginTop: 8 }}>{compassResult.chart_theme}</p>}
+                </GlassCard>
+
+                {compassResult.highest_use_work && compassResult.highest_use_work.length > 0 && (
+                  <GlassCard soul>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6FB8', marginBottom: 10 }}>Highest-use work today</p>
+                    {compassResult.highest_use_work.map((w, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 10, paddingTop: 8, paddingBottom: 8, borderBottom: i < compassResult.highest_use_work!.length - 1 ? '1px solid rgba(139,111,184,0.08)' : 'none' }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: '#8B6FB8', minWidth: 20 }}>0{i+1}</span>
+                        <p style={{ fontSize: 14, color: 'white' }}>{w}</p>
+                      </div>
+                    ))}
+                  </GlassCard>
+                )}
+
+                {compassResult.recognition_check && (
+                  <GlassCard>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A96E', marginBottom: 8 }}>Recognition check</p>
+                    <p style={{ fontSize: 14, fontStyle: 'italic', color: 'white' }}>{compassResult.recognition_check}</p>
+                    <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      {RECOGNITION_QUESTIONS.map((q, i) => (
+                        <p key={i} style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>· {q}</p>
+                      ))}
+                    </div>
+                  </GlassCard>
+                )}
+
+                {compassResult.voice_clarity_prompt && (
+                  <div style={{ ...GLASS, padding: '14px 16px', background: 'rgba(139,111,184,0.06)' }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6FB8', marginBottom: 8 }}>Voice clarity</p>
+                    <p style={{ fontSize: 14, fontStyle: 'italic', color: 'white', lineHeight: 1.6 }}>{compassResult.voice_clarity_prompt}</p>
+                    <Link href="/dictation">
+                      <button style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: '#8B6FB8', background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <Mic className="h-3.5 w-3.5" /> Speak it out →
+                      </button>
+                    </Link>
+                  </div>
+                )}
+
+                {compassResult.current_pattern && (
+                  <GlassCard>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 10 }}>Pattern → Highest Self</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ padding: '10px 14px', borderRadius: 12, background: 'rgba(224,94,94,0.06)', border: '1px solid rgba(224,94,94,0.12)' }}>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: '#E05E5E', marginBottom: 4 }}>Pattern</p>
+                        <p style={{ fontSize: 13, color: 'white' }}>{compassResult.current_pattern}</p>
+                      </div>
+                      <div style={{ padding: '10px 14px', borderRadius: 12, background: 'rgba(90,138,90,0.06)', border: '1px solid rgba(90,138,90,0.12)' }}>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: '#5A8A5A', marginBottom: 4 }}>Highest self</p>
+                        <p style={{ fontSize: 13, color: 'white' }}>{compassResult.highest_self_action}</p>
+                      </div>
+                    </div>
+                  </GlassCard>
+                )}
+
+                {compassResult.career_message && (
+                  <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontStyle: 'italic', color: 'rgba(255,255,255,0.5)' }}>
+                      &ldquo;{compassResult.career_message}&rdquo;
+                    </p>
+                  </div>
+                )}
+
+                <button onClick={() => setCompassResult(null)} style={{ width: '100%', padding: '12px', borderRadius: 14, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', cursor: 'pointer' }}>
+                  Regenerate
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── CLIENTS TAB ──────────────────────────────────── */}
+        {tab === 'clients' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {crmLoading && [1,2,3].map(i => <div key={i} style={{ ...GLASS, height: 80, background: 'rgba(255,255,255,0.03)' }} />)}
+
+            {!crmLoading && crmError && (
+              <div style={{ ...GLASS, padding: '20px', textAlign: 'center', background: 'rgba(224,94,94,0.06)' }}>
+                <AlertCircle className="h-8 w-8 mx-auto mb-2" style={{ color: '#E05E5E' }} />
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Can't reach DRYP CRM right now.</p>
+              </div>
+            )}
+
+            {!crmLoading && !crmError && accounts.length > 0 && (
+              <>
+                {/* Retainer clients first */}
+                {retainerAccounts.length > 0 && (
+                  <>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A96E', marginBottom: 4 }}>
+                      Retainer clients — ${totalMRR.toLocaleString()}/mo
+                    </p>
+                    {retainerAccounts.map(a => (
+                      <ClientCard key={a.id} account={a} tasks={tasksByClient[a.id] ?? []} />
+                    ))}
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 4, marginTop: 8 }}>
+                      All clients
+                    </p>
+                  </>
+                )}
+                {accounts.filter(a => !a.monthly_retainer || a.monthly_retainer <= 0).map(a => (
+                  <ClientCard key={a.id} account={a} tasks={tasksByClient[a.id] ?? []} />
+                ))}
+              </>
+            )}
+
+            {/* Open in CRM */}
+            <a href="https://dryphub.com/accounts" target="_blank" rel="noreferrer" style={{ ...GLASS, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, textDecoration: 'none' }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>Open in DRYP CRM</p>
+              <ExternalLink className="h-4 w-4" style={{ color: 'rgba(255,255,255,0.2)' }} />
+            </a>
+          </div>
+        )}
+
+        {/* ── LANES TAB ────────────────────────────────────── */}
+        {tab === 'lanes' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>
+              Your career is multi-lane. Ideas are safe here — one priority at a time.
+            </p>
+
+            {[
+              {
+                label: 'Client Work',
+                color: 'var(--lunar)',
+                items: accounts.length > 0
+                  ? accounts.map(a => a.business_name.trim())
+                  : ['EHM Strategies', 'Flanagan\'s Irish Pub', 'Villa Residential', 'Babe Coffee Lounge'],
+                live: accounts.length > 0,
+              },
+              { label: 'DRYP Growth',       color: '#8B6FB8',           items: ['DRYP Digital', 'DRYPHub CRM', 'Newsletter Studio', 'DRYP Studio', 'Social content'],   live: false },
+              { label: 'Money Moves',        color: '#C9A96E',           items: ['TikTok Shop', 'Dropshipping', 'Trading', 'Passive income streams'],                    live: false },
+              { label: 'Creative Identity',  color: 'var(--blush)',      items: ['Content creation', 'Sewing + clothing brand', 'Painting', 'Dance', 'Tattoo art'],      live: false },
+              { label: 'Future Projects',    color: 'var(--herb)',       items: ['Nurturly', 'LINK\'d UP', 'Bikini brand', 'Books', '144-client prep'],                  live: false },
+              { label: 'Parked',             color: 'rgba(255,255,255,0.25)', items: ['Ideas waiting for the right moment — safe here'],                               live: false },
+            ].map(lane => (
+              <div key={lane.label} style={{ ...GLASS, padding: '14px 16px', borderLeft: `3px solid ${lane.color}40` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: lane.color }} />
+                  <p style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{lane.label}</p>
+                  {lane.live && <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: lane.color, background: `${lane.color}18`, padding: '2px 6px', borderRadius: 6 }}>live</span>}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {lane.items.map((item, j) => (
+                    <span key={j} style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: `${lane.color}12`, border: `1px solid ${lane.color}20`, color: lane.color === 'rgba(255,255,255,0.25)' ? 'rgba(255,255,255,0.3)' : lane.color }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <p style={{ fontSize: 11, fontStyle: 'italic', textAlign: 'center', color: 'rgba(255,255,255,0.2)', paddingBottom: 8 }}>
+              One main priority. Everything else stays safe.
+            </p>
+          </div>
+        )}
+
+        {/* ── WEEK TAB ─────────────────────────────────────── */}
+        {tab === 'week' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {!weekResult ? (
+              <>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 4 }}>
+                  Reflect on your week. Answer what feels true — LUNA will read the pattern.
+                </p>
+                {WEEK_QUESTIONS.map(({ key, q }) => (
+                  <div key={key}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>{q}</p>
+                    <textarea
+                      value={weekAnswers[key] ?? ''}
+                      onChange={e => setWeekAnswers(prev => ({ ...prev, [key]: e.target.value }))}
+                      rows={2}
+                      placeholder="Speak your truth…"
+                      style={{
+                        width: '100%', padding: '10px 14px', borderRadius: 12, fontSize: 13,
+                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'white', resize: 'none', outline: 'none', boxSizing: 'border-box',
+                        lineHeight: 1.5,
+                      }}
+                    />
                   </div>
                 ))}
-              </div>
-              <button
-                className="w-full py-4 rounded-2xl font-semibold text-white transition-all active:scale-95"
-                style={{ background: 'linear-gradient(135deg, var(--lunar), #7BA8C8)' }}>
-                <Sparkles className="inline h-4 w-4 mr-2" />
-                Reflect on my week
-              </button>
-            </div>
-          )}
+                <button onClick={submitWeek} disabled={weekLoading || Object.keys(weekAnswers).length === 0} style={{
+                  width: '100%', padding: '14px', borderRadius: 16, fontWeight: 700, fontSize: 14, color: 'white', cursor: 'pointer', marginTop: 4,
+                  background: 'linear-gradient(135deg, rgba(168,196,218,0.25), rgba(139,111,184,0.25))',
+                  border: '1px solid rgba(168,196,218,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  opacity: Object.keys(weekAnswers).length === 0 ? 0.5 : 1,
+                }}>
+                  {weekLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Reading your week…</> : <><Sparkles className="h-4 w-4" /> Reflect on my week</>}
+                </button>
+              </>
+            ) : (
+              <>
+                {weekResult.week_theme && (
+                  <div style={{ ...GLASS, padding: '18px 20px', background: 'rgba(139,111,184,0.08)', border: '1px solid rgba(139,111,184,0.2)', borderRadius: 20, textAlign: 'center' }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6FB8', marginBottom: 8 }}>This week's theme</p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800, color: 'white' }}>{weekResult.week_theme}</p>
+                  </div>
+                )}
+                {weekResult.energy_summary && (
+                  <GlassCard>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--lunar)', marginBottom: 8 }}>Energy summary</p>
+                    <p style={{ fontSize: 14, color: 'white', lineHeight: 1.65 }}>{weekResult.energy_summary}</p>
+                  </GlassCard>
+                )}
+                {weekResult.what_to_keep && weekResult.what_to_keep.length > 0 && (
+                  <GlassCard>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5A8A5A', marginBottom: 8 }}>Keep doing</p>
+                    {weekResult.what_to_keep.map((w, i) => <p key={i} style={{ fontSize: 13, color: 'white', paddingTop: 4, paddingBottom: 4 }}>· {w}</p>)}
+                  </GlassCard>
+                )}
+                {weekResult.what_to_release && weekResult.what_to_release.length > 0 && (
+                  <GlassCard>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#E05E5E', marginBottom: 8 }}>Release</p>
+                    {weekResult.what_to_release.map((w, i) => <p key={i} style={{ fontSize: 13, color: 'white', paddingTop: 4, paddingBottom: 4 }}>· {w}</p>)}
+                  </GlassCard>
+                )}
+                {weekResult.next_week_intention && (
+                  <GlassCard>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A96E', marginBottom: 8 }}>Next week intention</p>
+                    <p style={{ fontSize: 14, color: 'white', lineHeight: 1.65 }}>{weekResult.next_week_intention}</p>
+                  </GlassCard>
+                )}
+                {weekResult.affirmation && (
+                  <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontStyle: 'italic', color: 'rgba(255,255,255,0.5)' }}>
+                      &ldquo;{weekResult.affirmation}&rdquo;
+                    </p>
+                  </div>
+                )}
+                <button onClick={() => { setWeekResult(null); setWeekAnswers({}) }} style={{ width: '100%', padding: '12px', borderRadius: 14, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', cursor: 'pointer' }}>
+                  Reflect again
+                </button>
+              </>
+            )}
 
-        </div>
+            {/* Link to work page */}
+            <Link href="/work" style={{ textDecoration: 'none' }}>
+              <div style={{ ...GLASS, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>See this week's open tasks</p>
+                <ChevronRight className="h-4 w-4" style={{ color: 'rgba(255,255,255,0.2)' }} />
+              </div>
+            </Link>
+          </div>
+        )}
+
+        <div style={{ height: 32 }} />
       </AppLayout>
     </div>
   )

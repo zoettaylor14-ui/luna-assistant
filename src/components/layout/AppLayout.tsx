@@ -12,18 +12,18 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, noPad, className, darkDesktop }: AppLayoutProps) {
   return (
-    <SwipeContainer className="min-h-full bg-app">
+    <SwipeContainer className="min-h-screen bg-app">
       {/* Desktop top header — hidden on mobile/tablet */}
       <DesktopHeader />
 
       {/* Main content */}
       <main className={[
         'mx-auto w-full',
-        'max-w-xl',               // Mobile: 576px
-        'lg:max-w-[1200px]',      // Desktop: 1200px — proper bento grid width with room for margins
+        'max-w-[860px]',          // Mobile/tablet: 860px feels right
+        'lg:max-w-[1200px]',      // Desktop: 1200px — proper bento grid, side margins on 1440p+
         'lg:pt-16',
-        noPad ? '' : 'px-6 lg:px-12',
-        'pb-nav lg:pb-[100px]',
+        noPad ? '' : 'px-5 lg:px-12',
+        'pb-nav lg:pb-[120px]',
         className ?? '',
       ].join(' ')}>
         <div className="animate-page-enter content-enter">

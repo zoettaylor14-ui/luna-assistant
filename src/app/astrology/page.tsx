@@ -1,494 +1,341 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { Star, ArrowRight, Moon, Sparkles, BookOpen, Calendar, RotateCcw, Gem, Sun, Zap, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 
-type AstroPage = 'cosmic' | 'moon' | 'transits' | 'chart' | 'spirit' | 'crystals' | 'love' | 'forecast' | 'deep'
-
-const PAGES: { id: AstroPage; label: string; emoji: string }[] = [
-  { id: 'cosmic',   label: 'Cosmic',    emoji: '✨' },
-  { id: 'moon',     label: 'Moon',      emoji: '🌙' },
-  { id: 'transits', label: 'Transits',  emoji: '🪐' },
-  { id: 'chart',    label: 'Chart',     emoji: '⭕' },
-  { id: 'spirit',   label: 'Spirit',    emoji: '🪷' },
-  { id: 'crystals', label: 'Crystals',  emoji: '🔮' },
-  { id: 'love',     label: 'Love',      emoji: '💗' },
-  { id: 'forecast', label: 'Forecast',  emoji: '📅' },
-  { id: 'deep',     label: 'Deep Dive', emoji: '🌌' },
-]
-
-const MOON_PHASES = [
-  { name: 'New Moon',        emoji: '🌑', keyword: 'Intentions', ritual: 'Set one intention. Write it. Light a candle.' },
-  { name: 'Waxing Crescent', emoji: '🌒', keyword: 'Growth',     ritual: 'Take one step toward something you started.' },
-  { name: 'First Quarter',   emoji: '🌓', keyword: 'Action',     ritual: 'Push through resistance. Keep going.' },
-  { name: 'Waxing Gibbous',  emoji: '🌔', keyword: 'Refine',     ritual: 'Adjust. What needs to shift before the full moon?' },
-  { name: 'Full Moon',       emoji: '🌕', keyword: 'Release',    ritual: 'Write what you are releasing. Burn it or tear it up.' },
-  { name: 'Waning Gibbous',  emoji: '🌖', keyword: 'Gratitude',  ritual: 'List 3 things the last cycle brought you.' },
-  { name: 'Last Quarter',    emoji: '🌗', keyword: 'Let go',     ritual: 'Clear one thing — physical or emotional.' },
-  { name: 'Waning Crescent', emoji: '🌘', keyword: 'Rest',       ritual: 'Do less. Restore. Prepare for the new cycle.' },
-]
-
-const CRYSTALS = [
-  { name: 'Amethyst',         tags: 'Calm · Clarity · Protection',       color: '#8B6FB8', emoji: '🔮', use: 'Hold during meditation or place on your crown.' },
-  { name: 'Labradorite',      tags: 'Intuition · Magic · Vision',         color: '#4A7FB8', emoji: '✨', use: 'Carry when you need to trust your gut.' },
-  { name: 'Rose Quartz',      tags: 'Self-love · Healing · Softness',     color: '#E8B4B8', emoji: '💗', use: 'Place on your heart center when you feel closed off.' },
-  { name: 'Citrine',          tags: 'Abundance · Motivation · Clarity',   color: '#E8C97A', emoji: '⭐', use: 'Keep near your workspace for creative flow.' },
-  { name: 'Black Tourmaline', tags: 'Protection · Grounding · Safety',    color: '#3D3547', emoji: '🖤', use: 'Place at your front door or hold when anxious.' },
-  { name: 'Selenite',         tags: 'Clarity · Higher guidance · Peace',  color: '#B8C4D8', emoji: '🌙', use: 'Use to clear other crystals. Never get it wet.' },
-  { name: 'Moonstone',        tags: 'Intuition · Cycles · Feminine flow', color: '#C4D0E8', emoji: '🌕', use: 'Wear during new or full moon rituals.' },
-]
-
-const AFFIRMATIONS = [
-  'I move with grace. I do not chase the day — I guide it.',
-  'My ideas are safe. My energy is sacred. I choose what matters.',
-  'I am not here to do everything. I am here to do what is mine.',
-  'I trust my own voice. Clarity comes when I speak my truth.',
-  'I am becoming the woman I see in my future.',
-  'Rest is productive. Peace is power. Softness is strength.',
-]
-
-const SHADOW_QUESTIONS = [
-  'What do I keep attracting that I haven\'t fully looked at yet?',
-  'What emotion am I most uncomfortable sitting with?',
-  'Where am I still performing instead of being real?',
-  'What would I stop tolerating if I truly believed I deserved better?',
-  'Who am I when no one is watching?',
-]
-
-function getTodayIndex<T>(arr: T[]) { return new Date().getDate() % arr.length }
-
-function getMoonPhase(): (typeof MOON_PHASES)[0] {
-  const known = new Date('2024-01-11').getTime()
-  const days = (Date.now() - known) / (1000 * 60 * 60 * 24)
-  return MOON_PHASES[Math.floor(((days % 29.53) / 29.53) * 8)] ?? MOON_PHASES[0]
+// ─── Types ────────────────────────────────────────────────────────────────────
+type Brief = {
+  overall_vibe: string
+  tagline: string
+  energy: string
+  avoid: string
+  focus: string
+  gifts: string
+  prepare: string
+  mantra: string
+  colors: string[]
+  color_note: string
+  crystals: string[]
+  crystal_notes: Record<string, string>
+  generated_at: string
 }
 
-const ZOE_PLACEMENTS = [
-  { planet: 'Sun',     sign: 'Scorpio',     house: '6th', keyword: 'Intensity · Depth · Transformation' },
-  { planet: 'Moon',    sign: 'Cancer',      house: '2nd', keyword: 'Nurture · Safety · Home' },
-  { planet: 'Rising',  sign: 'Gemini',      house: '1st', keyword: 'Curiosity · Movement · Duality' },
-  { planet: 'Mercury', sign: 'Scorpio',     house: '6th', keyword: 'Deep truth · Investigation' },
-  { planet: 'Venus',   sign: 'Sagittarius', house: '7th', keyword: 'Freedom · Adventure · Honesty in love' },
-  { planet: 'Mars',    sign: 'Libra',       house: '5th', keyword: 'Action through harmony · Decisive but fair' },
-  { planet: 'Saturn',  sign: 'Taurus',      house: '12th', keyword: 'Hidden lessons around worth + security' },
+type MoonData = {
+  phase: { name: string; emoji: string; illumination: number; description: string; next_exact?: { name: string; time: string } }
+  sign: { name: string; emoji: string; degree: number; minutes: number; formatted: string; keywords: string }
+  next_ingress: string | null
+}
+
+type PlanetData = {
+  planets: Array<{ name: string; sign: string; degree: number; minutes: number; retrograde: boolean; emoji: string }>
+  retrogrades: string[]
+}
+
+// ─── Design ───────────────────────────────────────────────────────────────────
+const GLASS: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 20,
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+}
+
+const SECTIONS = [
+  { href: '/astrology/daily',       icon: Sun,        label: 'Daily Reading',  sub: 'Horoscope + all life areas',       color: '#C9A96E' },
+  { href: '/astrology/birth-chart', icon: Star,       label: 'Birth Chart',    sub: 'Natal planets, houses, patterns',  color: '#8B6FB8' },
+  { href: '/astrology/moon',        icon: Moon,       label: 'Moon Portal',    sub: 'Phase, sign, rituals',             color: '#A8C4DA' },
+  { href: '/astrology/transits',    icon: Zap,        label: 'Daily Transits', sub: 'Current sky vs your natal chart',  color: '#C9A96E' },
+  { href: '/astrology/deep-dives',  icon: BookOpen,   label: 'Deep Dives',     sub: 'Planets, houses, aspects',         color: '#B8C9B4' },
+  { href: '/astrology/forecasts',   icon: Calendar,   label: 'Forecasts',      sub: 'Weekly and monthly astrology',     color: '#E8C0C2' },
+  { href: '/astrology/retrogrades', icon: RotateCcw,  label: 'Retrogrades',    sub: 'What\'s RX and what it means',    color: '#C4A9E8' },
+  { href: '/astrology/rituals',     icon: Sparkles,   label: 'Moon Rituals',   sub: 'New moon, full moon, personalized', color: '#8B6FB8' },
+  { href: '/astrology/crystals',    icon: Gem,        label: 'Crystal Match',  sub: 'Today\'s recommended crystals',   color: '#A8C4DA' },
 ]
 
-const TODAYS_TRANSITS = [
-  { planet: 'Moon', aspect: 'conjunct', target: 'Jupiter', sign: 'Cancer', effect: 'Emotional expansion. Generosity. Open heart energy.', type: 'supportive' },
-  { planet: 'Saturn', aspect: 'opposite', target: 'Mars', sign: 'Libra', effect: 'Tension between what you want and what\'s allowed. Patience required.', type: 'challenging' },
-  { planet: 'Venus', aspect: 'sextile', target: 'Neptune', sign: 'Pisces', effect: 'Romantic, dreamy, intuitive. Good for creative work and connection.', type: 'supportive' },
-]
+// ─── Brief section card ───────────────────────────────────────────────────────
+function BriefSection({ label, icon, text, accent }: { label: string; icon: string; text: string; accent: string }) {
+  return (
+    <div style={{ ...GLASS, padding: '14px 16px', borderLeft: `3px solid ${accent}` }}>
+      <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: accent, marginBottom: 6 }}>
+        {icon} {label}
+      </p>
+      <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.88)', lineHeight: 1.65 }}>{text}</p>
+    </div>
+  )
+}
 
-const LOVE_PATTERNS = [
-  { pattern: 'Chasing clarity from silence', aligned: 'State your need once, clearly. Then let it land.' },
-  { pattern: 'Sending messages from hurt',   aligned: 'Pause. Ground first. Write it — then decide.' },
-  { pattern: 'Shrinking to keep the peace',  aligned: 'Your needs do not end the relationship. Express them.' },
-  { pattern: 'Reading into everything',      aligned: 'Ask directly. Assume the kindest explanation first.' },
-]
+// ─── Shimmer card ─────────────────────────────────────────────────────────────
+function Shimmer({ h = 80 }: { h?: number }) {
+  return <div style={{ ...GLASS, height: h, background: 'rgba(255,255,255,0.04)' }} />
+}
 
-export default function AstrologyPage() {
-  const [page, setPage] = useState<AstroPage>('cosmic')
+function MoonSphere({ size = 80 }: { size?: number }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%', flexShrink: 0,
+      background: [
+        'radial-gradient(circle at 58% 22%, rgba(155,150,172,0.95) 0%, rgba(135,130,155,0.5) 8%, transparent 13%)',
+        'radial-gradient(circle at 26% 64%, rgba(140,135,162,0.85) 0%, transparent 10%)',
+        'radial-gradient(circle at 44% 78%, rgba(125,120,148,0.9) 0%, transparent 13%)',
+        'radial-gradient(ellipse at 38% 35%, rgba(252,250,255,1) 0%, rgba(228,224,240,1) 15%, rgba(196,192,212,1) 32%, rgba(162,158,180,1) 52%, rgba(124,120,145,1) 70%, rgba(88,84,108,1) 88%)',
+      ].join(', '),
+      boxShadow: `inset ${size*0.13}px ${size*0.07}px ${size*0.22}px rgba(0,0,0,0.32), 0 0 ${size*0.3}px ${size*0.1}px rgba(180,160,240,0.28)`,
+    }} />
+  )
+}
 
-  const moon    = getMoonPhase()
-  const crystal = CRYSTALS[getTodayIndex(CRYSTALS)]
-  const affirmation = AFFIRMATIONS[getTodayIndex(AFFIRMATIONS)]
-  const shadowQ = SHADOW_QUESTIONS[getTodayIndex(SHADOW_QUESTIONS)]
+// ─── Page ─────────────────────────────────────────────────────────────────────
+export default function AstrologyPortal() {
+  const [brief,        setBrief]        = useState<Brief | null>(null)
+  const [briefLoading, setBriefLoading] = useState(true)
+  const [briefError,   setBriefError]   = useState(false)
+  const [moon,         setMoon]         = useState<MoonData | null>(null)
+  const [planets,      setPlanets]      = useState<PlanetData | null>(null)
+  const [showSky,      setShowSky]      = useState(false)
+
+  const tz = typeof window !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'America/New_York'
+  const today = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())
+
+  function loadBrief() {
+    setBriefLoading(true); setBriefError(false)
+    fetch(`/api/astrology/daily-brief?tz=${encodeURIComponent(tz)}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) { setBriefError(true); return }
+        setBrief(d)
+        if (d.sky?.moon)      setMoon(d.sky.moon)
+        if (d.sky?.planets)   setPlanets({ planets: d.sky.planets, retrogrades: d.sky.retrogrades ?? [] })
+      })
+      .catch(() => setBriefError(true))
+      .finally(() => setBriefLoading(false))
+  }
+
+  useEffect(() => {
+    loadBrief()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
-    <div className="bg-app min-h-screen">
-      <AppLayout noPad>
-        <div className="lg:max-w-3xl lg:mx-auto lg:pt-20 lg:pb-[110px]">
-        <div className="pt-12 pb-nav">
+    <div className="min-h-screen bg-app overflow-x-hidden">
+      <div className="fixed top-0 right-0 pointer-events-none z-0"
+        style={{ width: 300, height: 300, background: 'radial-gradient(circle at 75% 15%, rgba(139,111,184,0.12) 0%, transparent 65%)', filter: 'blur(60px)' }} />
+      <div className="fixed bottom-0 left-0 pointer-events-none z-0"
+        style={{ width: 250, height: 250, background: 'radial-gradient(circle at 20% 85%, rgba(90,120,180,0.08) 0%, transparent 65%)', filter: 'blur(60px)' }} />
 
-          {/* Header */}
-          <div className="px-4 mb-4">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm">⭐</span>
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--violet)' }}>Astrology</p>
+      <AppLayout>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingTop: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(139,111,184,0.15)', border: '1px solid rgba(139,111,184,0.25)' }}>
+              <Star className="h-5 w-5" style={{ color: 'var(--violet)' }} strokeWidth={1.6} />
             </div>
-            <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--text-1)' }}>
-              Your cosmic weather.
-            </h1>
-          </div>
-
-          {/* Sub-page tabs */}
-          <div className="px-4 mb-4">
-            <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-              {PAGES.map(p => (
-                <button key={p.id} onClick={() => setPage(p.id)}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
-                  style={page === p.id
-                    ? { background: 'var(--violet)', color: 'white' }
-                    : { background: 'var(--surface)', color: 'var(--text-2)', border: '1px solid var(--surface-border)' }
-                  }>
-                  <span>{p.emoji}</span> {p.label}
-                </button>
-              ))}
+            <div>
+              <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--text-1)' }}>Astrology</h1>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{today}</p>
             </div>
           </div>
+          <button onClick={loadBrief} disabled={briefLoading} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+            <RefreshCw className={`h-3 w-3 ${briefLoading ? 'animate-spin' : ''}`} /> Refresh
+          </button>
+        </div>
 
-          {/* Page content */}
-          <div className="px-4 space-y-4">
+        {/* ── DAILY COSMIC BRIEF ──────────────────────────────────── */}
+        <div style={{ marginBottom: 24 }}>
 
-            {/* ── Cosmic Weather ── */}
-            {page === 'cosmic' && (
-              <>
-                <div className="rounded-2xl p-5 relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(26,21,53,0.97), rgba(36,28,72,0.97))',
-                    border: '1px solid rgba(139,111,184,0.25)',
-                  }}>
-                  <div className="absolute top-0 right-0 w-32 h-32 pointer-events-none"
-                    style={{ background: 'radial-gradient(circle at 100% 0%, rgba(139,111,184,0.2) 0%, transparent 70%)' }} />
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#C4A9E8' }}>Today&apos;s Cosmic Weather</p>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-4xl">{moon.emoji}</span>
-                    <div>
-                      <p className="text-base font-bold text-white">{moon.name}</p>
-                      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>Theme: {moon.keyword}</p>
-                    </div>
+          {/* Hero vibe card */}
+          <div style={{ borderRadius: 24, overflow: 'hidden', marginBottom: 12, position: 'relative', background: 'linear-gradient(145deg, #16133A 0%, #221850 55%, #16133A 100%)', border: '1px solid rgba(139,111,184,0.3)' }}>
+            {/* Ambient glow */}
+            <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,111,184,0.25) 0%, transparent 70%)', filter: 'blur(30px)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: -30, left: -20, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(90,120,200,0.15) 0%, transparent 70%)', filter: 'blur(24px)', pointerEvents: 'none' }} />
+
+            <div style={{ position: 'relative', zIndex: 1, padding: '22px 20px 20px' }}>
+              {briefLoading ? (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <Sparkles className="h-4 w-4 animate-pulse" style={{ color: 'rgba(196,169,232,0.6)' }} />
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(196,169,232,0.5)' }}>Reading the sky for you…</p>
                   </div>
-                  <p className="text-sm leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                    The moon is in its {moon.name.toLowerCase()} phase. Energy is aligned with {moon.keyword.toLowerCase()}.
-                    Use today&apos;s energy intentionally.
-                  </p>
-                  <p className="text-xs font-semibold" style={{ color: '#A8C4DA' }}>Crystal today: {crystal.name} — {crystal.tags}</p>
-                </div>
-
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-3)' }}>Personal Activation</p>
-                  <p className="text-sm mb-3" style={{ color: 'var(--text-1)' }}>
-                    <strong>Scorpio Sun</strong> — your depth and intensity are your power today. Don&apos;t shrink them.
-                  </p>
-                  <p className="text-sm mb-3" style={{ color: 'var(--text-1)' }}>
-                    <strong>Cancer Moon</strong> — pay attention to what feels emotionally off. Your gut is accurate.
-                  </p>
-                  <p className="text-sm" style={{ color: 'var(--text-1)' }}>
-                    <strong>Gemini Rising</strong> — you&apos;re communicating quickly today. Be intentional with your words.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-3)' }}>Highest Self Move Today</p>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-1)' }}>
-                    Lead with clarity, not reaction. Before you respond to anything today, take one breath and ask: is this from fear or from truth?
-                  </p>
-                </div>
-              </>
-            )}
-
-            {/* ── Moon Portal ── */}
-            {page === 'moon' && (
-              <>
-                <div className="rounded-2xl p-5 text-center relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(160deg, rgba(20,16,48,0.98), rgba(32,24,64,0.98))',
-                    border: '1px solid rgba(139,111,184,0.2)',
-                  }}>
-                  <div className="text-6xl mb-3">{moon.emoji}</div>
-                  <p className="text-xl font-bold text-white mb-1">{moon.name}</p>
-                  <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.55)' }}>Theme: {moon.keyword}</p>
-                  <div className="rounded-xl p-3 mx-4"
-                    style={{ background: 'rgba(139,111,184,0.12)', border: '1px solid rgba(139,111,184,0.15)' }}>
-                    <p className="text-xs font-bold mb-1" style={{ color: '#C4A9E8' }}>Ritual for this phase</p>
-                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{moon.ritual}</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {[180, 120, 100].map((w, i) => (
+                      <div key={i} style={{ height: 14, borderRadius: 7, background: 'rgba(255,255,255,0.07)', width: `${w}px`, maxWidth: '100%' }} />
+                    ))}
                   </div>
                 </div>
+              ) : briefError ? (
+                <div>
+                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>Couldn't load today's brief.</p>
+                  <button onClick={loadBrief} style={{ fontSize: 12, color: '#8B6FB8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>Try again →</button>
+                </div>
+              ) : brief ? (
+                <>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(196,169,232,0.55)', marginBottom: 6 }}>
+                    Today's Cosmic Brief
+                  </p>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 800, color: 'white', lineHeight: 1.2, marginBottom: 8 }}>
+                    {brief.overall_vibe}
+                  </h2>
+                  <p style={{ fontSize: 14, color: 'rgba(196,169,232,0.85)', lineHeight: 1.6, marginBottom: 16 }}>
+                    {brief.tagline}
+                  </p>
 
-                <div className="grid grid-cols-4 gap-2">
-                  {MOON_PHASES.map(p => (
-                    <div key={p.name} className="rounded-xl p-3 text-center"
-                      style={{
-                        background: p.name === moon.name ? 'rgba(139,111,184,0.15)' : 'var(--surface)',
-                        border: `1px solid ${p.name === moon.name ? 'rgba(139,111,184,0.3)' : 'var(--surface-border)'}`,
-                      }}>
-                      <div className="text-xl mb-1">{p.emoji}</div>
-                      <p className="text-xs font-semibold" style={{ color: p.name === moon.name ? 'var(--violet)' : 'var(--text-3)', fontSize: 9 }}>
-                        {p.keyword}
-                      </p>
+                  {/* Mantra pill */}
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 20, background: 'rgba(139,111,184,0.2)', border: '1px solid rgba(139,111,184,0.35)' }}>
+                    <span style={{ fontSize: 13 }}>✨</span>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: 'rgba(220,200,255,0.95)', fontStyle: 'italic' }}>{brief.mantra}</p>
+                  </div>
+
+                  {/* Moon summary inline */}
+                  {moon && (
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 11, color: 'rgba(168,196,218,0.7)', background: 'rgba(168,196,218,0.08)', border: '1px solid rgba(168,196,218,0.15)', padding: '4px 10px', borderRadius: 10, fontWeight: 600 }}>
+                        {moon.phase.emoji} {moon.phase.name} · {moon.phase.illumination}%
+                      </span>
+                      <span style={{ fontSize: 11, color: 'rgba(168,196,218,0.7)', background: 'rgba(168,196,218,0.08)', border: '1px solid rgba(168,196,218,0.15)', padding: '4px 10px', borderRadius: 10, fontWeight: 600 }}>
+                        Moon in {moon.sign.emoji} {moon.sign.name}
+                      </span>
                     </div>
+                  )}
+                </>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Brief sections grid */}
+          {brief && !briefLoading && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <BriefSection label="Energy to embody"       icon="🔥" text={brief.energy}  accent="rgba(139,111,184,0.9)" />
+              <BriefSection label="What to avoid"          icon="🚫" text={brief.avoid}   accent="rgba(224,94,94,0.8)" />
+              <BriefSection label="Stay focused on"        icon="🎯" text={brief.focus}   accent="rgba(201,169,110,0.9)" />
+              <BriefSection label="Gifts available today"  icon="🎁" text={brief.gifts}   accent="rgba(90,180,140,0.8)" />
+              <BriefSection label="How to prepare"         icon="🛡️" text={brief.prepare} accent="rgba(168,196,218,0.8)" />
+
+              {/* Colors */}
+              <div style={{ ...GLASS, padding: '14px 16px', borderLeft: '3px solid rgba(220,160,220,0.7)' }}>
+                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(220,160,220,0.8)', marginBottom: 10 }}>
+                  🎨 Wear today
+                </p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                  {brief.colors.map(c => (
+                    <span key={c} style={{ padding: '5px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', fontSize: 13, fontWeight: 700, color: 'white', textTransform: 'capitalize' }}>
+                      {c}
+                    </span>
                   ))}
                 </div>
+                {brief.color_note && <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>{brief.color_note}</p>}
+              </div>
 
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-3)' }}>Moon Journal</p>
-                  <p className="text-sm mb-3" style={{ color: 'var(--text-2)' }}>
-                    What are you releasing or calling in with this {moon.name.toLowerCase()}?
-                  </p>
-                  <textarea rows={4} placeholder="Write here..."
-                    className="w-full rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
-                    style={{ background: 'var(--surface-subtle)', color: 'var(--text-1)', border: '1px solid var(--surface-border)' }}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* ── Transits ── */}
-            {page === 'transits' && (
-              <>
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-3)' }}>Today&apos;s Sky → Your Chart</p>
-                  <div className="space-y-3">
-                    {TODAYS_TRANSITS.map((t, i) => (
-                      <div key={i} className="rounded-xl p-3"
-                        style={{
-                          background: t.type === 'supportive' ? 'rgba(184,201,180,0.08)' : 'rgba(224,170,94,0.08)',
-                          border: `1px solid ${t.type === 'supportive' ? 'rgba(184,201,180,0.15)' : 'rgba(224,170,94,0.15)'}`,
-                        }}>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-bold" style={{ color: t.type === 'supportive' ? '#B8C9B4' : '#E0AA5E' }}>
-                            {t.planet} {t.aspect} {t.target}
-                          </span>
-                          <span className="text-xs px-1.5 py-0.5 rounded-full"
-                            style={{
-                              background: t.type === 'supportive' ? 'rgba(184,201,180,0.15)' : 'rgba(224,170,94,0.15)',
-                              color: t.type === 'supportive' ? '#B8C9B4' : '#E0AA5E',
-                              fontSize: 9,
-                            }}>
-                            {t.type}
-                          </span>
-                        </div>
-                        <p className="text-xs" style={{ color: 'var(--text-2)' }}>{t.effect}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-3)' }}>Major Active Transits</p>
-                  <p className="text-xs mb-3" style={{ color: 'var(--text-3)' }}>2026 · Personal to your chart</p>
-                  {[
-                    { transit: 'Jupiter conjunct Cancer Moon', active: 'Final pass April 2026', desc: 'Most emotionally supported window. Open heart. Ready to receive.' },
-                    { transit: 'Saturn opposite Mars in Libra', active: 'Active now – late 2026', desc: 'Relationship structures under pressure. Act from clarity, not fear.' },
-                    { transit: 'Mercury Rx in Cancer', active: 'June 29 – July 23, 2026', desc: 'Old feelings resurface. Communication through tone and timing is loaded.' },
-                  ].map((t, i) => (
-                    <div key={i} className="py-3" style={{ borderBottom: i < 2 ? '1px solid var(--surface-border)' : 'none' }}>
-                      <p className="text-sm font-semibold mb-0.5" style={{ color: 'var(--text-1)' }}>{t.transit}</p>
-                      <p className="text-xs mb-1" style={{ color: 'var(--violet)' }}>{t.active}</p>
-                      <p className="text-xs leading-relaxed" style={{ color: 'var(--text-2)' }}>{t.desc}</p>
-                    </div>
+              {/* Crystals — full list */}
+              <div style={{ ...GLASS, padding: '16px 16px', borderLeft: '3px solid rgba(168,196,218,0.7)' }}>
+                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(168,196,218,0.8)', marginBottom: 12 }}>
+                  💎 Crystals for today
+                </p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+                  {brief.crystals.map(c => (
+                    <span key={c} style={{ padding: '5px 14px', borderRadius: 20, background: 'rgba(168,196,218,0.09)', border: '1px solid rgba(168,196,218,0.2)', fontSize: 13, fontWeight: 700, color: 'rgba(168,196,218,0.95)', textTransform: 'capitalize' }}>
+                      {c}
+                    </span>
                   ))}
                 </div>
-              </>
-            )}
-
-            {/* ── Birth Chart ── */}
-            {page === 'chart' && (
-              <>
-                <div className="rounded-2xl p-4 relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(26,21,53,0.97), rgba(36,28,72,0.97))',
-                    border: '1px solid rgba(139,111,184,0.2)',
-                  }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#C4A9E8' }}>Zoe Taylor</p>
-                  <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>November 14, 2000 · 7:04 PM · Sellersville, PA</p>
-                  <div className="flex gap-4 mb-3">
-                    {[['☀️', 'Scorpio', 'Sun'], ['🌙', 'Cancer', 'Moon'], ['⬆️', 'Gemini', 'Rising']].map(([e, sign, label]) => (
-                      <div key={label} className="text-center">
-                        <div className="text-2xl mb-0.5">{e}</div>
-                        <p className="text-xs font-bold text-white">{sign}</p>
-                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9 }}>{label}</p>
+                {brief.crystal_notes && Object.entries(brief.crystal_notes).length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                    {Object.entries(brief.crystal_notes).map(([crystal, note]) => (
+                      <div key={crystal} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(168,196,218,0.8)', minWidth: 90, flexShrink: 0, textTransform: 'capitalize', paddingTop: 1 }}>{crystal}</span>
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>{note}</span>
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Human Design · Self-Projected Projector 4/6</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Loading skeletons for sections */}
+          {briefLoading && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[80, 80, 80, 80, 80, 100, 180].map((h, i) => <Shimmer key={i} h={h} />)}
+            </div>
+          )}
+        </div>
+
+        {/* ── CURRENT SKY (collapsible) ──────────────────────────── */}
+        <button onClick={() => setShowSky(v => !v)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)', cursor: 'pointer', marginBottom: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>Current Sky Snapshot</span>
+          {showSky ? <ChevronUp className="h-4 w-4" style={{ color: 'rgba(255,255,255,0.3)' }} /> : <ChevronDown className="h-4 w-4" style={{ color: 'rgba(255,255,255,0.3)' }} />}
+        </button>
+
+        {showSky && (
+          <div style={{ marginBottom: 16 }}>
+            {/* Moon card */}
+            {moon && (
+              <div style={{ ...GLASS, padding: '16px 18px', marginBottom: 10, position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)' }}>
+                  <MoonSphere size={70} />
                 </div>
-
-                <div className="space-y-2">
-                  {ZOE_PLACEMENTS.map(p => (
-                    <div key={p.planet} className="rounded-2xl p-4 flex items-center gap-3"
-                      style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                      <div className="w-16 flex-shrink-0">
-                        <p className="text-xs font-bold" style={{ color: 'var(--violet)' }}>{p.planet}</p>
-                        <p className="text-xs" style={{ color: 'var(--text-3)' }}>House {p.house}</p>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold mb-0.5" style={{ color: 'var(--text-1)' }}>{p.sign}</p>
-                        <p className="text-xs" style={{ color: 'var(--text-3)' }}>{p.keyword}</p>
-                      </div>
-                    </div>
-                  ))}
+                <div style={{ paddingRight: 90 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(168,196,218,0.5)', marginBottom: 6 }}>Moon</p>
+                  <p style={{ fontSize: 17, fontWeight: 700, color: 'white', marginBottom: 3 }}>{moon.phase.emoji} {moon.phase.name}</p>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 2 }}>Moon Sign: {moon.sign.emoji} {moon.sign.name} · {moon.sign.formatted}</p>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{moon.phase.illumination}% illuminated{moon.next_ingress ? ` · ${moon.next_ingress}` : ''}</p>
                 </div>
-              </>
-            )}
-
-            {/* ── Spirit + Rituals ── */}
-            {page === 'spirit' && (
-              <>
-                <div className="rounded-2xl p-5"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-3)' }}>Daily Affirmation</p>
-                  <p className="font-display text-base italic leading-relaxed" style={{ color: 'var(--text-1)' }}>
-                    &ldquo;{affirmation}&rdquo;
-                  </p>
-                </div>
-
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-3)' }}>Shadow Question</p>
-                  <p className="text-sm italic leading-relaxed" style={{ color: 'var(--text-1)' }}>
-                    &ldquo;{shadowQ}&rdquo;
-                  </p>
-                </div>
-
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-3)' }}>Today&apos;s Ritual</p>
-                  <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-2)' }}>{moon.ritual}</p>
-                  <div className="space-y-2">
-                    {[
-                      '5 minutes of silence before your phone',
-                      'One thing you are grateful for — say it out loud',
-                      'One thing you are releasing — write it down',
-                    ].map((step, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                          style={{ background: 'rgba(139,111,184,0.15)', color: 'var(--violet)' }}>{i + 1}</span>
-                        <p className="text-sm" style={{ color: 'var(--text-1)' }}>{step}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Link href="/spirit">
-                  <button className="w-full py-3 rounded-2xl text-sm font-semibold"
-                    style={{ background: 'rgba(139,111,184,0.08)', color: 'var(--violet)' }}>
-                    Full Spirit Guide →
-                  </button>
-                </Link>
-              </>
-            )}
-
-            {/* ── Crystals ── */}
-            {page === 'crystals' && (
-              <>
-                <div className="rounded-2xl p-5 text-center"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-3)' }}>Crystal of the Day</p>
-                  <div className="text-5xl mb-3">{crystal.emoji}</div>
-                  <p className="text-xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>{crystal.name}</p>
-                  <p className="text-sm mb-2" style={{ color: 'var(--text-3)' }}>{crystal.tags}</p>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-2)' }}>{crystal.use}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {CRYSTALS.filter(c => c.name !== crystal.name).map(c => (
-                    <div key={c.name} className="rounded-2xl p-4"
-                      style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                      <div className="text-2xl mb-2">{c.emoji}</div>
-                      <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-1)' }}>{c.name}</p>
-                      <p className="text-xs" style={{ color: 'var(--text-3)' }}>{c.tags}</p>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* ── Love ── */}
-            {page === 'love' && (
-              <>
-                <div className="rounded-2xl p-5 relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(26,21,53,0.97), rgba(36,28,72,0.97))',
-                    border: '1px solid rgba(184,139,184,0.2)',
-                  }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#C4A9E8' }}>Zoe + Kaleb · Synastry</p>
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    {[
-                      { label: 'Emotional', score: '8/10', color: '#B8C9B4' },
-                      { label: 'Long-term', score: '8.5/10', color: '#C4A9E8' },
-                      { label: 'Chemistry', score: '9/10', color: '#E8B4B8' },
-                      { label: 'Communication', score: '5→8/10', color: '#A8C4DA' },
-                    ].map(s => (
-                      <div key={s.label} className="rounded-xl p-3"
-                        style={{ background: 'rgba(139,111,184,0.1)', border: '1px solid rgba(139,111,184,0.15)' }}>
-                        <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{s.label}</p>
-                        <p className="text-base font-bold" style={{ color: s.color }}>{s.score}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                    Cancer Moon (Zoe) + Taurus Moon (Kaleb) — one of the most emotionally compatible Moon pairings. Both want safety, loyalty, comfort, and consistency.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-3)' }}>Your Patterns</p>
-                  <div className="space-y-3">
-                    {LOVE_PATTERNS.map((p, i) => (
-                      <div key={i} className="rounded-xl p-3"
-                        style={{ background: 'var(--surface-subtle)', border: '1px solid var(--surface-border)' }}>
-                        <p className="text-xs mb-1" style={{ color: '#E0AA5E' }}>Pattern: {p.pattern}</p>
-                        <p className="text-xs" style={{ color: 'var(--text-1)' }}>→ {p.aligned}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Link href="/relationships">
-                  <button className="w-full py-3 rounded-2xl text-sm font-semibold"
-                    style={{ background: 'rgba(139,111,184,0.08)', color: 'var(--violet)' }}>
-                    Full Relationship Guide →
-                  </button>
-                </Link>
-              </>
-            )}
-
-            {/* ── Forecast ── */}
-            {page === 'forecast' && (
-              <div className="space-y-3">
-                {[
-                  { period: 'Now – July 2026', theme: 'Emotional conversations + nervous system testing', detail: 'Mercury Rx in Cancer June 29 – July 23. Old feelings, attachment fears, communication loaded with tone and timing.' },
-                  { period: 'August 2026', theme: 'Romance gets easier', detail: 'Venus in Libra hits Kaleb\'s Venus + Zoe\'s Mars. Chemistry feels natural, flirty, sweet. Best window for dates and honest-but-gentle talks.' },
-                  { period: 'Oct – Nov 2026', theme: 'Major relationship review', detail: 'Venus retrograde Scorpio → Libra. Venus retrograde + Mercury retrograde both active. Truth has to come out.' },
-                  { period: 'Spring 2027', theme: 'Commitment energy strengthens', detail: 'Jupiter trine Saturn April 2027. Growth + structure alignment. "Make it real" energy.' },
-                  { period: '2028', theme: 'The serious long-term test', detail: 'Saturn enters Taurus (Kaleb\'s Moon). Commitment, security, emotional safety — all come into clear focus.' },
-                ].map((f, i) => (
-                  <div key={i} className="rounded-2xl p-4"
-                    style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                    <p className="text-xs font-bold mb-0.5" style={{ color: 'var(--violet)' }}>{f.period}</p>
-                    <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-1)' }}>{f.theme}</p>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--text-2)' }}>{f.detail}</p>
-                  </div>
-                ))}
               </div>
             )}
 
-            {/* ── Deep Dives ── */}
-            {page === 'deep' && (
-              <div className="space-y-3">
-                {[
-                  { title: 'Scorpio Sun — Full Read', sub: 'Depth, intensity, transformation, loyalty, shadow work' },
-                  { title: 'Cancer Moon — Full Read', sub: 'Emotional safety, nurturing, home, attachment patterns' },
-                  { title: 'Gemini Rising — Full Read', sub: 'First impression, communication style, social energy' },
-                  { title: 'North Node in Cancer', sub: 'Soul direction: build home, safety, deep emotional roots' },
-                  { title: 'Chiron in Sagittarius', sub: 'Wound around freedom, belief, being too much or too free' },
-                  { title: 'Self-Projected Projector 4/6', sub: 'Human Design: speak to hear yourself, network is destiny' },
-                  { title: 'Venus in Sagittarius', sub: 'Love needs freedom, honesty, adventure, space to roam' },
-                  { title: 'Saturn in Taurus (12th)', sub: 'Hidden lessons around worth, security, the body, money' },
-                ].map((d, i) => (
-                  <div key={i} className="rounded-2xl p-4 flex items-center justify-between"
-                    style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)' }}>
-                    <div className="flex-1 min-w-0 mr-3">
-                      <p className="text-sm font-semibold mb-0.5" style={{ color: 'var(--text-1)' }}>{d.title}</p>
-                      <p className="text-xs" style={{ color: 'var(--text-3)' }}>{d.sub}</p>
+            {/* Planets horizontal scroll */}
+            {planets && (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+                  {planets.planets.map(p => (
+                    <div key={p.name} style={{ flexShrink: 0, ...GLASS, borderRadius: 16, padding: '10px 12px', textAlign: 'center', minWidth: 72 }}>
+                      <p style={{ fontSize: 15, marginBottom: 2 }}>{p.emoji}</p>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>{p.name}</p>
+                      <p style={{ fontSize: 10, color: '#8B6FB8' }}>{p.sign}</p>
+                      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>{p.degree}°{p.retrograde ? ' ℞' : ''}</p>
                     </div>
-                    <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--text-3)' }} />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
 
+            {/* Retrogrades */}
+            {planets && planets.retrogrades.length > 0 && (
+              <div style={{ ...GLASS, padding: '12px 14px', marginBottom: 10, background: 'rgba(201,169,110,0.07)', border: '1px solid rgba(201,169,110,0.2)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <RotateCcw className="h-4 w-4 flex-shrink-0" style={{ color: '#C9A96E' }} />
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#C9A96E' }}>
+                  {planets.retrogrades.join(', ')} {planets.retrogrades.length === 1 ? 'is' : 'are'} retrograde
+                </p>
+              </div>
+            )}
           </div>
+        )}
+
+        {/* ── EXPLORE ───────────────────────────────────────────── */}
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Explore</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, paddingBottom: 32 }}>
+          {SECTIONS.map(s => (
+            <Link key={s.href} href={s.href}>
+              <div style={{ ...GLASS, padding: 16, height: '100%' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, background: `${s.color}18`, border: `1px solid ${s.color}28` }}>
+                  <s.icon className="h-4 w-4" style={{ color: s.color }} strokeWidth={1.6} />
+                </div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 3 }}>{s.label}</p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>{s.sub}</p>
+              </div>
+            </Link>
+          ))}
         </div>
-        </div>
+
+        {/* Open full daily reading */}
+        <Link href="/astrology/daily">
+          <div style={{ ...GLASS, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(139,111,184,0.1)', border: '1px solid rgba(139,111,184,0.25)', borderRadius: 18, marginBottom: 24 }}>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: 'white' }}>Full Daily Reading</p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>All life areas · HD guidance · Extended transits</p>
+            </div>
+            <ArrowRight className="h-5 w-5 flex-shrink-0" style={{ color: '#8B6FB8' }} />
+          </div>
+        </Link>
       </AppLayout>
     </div>
   )

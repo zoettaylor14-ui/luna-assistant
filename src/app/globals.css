@@ -110,27 +110,37 @@
 }
 
 /* ─── Base ──────────────────────────────────────────────────── */
-html, body { height: 100%; }
+html, body { min-height: 100%; }
 
 html {
-  /* text-xs ≈ 14.25px, text-sm ≈ 16.625px, text-base ≈ 19px */
-  font-size: 19px;
+  font-size: 17px;
+  background-color: var(--app-bg-to);
+}
+
+@media (min-width: 768px) {
+  html { font-size: 18px; }
 }
 
 body {
+  min-height: 100vh;
   background-color: var(--app-bg-to);
   color: var(--text-1);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 1rem;
-  line-height: 1.65;
+  font-weight: 450;
+  line-height: 1.7;
 }
 
 * { box-sizing: border-box; }
 
 /* ─── Scrollbar ─────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 0px; height: 0px; }
+
+/* ─── Dark inputs (SmartInput, journal write) ───────────────── */
+.luna-input::placeholder { color: rgba(255,255,255,0.3); }
+.luna-input:focus { border-color: rgba(139,111,184,0.5) !important; outline: none; }
 
 /* ─── Typography helpers ────────────────────────────────────── */
 .font-display { font-family: var(--font-display); }
@@ -361,16 +371,20 @@ p, li { line-height: 1.65; }
 .text-t3 { color: var(--text-3) !important; }
 
 /* ─── Minimum readable font sizes ───────────────────────────── */
-/* Tailwind's text-xs at 17.5px base = ~13px — bump to 14px min  */
-.text-xs  { font-size: 0.8rem   !important; }  /* ~14px  */
-.text-sm  { font-size: 0.9rem   !important; }  /* ~15.7px */
-.text-base{ font-size: 1rem     !important; }  /* ~17.5px */
+.text-xs  { font-size: 0.8rem  !important; }  /* ~14-15px */
+.text-sm  { font-size: 0.9rem  !important; }  /* ~16-17px */
+.text-base{ font-size: 1rem    !important; }  /* ~17-18px */
+.text-lg  { font-size: 1.15rem !important; }  /* ~20-21px */
+.text-xl  { font-size: 1.3rem  !important; }  /* ~23-24px */
+
+/* Stronger default weights for readability */
+.text-sm, .text-xs { font-weight: 500; }
 
 /* Nav tab labels always readable */
 nav .text-xs, nav .text-sm { font-size: 0.8rem !important; }
 
 /* ─── Bottom nav safe area ──────────────────────────────────── */
-.pb-nav { padding-bottom: calc(var(--nav-h) + 16px); }
+.pb-nav { padding-bottom: calc(var(--nav-h) + 52px); }
 
 /* ─── Desktop overrides ─────────────────────────────────────── */
 @media (min-width: 1024px) {

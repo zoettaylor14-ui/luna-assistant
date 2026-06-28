@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { RefreshCw, Sparkles, Check } from 'lucide-react'
+import { SmartInput } from '@/components/ui/SmartInput'
 
 const RESET_SECTIONS = [
   {
@@ -186,15 +187,16 @@ export default function WeeklyResetPage() {
           {activeView === 'reflect' && !result && (
             <div className="space-y-4">
               {REFLECTION_PROMPTS.map(p => (
-                <div key={p.key} className="glass-card p-4">
-                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--violet)' }}>{p.label}</p>
-                  <textarea
+                <div key={p.key}>
+                  <p className="text-xs font-semibold mb-2 px-1" style={{ color: 'var(--violet)' }}>{p.label}</p>
+                  <SmartInput
+                    context={p.label}
+                    placeholder="Speak or tap..."
                     value={reflections[p.key] ?? ''}
-                    onChange={e => setReflections(r => ({ ...r, [p.key]: e.target.value }))}
+                    onChange={v => setReflections(r => ({ ...r, [p.key]: v }))}
+                    patternType="weekly"
                     rows={3}
-                    placeholder="Write freely..."
-                    className="w-full bg-transparent outline-none text-sm resize-none"
-                    style={{ color: 'var(--text-1)' }}
+                    autoSuggest={false}
                   />
                 </div>
               ))}
