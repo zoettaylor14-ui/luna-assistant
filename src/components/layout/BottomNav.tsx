@@ -1,21 +1,14 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  Home, MessageCircle, Calendar, CheckSquare,
-  Sparkles, Scissors, Moon, BookHeart, Settings
-} from 'lucide-react'
+import { Home, Briefcase, Sparkles, Star, Scissors } from 'lucide-react'
 
 const TABS = [
-  { href: '/',         label: 'Home',     icon: Home          },
-  { href: '/messages', label: 'Messages', icon: MessageCircle, badge: 4 },
-  { href: '/calendar', label: 'Calendar', icon: Calendar,      date: true },
-  { href: '/tasks',    label: 'Tasks',    icon: CheckSquare   },
-  { href: '/spirit',   label: 'Spirit',   icon: Sparkles      },
-  { href: '/atelier',  label: 'Atelier',  icon: Scissors      },
-  { href: '/night',    label: 'Night',    icon: Moon          },
-  { href: '/memory',   label: 'Memory',   icon: BookHeart     },
-  { href: '/settings', label: 'Settings', icon: Settings      },
+  { href: '/',          label: 'Home',      icon: Home      },
+  { href: '/work',      label: 'Work',      icon: Briefcase },
+  { href: '/luna',      label: 'LUNA',      icon: Sparkles  },
+  { href: '/astrology', label: 'Astrology', icon: Star      },
+  { href: '/atelier',   label: 'Atelier',   icon: Scissors  },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -25,7 +18,6 @@ function isActive(pathname: string, href: string) {
 
 export function BottomNav() {
   const pathname = usePathname()
-  const today    = new Date().getDate()
 
   return (
     <nav
@@ -38,14 +30,13 @@ export function BottomNav() {
         borderTop: '1px solid var(--nav-border)',
       }}>
       <div className="flex items-center h-full max-w-xl mx-auto px-1">
-        {TABS.map(({ href, label, icon: Icon, badge, date }) => {
+        {TABS.map(({ href, label, icon: Icon }) => {
           const active = isActive(pathname, href)
           return (
             <Link key={href} href={href}
               className="flex flex-col items-center justify-center flex-1 py-1 relative"
               style={{ minHeight: 56 }}>
 
-              {/* Active pill background */}
               {active && (
                 <div className="absolute inset-x-1 inset-y-1 rounded-2xl"
                   style={{
@@ -56,40 +47,12 @@ export function BottomNav() {
               )}
 
               <div className="relative z-10 flex flex-col items-center gap-0.5">
-                {/* Icon */}
-                <div className="relative">
-                  {date ? (
-                    <div className="relative">
-                      <Icon className="h-5 w-5"
-                        style={{
-                          color: active ? 'var(--violet)' : 'var(--tab-inactive-text)',
-                          strokeWidth: active ? 2.2 : 1.6,
-                          transition: 'color 0.2s, stroke-width 0.2s',
-                        }} />
-                      <span className="absolute -bottom-1 -right-2 text-xs font-bold"
-                        style={{ color: active ? 'var(--violet)' : 'var(--tab-inactive-text)', fontSize: 9 }}>
-                        {today}
-                      </span>
-                    </div>
-                  ) : (
-                    <>
-                      <Icon className="h-5 w-5"
-                        style={{
-                          color: active ? 'var(--violet)' : 'var(--tab-inactive-text)',
-                          strokeWidth: active ? 2.2 : 1.6,
-                          transition: 'color 0.2s, stroke-width 0.2s',
-                        }} />
-                      {badge && (
-                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
-                          style={{ background: 'var(--violet)', border: '1.5px solid var(--nav-bg)' }}>
-                          <span className="text-white font-bold" style={{ fontSize: 8 }}>{badge}</span>
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Label */}
+                <Icon className="h-5 w-5"
+                  style={{
+                    color: active ? 'var(--violet)' : 'var(--tab-inactive-text)',
+                    strokeWidth: active ? 2.2 : 1.6,
+                    transition: 'color 0.2s, stroke-width 0.2s',
+                  }} />
                 <span style={{
                   fontSize: 9,
                   fontWeight: active ? 700 : 500,

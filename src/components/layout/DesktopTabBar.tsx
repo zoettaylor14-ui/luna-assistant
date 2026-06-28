@@ -1,26 +1,18 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  Home, MessageCircle, Calendar, CheckSquare,
-  Sparkles, Settings, Scissors, Moon, Mic, BookHeart
-} from 'lucide-react'
+import { Home, Briefcase, Sparkles, Star, Scissors } from 'lucide-react'
 
 const TABS = [
-  { href: '/',              label: 'Home',     icon: Home,          badge: null            },
-  { href: '/messages',      label: 'Messages', icon: MessageCircle, badge: 4               },
-  { href: '/calendar',      label: 'Calendar', icon: Calendar,      badge: null, dateLabel: true },
-  { href: '/tasks',         label: 'Tasks',    icon: CheckSquare,   badge: null            },
-  { href: '/spirit',        label: 'Spirit',   icon: Sparkles,      badge: null            },
-  { href: '/atelier',       label: 'Atelier',  icon: Scissors,      badge: null            },
-  { href: '/night',         label: 'Night',    icon: Moon,          badge: null            },
-  { href: '/memory',        label: 'Memory',   icon: BookHeart,     badge: null            },
-  { href: '/settings',      label: 'Settings', icon: Settings,      badge: null            },
+  { href: '/',          label: 'Home',      icon: Home      },
+  { href: '/work',      label: 'Work',      icon: Briefcase },
+  { href: '/luna',      label: 'LUNA',      icon: Sparkles  },
+  { href: '/astrology', label: 'Astrology', icon: Star      },
+  { href: '/atelier',   label: 'Atelier',   icon: Scissors  },
 ]
 
 export function DesktopTabBar() {
   const pathname = usePathname()
-  const today = new Date().getDate()
 
   function isActive(href: string) {
     if (href === '/') return pathname === '/'
@@ -28,67 +20,36 @@ export function DesktopTabBar() {
   }
 
   return (
-    <>
-      {/* Floating dictation button */}
-      <Link href="/dictation"
-        className="hidden lg:flex fixed bottom-[88px] right-8 z-50 w-14 h-14 rounded-full items-center justify-center transition-all duration-200 hover:scale-110"
+    <nav className="hidden lg:flex fixed bottom-0 left-0 right-0 z-50 justify-center pb-4 px-8"
+      style={{ pointerEvents: 'none' }}>
+      <div className="flex items-center gap-1 px-3 py-2.5 rounded-[28px]"
         style={{
-          background: 'linear-gradient(135deg, #8B6FB8 0%, #6A4F9B 100%)',
-          boxShadow: '0 4px 24px rgba(139,111,184,0.5), 0 0 0 1px rgba(139,111,184,0.3)',
+          background: 'var(--dock-bg)',
+          backdropFilter: 'blur(32px)',
+          WebkitBackdropFilter: 'blur(32px)',
+          border: '1px solid var(--dock-border)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
+          pointerEvents: 'all',
         }}>
-        <Mic className="h-6 w-6 text-white" strokeWidth={1.8} />
-      </Link>
-
-      {/* Bottom dock */}
-      <nav className="hidden lg:flex fixed bottom-0 left-0 right-0 z-50 justify-center pb-4 px-8"
-        style={{ pointerEvents: 'none' }}>
-        <div className="flex items-center gap-0.5 px-2 py-2 rounded-[28px]"
-          style={{
-            background: 'var(--dock-bg)',
-            backdropFilter: 'blur(32px)',
-            WebkitBackdropFilter: 'blur(32px)',
-            border: '1px solid var(--dock-border)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
-            pointerEvents: 'all',
-          }}>
-          {TABS.map(({ href, label, icon: Icon, badge, dateLabel }) => {
-            const active = isActive(href)
-            return (
-              <Link key={href} href={href}
-                className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-[20px] transition-all duration-200 group"
-                style={{
-                  background: active ? 'var(--tab-active-bg)' : 'transparent',
-                  minWidth: 60,
-                }}>
-                <div className="relative">
-                  {dateLabel ? (
-                    <div className="relative">
-                      <Icon className="h-5 w-5" style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }} strokeWidth={1.6} />
-                      <div className="absolute -bottom-1 -right-2 text-xs font-bold"
-                        style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }}>{today}</div>
-                    </div>
-                  ) : (
-                    <>
-                      <Icon className="h-5 w-5 transition-transform duration-150 group-hover:scale-110"
-                        style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }} strokeWidth={1.6} />
-                      {badge && (
-                        <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
-                          style={{ background: '#8B6FB8', border: '1.5px solid var(--dock-bg)' }}>
-                          <span className="text-white font-bold" style={{ fontSize: 9 }}>{badge}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-                <span className="text-xs font-medium whitespace-nowrap transition-colors"
-                  style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }}>
-                  {label}
-                </span>
-              </Link>
-            )
-          })}
-        </div>
-      </nav>
-    </>
+        {TABS.map(({ href, label, icon: Icon }) => {
+          const active = isActive(href)
+          return (
+            <Link key={href} href={href}
+              className="relative flex flex-col items-center gap-1 px-5 py-2 rounded-[20px] transition-all duration-200 group"
+              style={{
+                background: active ? 'var(--tab-active-bg)' : 'transparent',
+                minWidth: 72,
+              }}>
+              <Icon className="h-5 w-5 transition-transform duration-150 group-hover:scale-110"
+                style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }} strokeWidth={1.6} />
+              <span className="text-xs font-medium whitespace-nowrap transition-colors"
+                style={{ color: active ? 'var(--tab-active-text)' : 'var(--tab-inactive-text)' }}>
+                {label}
+              </span>
+            </Link>
+          )
+        })}
+      </div>
+    </nav>
   )
 }

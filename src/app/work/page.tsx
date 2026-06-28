@@ -2,10 +2,10 @@
 import { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
-import { Briefcase, Mail, Clock, Sparkles, RefreshCw, ExternalLink, Check } from 'lucide-react'
+import { Briefcase, Mail, Clock, Sparkles, RefreshCw, ExternalLink, Check, Calendar, Users, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 
-type WorkTab = 'overview' | 'tasks' | 'emails'
+type WorkTab = 'overview' | 'calendar' | 'emails' | 'tasks' | 'clients' | 'money'
 
 interface WorkItem {
   id: string
@@ -58,7 +58,7 @@ export default function WorkScreen() {
   return (
     <div className="bg-sanctuary min-h-screen">
       <AppLayout noPad className="pt-16">
-        <div className="px-6 pb-nav">
+        <div className="px-6 lg:px-0 pb-nav lg:max-w-3xl lg:mx-auto">
 
           {/* Header */}
           <div className="flex items-center justify-between mb-2">
@@ -81,10 +81,22 @@ export default function WorkScreen() {
           </p>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-5">
-            {(['overview','tasks','emails'] as const).map(t => (
-              <button key={t} onClick={() => setTab(t)} className={`tab-pill ${tab === t ? 'active' : ''}`}>
-                {t === 'overview' ? '📋 Overview' : t === 'tasks' ? '⚡ Tasks' : '📬 Emails'}
+          <div className="flex gap-2 mb-5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            {([
+              ['overview',  '📋 Command'],
+              ['calendar',  '📅 Calendar'],
+              ['emails',    '📬 Email'],
+              ['tasks',     '⚡ Tasks'],
+              ['clients',   '🤝 Clients'],
+              ['money',     '💵 Money'],
+            ] as const).map(([id, label]) => (
+              <button key={id} onClick={() => setTab(id)}
+                className="flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
+                style={tab === id
+                  ? { background: 'var(--violet)', color: 'white' }
+                  : { background: 'var(--surface)', color: 'var(--text-2)', border: '1px solid var(--surface-border)' }
+                }>
+                {label}
               </button>
             ))}
           </div>
@@ -226,6 +238,98 @@ export default function WorkScreen() {
               <Link href="/email">
                 <button className="w-full py-3.5 rounded-2xl text-sm font-medium" style={{ color: 'var(--lunar)', background: 'rgba(168,196,218,0.1)' }}>
                   Full inbox →
+                </button>
+              </Link>
+            </div>
+          )}
+
+          {/* Calendar tab */}
+          {tab === 'calendar' && (
+            <div className="space-y-3 animate-fade-up">
+              <GlassCard soul>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>Today</p>
+                {[
+                  { time: '11:00 AM', title: 'DRYP Weekly Sync', sub: '45 min · Google Meet', color: 'var(--violet)' },
+                  { time: '2:00 PM',  title: 'EHM Strategy Call', sub: '30 min · Zoom', color: 'var(--lunar)' },
+                  { time: '4:30 PM',  title: 'Deep work block', sub: '90 min · No calls', color: '#C9A96E' },
+                ].map((e, i, arr) => (
+                  <div key={e.time} className="flex items-start gap-3 py-3"
+                    style={{ borderBottom: i < arr.length - 1 ? '1px solid rgba(139,111,184,0.07)' : 'none' }}>
+                    <span className="text-xs font-bold flex-shrink-0 w-16" style={{ color: e.color }}>{e.time}</span>
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text-1)' }}>{e.title}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{e.sub}</p>
+                    </div>
+                  </div>
+                ))}
+              </GlassCard>
+              <GlassCard>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-3)' }}>Tomorrow</p>
+                <p className="text-sm" style={{ color: 'var(--text-2)' }}>No events scheduled yet.</p>
+              </GlassCard>
+              <Link href="/calendar">
+                <button className="w-full py-3.5 rounded-2xl text-sm font-medium" style={{ color: 'var(--violet)', background: 'rgba(139,111,184,0.06)' }}>
+                  Full calendar →
+                </button>
+              </Link>
+            </div>
+          )}
+
+          {/* Clients tab */}
+          {tab === 'clients' && (
+            <div className="space-y-3 animate-fade-up">
+              {[
+                { name: 'EHM Strategies',    tag: 'Website + CRM',    status: 'Active',  due: 'Website plan — Today' },
+                { name: 'DRYP Digital',       tag: 'Internal',         status: 'Active',  due: 'Newsletter content — This week' },
+                { name: 'Villa Residential',  tag: 'SEO + Social',     status: 'Waiting', due: 'SEO report follow-up' },
+                { name: 'Babe Coffee Lounge', tag: 'Social',           status: 'Waiting', due: 'Follow up this week' },
+                { name: 'Crafted K+B',        tag: 'Website',          status: 'Done',    due: 'Site live ✓' },
+              ].map(c => (
+                <div key={c.name} className="glass-card p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{c.name}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{c.tag}</p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--lunar)' }}>{c.due}</p>
+                    </div>
+                    <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-medium"
+                      style={{
+                        background: c.status === 'Active' ? 'rgba(184,201,180,0.15)' : c.status === 'Done' ? 'rgba(139,111,184,0.12)' : 'rgba(224,170,94,0.12)',
+                        color: c.status === 'Active' ? '#B8C9B4' : c.status === 'Done' ? 'var(--violet)' : '#E0AA5E',
+                      }}>
+                      {c.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Money tab */}
+          {tab === 'money' && (
+            <div className="space-y-3 animate-fade-up">
+              <GlassCard soul>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--violet)' }}>This month</p>
+                {[
+                  { label: 'Income',       value: '$4,200',  color: '#B8C9B4' },
+                  { label: 'Expenses',     value: '$1,840',  color: '#E05E5E' },
+                  { label: 'Net',          value: '$2,360',  color: 'var(--violet)' },
+                  { label: 'Invoices out', value: '$3,500',  color: '#C9A96E' },
+                ].map((row, i, arr) => (
+                  <div key={row.label} className="flex items-center justify-between py-2.5"
+                    style={{ borderBottom: i < arr.length - 1 ? '1px solid rgba(139,111,184,0.07)' : 'none' }}>
+                    <p className="text-sm" style={{ color: 'var(--text-2)' }}>{row.label}</p>
+                    <p className="text-sm font-bold" style={{ color: row.color }}>{row.value}</p>
+                  </div>
+                ))}
+              </GlassCard>
+              <GlassCard>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-3)' }}>One money move today</p>
+                <p className="text-sm" style={{ color: 'var(--text-1)' }}>Follow up on the EHM invoice — it&apos;s been 14 days.</p>
+              </GlassCard>
+              <Link href="/money">
+                <button className="w-full py-3.5 rounded-2xl text-sm font-medium" style={{ color: 'var(--golden)', background: 'rgba(201,169,110,0.06)' }}>
+                  Full money dashboard →
                 </button>
               </Link>
             </div>

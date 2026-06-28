@@ -5,7 +5,7 @@ import {
   Sparkles, Star, Scissors, ShirtIcon, Image, BookOpen, Gem, Plus,
   ChevronDown, ChevronRight, Check, RotateCcw, Wand2, Camera,
   Layers, ArrowRight, Moon, Sun, Wind, Zap, Heart, Music,
-  Package, Hammer, Coffee, AlertCircle, Loader2
+  Package, Hammer, Coffee, AlertCircle, Loader2, ShoppingBag
 } from 'lucide-react'
 
 // ─── Types ───────────────────────────────────────────────────
@@ -61,12 +61,13 @@ interface WardrobeItem {
 
 // ─── Section nav ────────────────────────────────────────────
 const SECTIONS = [
-  { id: 'oracle',      label: 'Oracle',      icon: Sparkles  },
-  { id: 'closet',      label: 'Closet',      icon: ShirtIcon },
-  { id: 'inspiration', label: 'Inspo',       icon: Image     },
-  { id: 'projects',    label: 'Projects',    icon: Scissors  },
-  { id: 'studio',      label: 'Studio',      icon: Layers    },
-  { id: 'vault',       label: 'Vault',       icon: Gem       },
+  { id: 'oracle',      label: 'Today',       icon: Sparkles     },
+  { id: 'closet',      label: 'Closet',      icon: ShirtIcon    },
+  { id: 'inspiration', label: 'Inspo',       icon: Image        },
+  { id: 'projects',    label: 'Sewing',      icon: Scissors     },
+  { id: 'studio',      label: 'Generated',   icon: Layers       },
+  { id: 'vault',       label: 'Fashion Vault', icon: Gem        },
+  { id: 'shopping',    label: 'Wishlist',    icon: ShoppingBag  },
 ]
 
 // ─── Mood options ────────────────────────────────────────────
@@ -1088,6 +1089,88 @@ function VaultSection() {
   )
 }
 
+// ─── Shopping Section ─────────────────────────────────────────
+function ShoppingSection() {
+  const [items, setItems] = useState([
+    { id: 1, list: 'Thrift',   text: 'Wide-leg linen trousers — cream or sand' },
+    { id: 2, list: 'Thrift',   text: 'Vintage blazer — oversized, earth tone' },
+    { id: 3, list: 'Fabric',   text: '2 yards of silk charmeuse — dusty rose' },
+    { id: 4, list: 'Buy',      text: 'Ribbed tank bodysuit — black' },
+    { id: 5, list: 'Accessory',text: 'Gold hoop earrings — medium, thick gauge' },
+    { id: 6, list: 'Accessory',text: 'Brown leather belt — thin strap' },
+  ])
+  const [newItem, setNewItem] = useState('')
+  const [newList, setNewList] = useState<'Thrift' | 'Fabric' | 'Buy' | 'Accessory'>('Buy')
+  const lists = ['Buy', 'Thrift', 'Fabric', 'Accessory'] as const
+
+  function addItem() {
+    if (!newItem.trim()) return
+    setItems(prev => [...prev, { id: Date.now(), list: newList, text: newItem.trim() }])
+    setNewItem('')
+  }
+
+  function removeItem(id: number) {
+    setItems(prev => prev.filter(i => i.id !== id))
+  }
+
+  return (
+    <div className="space-y-4">
+      <SectionHeader icon={ShoppingBag} title="Shopping & Wishlist" sub="What you&apos;re hunting for" />
+
+      <ACard>
+        <SLabel>Add to list</SLabel>
+        <div className="flex gap-2 mb-3 flex-wrap">
+          {lists.map(l => (
+            <button key={l} onClick={() => setNewList(l)}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold"
+              style={newList === l
+                ? { background: 'var(--violet)', color: 'white' }
+                : { background: 'rgba(139,111,184,0.1)', color: 'var(--text-2)' }
+              }>
+              {l}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input value={newItem} onChange={e => setNewItem(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addItem()}
+            placeholder="What are you looking for?"
+            className="flex-1 rounded-xl px-3 py-2.5 text-sm outline-none"
+            style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-1)', border: '1px solid rgba(139,111,184,0.15)' }}
+          />
+          <button onClick={addItem}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0"
+            style={{ background: 'var(--violet)', color: 'white' }}>
+            Add
+          </button>
+        </div>
+      </ACard>
+
+      {lists.map(list => {
+        const listItems = items.filter(i => i.list === list)
+        if (!listItems.length) return null
+        return (
+          <ACard key={list}>
+            <SLabel>{list === 'Buy' ? 'Buy New' : list === 'Thrift' ? 'Thrift List' : list === 'Fabric' ? 'Fabric List' : 'Accessories'}</SLabel>
+            <div className="space-y-2">
+              {listItems.map(item => (
+                <div key={item.id} className="flex items-center gap-3">
+                  <button onClick={() => removeItem(item.id)}
+                    className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
+                    style={{ background: 'rgba(139,111,184,0.1)', border: '1px solid rgba(139,111,184,0.2)' }}>
+                    <Check className="w-3 h-3" style={{ color: 'var(--violet)' }} />
+                  </button>
+                  <p className="text-sm flex-1" style={{ color: 'var(--text-1)' }}>{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </ACard>
+        )
+      })}
+    </div>
+  )
+}
+
 // ─── Main Page ────────────────────────────────────────────────
 export default function AtelierPage() {
   const [activeSection, setActiveSection] = useState('oracle')
@@ -1100,6 +1183,7 @@ export default function AtelierPage() {
       case 'projects':    return <ProjectsSection />
       case 'studio':      return <StudioSection />
       case 'vault':       return <VaultSection />
+      case 'shopping':    return <ShoppingSection />
       default:            return <OracleSection />
     }
   }
